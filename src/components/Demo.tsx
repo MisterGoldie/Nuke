@@ -14,6 +14,9 @@ type GameState = 'menu' | 'game' | 'leaderboard';
 export default function Demo() {
   const [gameState, setGameState] = useState<GameState>('menu');
   const [gameData, setGameData] = useState<LocalState>(initializeGame());
+  const [isSDKLoaded, setIsSDKLoaded] = useState(false);
+  const [context, setContext] = useState<FrameContext | null>(null);
+  const [isFrameLoaded, setIsFrameLoaded] = useState(false);
 
   const handleDrawCard = () => {
     console.log('Card clicked!');
@@ -25,8 +28,31 @@ export default function Demo() {
     });
   };
 
+  useEffect(() => {
+    const load = async () => {
+      console.log("Loading SDK...");
+      try {
+        const ctx = await sdk.context;
+        console.log("Got context:", ctx);
+        setContext(ctx);
+        await sdk.actions.ready();
+        console.log("SDK Ready - Game State:", gameState);
+        setTimeout(() => {
+          setIsFrameLoaded(true);
+        }, 1000);
+      } catch (err) {
+        console.error("SDK Error:", err);
+      }
+    };
+    if (sdk && !isSDKLoaded) {
+      setIsSDKLoaded(true);
+      load();
+    }
+  }, [isSDKLoaded, gameState]);
+
   // Menu State
   if (gameState === 'menu') {
+    console.log('Rendering menu board');
     return (
       <div className="arcade-container w-[424px] h-[685px] bg-black relative overflow-hidden flex flex-col justify-center">
         <div className="text-center mb-8">
@@ -108,6 +134,17 @@ export default function Demo() {
   // Leaderboard State
   if (gameState === 'leaderboard') {
     return <Leaderboard isMuted={false} playGameJingle={() => {}} />;
+  }
+
+  // Add condition to check for frame loaded state
+  if (!isFrameLoaded) {
+    return (
+      <div className="arcade-container w-[424px] h-[685px] bg-black relative overflow-hidden flex flex-col justify-center">
+        <div className="text-center">
+          <h1 className="arcade-text text-4xl animate-pulse">Loading...</h1>
+        </div>
+      </div>
+    );
   }
 
   return null;

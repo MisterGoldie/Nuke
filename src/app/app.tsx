@@ -15,6 +15,8 @@ const Demo = dynamic(() => import("~/components/Demo"), {
 });
 
 export default function App() {
+  console.log("App component rendering");
+
   return (
     <ErrorBoundary>
       <Suspense
@@ -24,7 +26,7 @@ export default function App() {
           </div>
         }
       >
-        <Demo />
+        <Demo key="demo-component" />
       </Suspense>
     </ErrorBoundary>
   );

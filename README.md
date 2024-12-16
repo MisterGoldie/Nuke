@@ -1,8 +1,8 @@
-POD Play v2 
+POD Play v2 - Nuke 
 
 A Farcaster Frames v2 gameapp.
 
-Created by @goldie and @themrsazon
+Created by @goldie and the POD team
 
 [🛠️ Frame Playground](https://warpcast.com/~/developers/frame-playground) (Mobile only)<br/>
 [📦 Frame SDK](https://github.com/farcasterxyz/frames/)<br/>

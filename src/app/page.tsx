@@ -13,7 +13,7 @@ const frame = {
       name: "Nuke",
       url: appUrl,
       splashImageUrl: `${appUrl}/splash.png`,
-      splashBackgroundColor: "#9d00ff",
+      splashBackgroundColor: "#000000",
     },
   },
 };
@@ -25,7 +25,7 @@ export async function generateMetadata(): Promise<Metadata> {
     title: "Nuke",
     openGraph: {
       title: "Nuke",
-      description: "WAR style cardgame by @goldie and the POD team.",
+      description: "WAR style card game by @goldie and the POD team.",
       images: [
         {
           url: `${appUrl}/game-board.png`,
