@@ -1,21 +1,21 @@
 export async function GET() {
   const config = {
     accountAssociation: {
-      header:
-        "eyJmaWQiOjc0NzIsInR5cGUiOiJjdXN0b2R5Iiwia2V5IjoiMHgzRjE2ODZlNEI1Yjg2NjdEQzY1RTMzQzMxZDVBYTg2NzcxNzhGZDRBIn0",
+      header: "eyJmaWQiOjc0NzIsInR5cGUiOiJjdXN0b2R5Iiwia2V5IjoiMHgzRjE2ODZlNEI1Yjg2NjdEQzY1RTMzQzMxZDVBYTg2NzcxNzhGZDRBIn0",
       payload: "eyJkb21haW4iOiJudWtlLXBvZHBsYXkudmVyY2VsLmFwcCJ9",
-      signature:
-        "MHhiZmFkMjEzY2IyNjMyODA2NDZmZjIxZWQ5YWUzY2ZiMjk0NzI0MTg0NzZiNTdkMmM2OWJmZWJhMzdkZWZmNThjMjRjYThlZGFjYzdmZmVkYmNkZmFjNWFkZjhlZjYyOTk1ZTdiMDFmODljYzlkMWRjZDlhMjRiOTcxNTliNDU3YTFj",
+      signature: "MHhiZmFkMjEzY2IyNjMyODA2NDZmZjIxZWQ5YWUzY2ZiMjk0NzI0MTg0NzZiNTdkMmM2OWJmZWJhMzdkZWZmNThjMjRjYThlZGFjYzdmZmVkYmNkZmFjNWFkZjhlZjYyOTk1ZTdiMDFmODljYzlkMWRjZDlhMjRiOTcxNTliNDU3YTFj"
     },
     frame: {
       version: "1",
-      name: "Nuke",
+      name: "Example Frame",
       iconUrl: "https://nuke-podplay.vercel.app/icon.png",
+      homeUrl: "https://nuke-podplay.vercel.app",
+      imageUrl: "https://nuke-podplay.vercel.app/image.png",
+      buttonTitle: "Check this out",
       splashImageUrl: "https://nuke-podplay.vercel.app/splash.png",
       splashBackgroundColor: "#000000",
-      homeUrl: "https://nuke-podplay.vercel.app",
-      webhookUrl: "https://nuke-podplay.vercel.app/api/webhook",
-    },
+      webhookUrl: "https://nuke-podplay.vercel.app/api/webhook"
+    }
   };
 
   return Response.json(config);
