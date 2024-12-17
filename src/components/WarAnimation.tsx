@@ -12,7 +12,7 @@ export default function WarAnimation({ isVisible }: WarAnimationProps) {
       
       {/* WAR text with explosion effect */}
       <div className="relative">
-        <div className="text-[120px] font-bold text-transparent war-text-stroke animate-war-pulse">
+        <div className="text-[150px] font-bold text-red-500" style={{ textShadow: 'none' }}>
           WAR!
         </div>
         {/* Explosive particles */}
