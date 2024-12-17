@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useCallback, useState } from "react";
+import { useEffect, useCallback, useState, useContext } from "react";
 import sdk, { FrameContext } from "@farcaster/frame-sdk";
 import { Button } from "~/components/ui/Button";
 import useSound from 'use-sound';
@@ -13,11 +13,16 @@ import NukeAnimation from './NukeAnimation';
 
 type GameState = 'menu' | 'game' | 'leaderboard';
 
+// Add interface for your context type
+interface ExtendedFrameContext extends FrameContext {
+  fid?: string;  // Add fid as optional property
+}
+
 export default function Demo() {
   const [gameState, setGameState] = useState<GameState>('menu');
   const [gameData, setGameData] = useState<LocalState>(initializeGame());
   const [isSDKLoaded, setIsSDKLoaded] = useState(false);
-  const [context, setContext] = useState<FrameContext | null>(null);
+  const [context, setContext] = useState<ExtendedFrameContext | null>(null);
   const [isFrameLoaded, setIsFrameLoaded] = useState(false);
   const [showWarAnimation, setShowWarAnimation] = useState(false);
   const [showNukeAnimation, setShowNukeAnimation] = useState(false);
@@ -28,12 +33,44 @@ export default function Demo() {
     loop: true
   });
 
+  const handleGameEnd = async (outcome: 'win' | 'loss') => {
+    if (!context?.fid) return;
+    
+    try {
+      const result = {
+        playerFid: context.fid,
+        score: gameData.playerDeck.length,
+        difficulty: 'medium' as const,
+        outcome: outcome,
+        moves: 0,
+      };
+      
+      const response = await fetch('/api/game-result', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(result),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to store game result');
+      }
+    } catch (error) {
+      console.error('Error storing game result:', error);
+    }
+  };
+
   const handleDrawCard = () => {
-    console.log('Card clicked!');
     setGameData(prevState => {
-      console.log('Previous state:', prevState);
       const newState = drawCards(prevState);
-      console.log('New state:', newState);
+      
+      // Check if game ended and store result
+      if (newState.gameOver) {
+        const outcome = newState.playerDeck.length === 52 ? 'win' : 'loss';
+        handleGameEnd(outcome);
+      }
+      
       return newState;
     });
   };
@@ -110,7 +147,7 @@ export default function Demo() {
           
           <div className="flex flex-col items-center gap-16">
             <div className="text-center">
-              <h1 className="arcade-text text-6xl mb-2">NUKE</h1>
+              <h1 className="arcade-text text-6xl mb-2 title-glow">NUKE</h1>
               <p className="arcade-text text-2xl">WAR STYLE CARD GAME</p>
             </div>
 
@@ -125,7 +162,7 @@ export default function Demo() {
             <div className="flex flex-col items-center gap-3 w-[260px]">
               <Button 
                 data-action="start-game"
-                className="arcade-button text-2xl py-3"
+                className="arcade-button glow-blue text-2xl py-3"
                 onClick={() => {
                   setGameData(initializeGame());
                   setGameState('game');
@@ -136,7 +173,7 @@ export default function Demo() {
               
               <Button 
                 data-action="leaderboard"
-                className="arcade-button text-2xl py-3"
+                className="arcade-button glow-yellow text-2xl py-3"
                 onClick={() => setGameState('leaderboard')}
               >
                 LEADERBOARD
@@ -196,7 +233,7 @@ export default function Demo() {
           <CardComponent
             suit={gameData.cpuCard?.suit || ''}
             rank={gameData.cpuCard?.display || ''}
-            isFlipped={gameData.playerCard !== null}
+            isFlipped={gameData.cpuCard !== null}
             isPlayerCard={false}
           />
         </div>

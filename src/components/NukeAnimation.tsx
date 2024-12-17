@@ -10,7 +10,7 @@ export default function NukeAnimation({ isVisible, initiator }: NukeAnimationPro
     <div className="absolute inset-0 flex items-center justify-center z-50">
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm"></div>
       <div className="relative">
-        <div className="text-[150px] font-bold text-red-500 nuke-text animate-nuke-pulse">
+        <div className="text-[125px] font-bold text-red-500 nuke-text animate-nuke-pulse">
           NUKE!
         </div>
         <div className="absolute inset-0 flex items-center justify-center">

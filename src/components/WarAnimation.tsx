@@ -11,7 +11,7 @@ export default function WarAnimation({ isVisible }: WarAnimationProps) {
       
       <div className="relative">
         <div 
-          className="text-[150px] font-bold text-red-500" 
+          className="text-[125px] font-bold text-red-500" 
           style={{ 
             textShadow: 'none',
             WebkitTextStroke: 'none',

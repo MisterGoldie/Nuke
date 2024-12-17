@@ -532,3 +532,44 @@ body {
     transform: rotate(360deg);
   }
 }
+
+/* Blue glow for Start Game */
+.arcade-button.glow-blue {
+  border-color: #00ffff !important;
+  color: #00ffff !important;
+  text-shadow: 0 0 10px #00ffff;
+  box-shadow: 
+    0 0 10px rgba(0, 255, 255, 0.5),
+    0 0 20px rgba(0, 255, 255, 0.3),
+    inset 0 0 15px rgba(0, 255, 255, 0.3);
+}
+
+/* Yellow glow for Leaderboard */
+.arcade-button.glow-yellow {
+  border-color: #ffff00 !important;
+  color: #ffff00 !important;
+  text-shadow: 0 0 10px #ffff00;
+  box-shadow: 
+    0 0 10px rgba(255, 255, 0, 0.5),
+    0 0 20px rgba(255, 255, 0, 0.3),
+    inset 0 0 15px rgba(255, 255, 0, 0.3);
+}
+
+@keyframes title-glow {
+  0%, 100% {
+    text-shadow: 
+      0 0 10px #00ff00,
+      0 0 20px #00ff00,
+      0 0 30px #00ff00;
+  }
+  50% {
+    text-shadow: 
+      0 0 5px #00ff00,
+      0 0 10px #00ff00,
+      0 0 15px #00ff00;
+  }
+}
+
+.title-glow {
+  animation: title-glow 2s ease-in-out infinite;
+}
