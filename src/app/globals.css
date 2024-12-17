@@ -80,9 +80,22 @@ body {
 
 .arcade-container {
   background: #000000;
-  border: 4px solid #00ff00;
-  box-shadow: var(--neon-glow);
-  padding: 20px;
+  border: 6px solid #00ff00 !important;
+  padding: 12px !important;
+  box-shadow: 
+    0 0 20px rgba(0, 255, 0, 0.7),
+    0 0 40px rgba(0, 255, 0, 0.4),
+    inset 0 0 20px rgba(0, 255, 0, 0.4);
+  position: relative !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  width: 100% !important; /* Full width on mobile */
+  max-width: 420px !important; /* Max width for larger screens */
+  min-height: 100vh !important; /* Full viewport height */
+  margin: 0 auto !important; /* Center horizontally */
+  overflow: hidden !important; /* Prevent scrolling */
 }
 
 .arcade-text {
@@ -92,17 +105,39 @@ body {
 
 .arcade-button {
   background: #000000 !important;
-  border: 2px solid #00ff00 !important;
-  color: #00ff00 !important;
-  text-shadow: var(--neon-glow);
-  box-shadow: var(--neon-glow);
-  transition: all 0.3s ease;
+  border: 2px solid !important;
+  padding: 8px 16px !important;
+  font-weight: bold !important;
+  letter-spacing: 1px !important;
+  transition: all 0.3s ease !important;
+  text-transform: uppercase !important;
+  border-radius: 4px !important;
 }
 
-.arcade-button:hover {
-  background: #00ff00 !important;
-  color: #000000 !important;
-  box-shadow: var(--neon-glow);
+/* Red glow for available NUKE */
+.arcade-button.border-red-500 {
+  border-color: #ff0000 !important;
+  color: #ff0000 !important;
+  text-shadow: 0 0 10px #ff0000;
+  box-shadow: 
+    0 0 10px rgba(255, 0, 0, 0.5),
+    0 0 20px rgba(255, 0, 0, 0.3),
+    inset 0 0 15px rgba(255, 0, 0, 0.3);
+}
+
+/* Green glow for used NUKE - removed border */
+.arcade-button.border-green-500 {
+  border: none !important;
+  color: #00ff00 !important;
+  text-shadow: 
+    0 0 10px #00ff00,
+    0 0 20px #00ff00,
+    0 0 30px #00ff00;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.arcade-button:hover:not(:disabled) {
   transform: scale(1.05);
 }
 
@@ -272,5 +307,227 @@ body {
   100% {
     transform: scale(20);
     opacity: 0;
+  }
+}
+
+@keyframes menuExplode {
+  0% {
+    transform: rotate(var(--rotation)) translateY(-20px) scale(0.3);
+    opacity: 1;
+  }
+  50% {
+    transform: rotate(var(--rotation)) translateY(-40px) scale(1);
+    opacity: 0.5;
+  }
+  100% {
+    transform: rotate(var(--rotation)) translateY(-20px) scale(0.3);
+    opacity: 1;
+  }
+}
+
+.menu-particle {
+  --rotation: 0deg;
+}
+
+.menu-particle:nth-child(1) { --rotation: 0deg; }
+.menu-particle:nth-child(2) { --rotation: 45deg; }
+.menu-particle:nth-child(3) { --rotation: 90deg; }
+.menu-particle:nth-child(4) { --rotation: 135deg; }
+.menu-particle:nth-child(5) { --rotation: 180deg; }
+.menu-particle:nth-child(6) { --rotation: 225deg; }
+.menu-particle:nth-child(7) { --rotation: 270deg; }
+.menu-particle:nth-child(8) { --rotation: 315deg; }
+
+/* Nuclear Explosion Animation */
+.explosion-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 20px;
+  height: 20px;
+  background: #ff6b00;
+  border-radius: 50%;
+  animation: explode-center 2s infinite;
+  box-shadow: 0 0 20px #ff6b00, 0 0 40px #ff6b00;
+}
+
+.explosion-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 40px;
+  height: 40px;
+  border: 2px solid #ff6b00;
+  border-radius: 50%;
+  animation: explode-ring 2s infinite;
+}
+
+.explosion-particles {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+.particle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 4px;
+  height: 4px;
+  background: #ff6b00;
+  border-radius: 50%;
+}
+
+.mushroom-cloud {
+  position: absolute;
+  bottom: 40%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 30px;
+  height: 40px;
+  background: #ff6b00;
+  border-radius: 30px 30px 0 0;
+  animation: mushroom-rise 2s infinite;
+}
+
+@keyframes explode-center {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(2);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes explode-ring {
+  0% {
+    width: 40px;
+    height: 40px;
+    opacity: 1;
+  }
+  100% {
+    width: 100px;
+    height: 100px;
+    opacity: 0;
+  }
+}
+
+@keyframes mushroom-rise {
+  0% {
+    height: 0;
+    opacity: 0;
+  }
+  50% {
+    height: 40px;
+    opacity: 1;
+    width: 30px;
+  }
+  75% {
+    width: 40px;
+  }
+  100% {
+    height: 40px;
+    opacity: 0;
+    width: 50px;
+  }
+}
+
+.particle:nth-child(1) { transform: rotate(0deg) translateY(-40px); }
+.particle:nth-child(2) { transform: rotate(30deg) translateY(-40px); }
+.particle:nth-child(3) { transform: rotate(60deg) translateY(-40px); }
+.particle:nth-child(4) { transform: rotate(90deg) translateY(-40px); }
+.particle:nth-child(5) { transform: rotate(120deg) translateY(-40px); }
+.particle:nth-child(6) { transform: rotate(150deg) translateY(-40px); }
+.particle:nth-child(7) { transform: rotate(180deg) translateY(-40px); }
+.particle:nth-child(8) { transform: rotate(210deg) translateY(-40px); }
+.particle:nth-child(9) { transform: rotate(240deg) translateY(-40px); }
+.particle:nth-child(10) { transform: rotate(270deg) translateY(-40px); }
+.particle:nth-child(11) { transform: rotate(300deg) translateY(-40px); }
+.particle:nth-child(12) { transform: rotate(330deg) translateY(-40px); }
+
+.particle {
+  animation: particle-fade 2s infinite;
+}
+
+@keyframes particle-fade {
+  0% {
+    transform: rotate(var(--rotation)) translateY(-20px) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: rotate(var(--rotation)) translateY(-60px) scale(0);
+    opacity: 0;
+  }
+}
+
+/* Nuclear Hazard Symbol (Trefoil) */
+.trefoil {
+  width: 120px;
+  height: 120px;
+  position: relative;
+  animation: spin 10s linear infinite;
+}
+
+.trefoil .circle {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  background: #00ff00;
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.trefoil .blade {
+  position: absolute;
+  width: 30px;
+  height: 80px;
+  background: #00ff00;
+  left: 45px;
+  top: 0;
+  border-radius: 15px 15px 0 0;
+}
+
+.trefoil .blade:nth-child(2) {
+  transform: rotate(120deg);
+  transform-origin: center 60px;
+}
+
+.trefoil .blade:nth-child(3) {
+  transform: rotate(240deg);
+  transform-origin: center 60px;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.trefoil {
+  filter: drop-shadow(0 0 15px #00ff00);
+  animation: spin 10s linear infinite, glow 2s ease-in-out infinite;
+}
+
+@keyframes glow {
+  0%, 100% {
+    filter: drop-shadow(0 0 15px #00ff00) 
+            drop-shadow(0 0 30px #00ff00);
+  }
+  50% {
+    filter: drop-shadow(0 0 20px #00ff00) 
+            drop-shadow(0 0 40px #00ff00);
   }
 }

@@ -89,33 +89,48 @@ export default function Demo() {
 
   // Menu State
   if (gameState === 'menu') {
-    console.log('Rendering menu board');
     return (
-      <div className="arcade-container w-[420px] h-[685px] bg-black relative overflow-hidden flex flex-col justify-center mx-auto">
-        <div className="text-center mb-8">
-          <h1 className="arcade-text text-6xl mb-4 animate-pulse">NUKE</h1>
-          <p className="arcade-text text-2xl">WAR CARD GAME</p>
-        </div>
-
-        <div className="flex flex-col gap-6 max-w-[260px] mx-auto">
-          <Button 
-            data-action="start-game"
-            className="arcade-button text-2xl py-6"
-            onClick={() => {
-              setGameData(initializeGame());
-              setGameState('game');
-            }}
-          >
-            START GAME
-          </Button>
+      <div className="arcade-container flex flex-col items-center">
+        <div className="h-full flex flex-col items-center justify-between py-20">
+          <div />
           
-          <Button 
-            data-action="leaderboard"
-            className="arcade-button text-2xl py-6"
-            onClick={() => setGameState('leaderboard')}
-          >
-            LEADERBOARD
-          </Button>
+          <div className="flex flex-col items-center gap-16">
+            <div className="text-center">
+              <h1 className="arcade-text text-6xl mb-2">NUKE</h1>
+              <p className="arcade-text text-2xl">WAR CARD GAME</p>
+            </div>
+
+            {/* Nuclear Hazard Symbol (Trefoil) */}
+            <div className="trefoil">
+              <div className="circle"></div>
+              <div className="blade"></div>
+              <div className="blade"></div>
+              <div className="blade"></div>
+            </div>
+
+            <div className="flex flex-col gap-3 w-[260px]">
+              <Button 
+                data-action="start-game"
+                className="arcade-button text-2xl py-3"
+                onClick={() => {
+                  setGameData(initializeGame());
+                  setGameState('game');
+                }}
+              >
+                START GAME
+              </Button>
+              
+              <Button 
+                data-action="leaderboard"
+                className="arcade-button text-2xl py-3"
+                onClick={() => setGameState('leaderboard')}
+              >
+                LEADERBOARD
+              </Button>
+            </div>
+          </div>
+
+          <div />
         </div>
       </div>
     );
@@ -138,13 +153,19 @@ export default function Demo() {
         </div>
 
         {/* NUKE Button */}
-        <div className="absolute top-16 right-4">
+        <div className="absolute top-16 right-2 flex justify-end w-32">
           <button
             onClick={handleNukeClick}
             disabled={!gameData.playerHasNuke || gameData.cpuDeck.length < 10}
             className={`
-              arcade-button px-4 py-2 text-sm
-              ${!gameData.playerHasNuke || gameData.cpuDeck.length < 10 ? 'opacity-50 cursor-not-allowed' : 'animate-pulse'}
+              arcade-button text-lg py-2 px-4
+              ${gameData.playerHasNuke 
+                ? 'border-red-500' 
+                : 'border-green-500'}
+              ${gameData.playerHasNuke && gameData.cpuDeck.length >= 10 
+                ? 'animate-pulse' 
+                : ''}
+              ml-auto
             `}
           >
             {gameData.playerHasNuke ? 'NUKE!' : 'NUKE USED'}
