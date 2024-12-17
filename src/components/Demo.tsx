@@ -105,7 +105,7 @@ export default function Demo() {
   if (gameState === 'menu') {
     return (
       <div className="arcade-container flex flex-col items-center">
-        <div className="h-full flex flex-col items-center justify-between py-20">
+        <div className="h-full flex flex-col items-center justify-between pt-20 pb-12">
           <div />
           
           <div className="flex flex-col items-center gap-16">
@@ -141,7 +141,7 @@ export default function Demo() {
               >
                 LEADERBOARD
               </Button>
-              <p className="arcade-text text-sm mt-2 text-center w-full">powered by POD</p>
+              <p className="arcade-text text-sm mt-2 text-center w-full">Powered by The POD</p>
             </div>
           </div>
 
@@ -243,11 +243,6 @@ export default function Demo() {
       </div>
     );
   }
-
-  // Add this at the bottom of your existing JSX, outside of other containers
-  <div className="fixed bottom-4 left-0 right-0 text-center z-10">
-    <p className="arcade-text text-sm animate-glow">Powered by The POD</p>
-  </div>
 
   return null;
 }
