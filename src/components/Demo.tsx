@@ -38,11 +38,8 @@ export default function Demo() {
     
     try {
       const result = {
-        playerFid: context.fid,
-        score: gameData.playerDeck.length,
-        difficulty: 'medium' as const,
-        outcome: outcome,
-        moves: 0,
+        fid: context.fid,
+        outcome: outcome
       };
       
       const response = await fetch('/api/game-result', {
@@ -138,6 +135,23 @@ export default function Demo() {
     };
   }, [gameState, playTheme, stopTheme]);
 
+  useEffect(() => {
+    if (gameData.readyForNextCard) {
+      // Auto-flip cards back after 1.5 seconds
+      const timer = setTimeout(() => {
+        setGameData(prevState => ({
+          ...prevState,
+          playerCard: null,
+          cpuCard: null,
+          readyForNextCard: false,
+          message: "Draw a card to continue!"
+        }));
+      }, 1500);
+
+      return () => clearTimeout(timer);
+    }
+  }, [gameData.readyForNextCard]);
+
   // Menu State
   if (gameState === 'menu') {
     return (
@@ -228,7 +242,7 @@ export default function Demo() {
         <WarAnimation isVisible={showWarAnimation} />
         
         {/* CPU Card Area */}
-        <div className="text-center w-full mt-8">
+        <div className="text-center w-full mt-8 flex flex-col items-center">
           <p className="arcade-text text-lg mb-4">CPU's Card</p>
           <CardComponent
             suit={gameData.cpuCard?.suit || ''}
@@ -251,7 +265,7 @@ export default function Demo() {
         </div>
 
         {/* Player Card Area */}
-        <div className="text-center w-full">
+        <div className="text-center w-full flex flex-col items-center">
           <CardComponent
             suit={gameData.playerCard?.suit || ''}
             rank={gameData.playerCard?.display || ''}

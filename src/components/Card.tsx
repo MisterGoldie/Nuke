@@ -25,33 +25,17 @@ export default function Card({ suit, rank, isFlipped, isPlayerCard, onClick }: C
           relative w-full h-full
           transition-transform duration-500 ease-in-out
           transform-style-preserve-3d
-          ${isFlipped ? 'rotate-y-0' : 'rotate-y-180'}
+          ${isFlipped ? 'rotate-y-180' : 'rotate-y-0'}
         `}
       >
-        {/* Front of card */}
-        <div
-          className={`
-            absolute w-full h-full
-            bg-white rounded-xl shadow-xl
-            border-2 border-green-500
-            flex flex-col justify-between p-4
-            backface-hidden
-            ${suit.includes('♥️') || suit.includes('♦️') ? 'text-red-600' : 'text-black'}
-          `}
-        >
-          <div className="self-start text-xl">{rank}{suit}</div>
-          <div className="text-4xl self-center">{suit}</div>
-          <div className="self-end text-xl rotate-180">{rank}{suit}</div>
-        </div>
-
-        {/* Back of card */}
+        {/* Front of card (back design) */}
         <div
           className={`
             absolute w-full h-full
             bg-[#1a237e] rounded-xl
             border-2 border-green-500
             flex justify-center items-center
-            backface-hidden rotate-y-180
+            backface-hidden
             overflow-hidden
           `}
         >
@@ -79,6 +63,22 @@ export default function Card({ suit, rank, isFlipped, isPlayerCard, onClick }: C
               ))}
             </div>
           </div>
+        </div>
+
+        {/* Back of card (card face) */}
+        <div
+          className={`
+            absolute w-full h-full
+            bg-white rounded-xl shadow-xl
+            border-2 border-green-500
+            flex flex-col justify-between p-4
+            backface-hidden rotate-y-180
+            ${suit.includes('♥️') || suit.includes('♦️') ? 'text-red-600' : 'text-black'}
+          `}
+        >
+          <div className="self-start text-xl">{rank}{suit}</div>
+          <div className="text-4xl self-center">{suit}</div>
+          <div className="self-end text-xl rotate-180">{rank}{suit}</div>
         </div>
       </div>
     </div>

@@ -6,22 +6,12 @@ export async function POST(request: Request) {
   try {
     const result = await request.json();
     
-    // Update player stats
-    const playerRef = db.collection('nuke_players').doc(result.playerFid);
+    // Update player stats - just wins and losses
+    const playerRef = db.collection('nuke_players').doc(result.fid);
     await playerRef.set({
-      totalGames: admin.firestore.FieldValue.increment(1),
       [`${result.outcome}s`]: admin.firestore.FieldValue.increment(1),
-      [`${result.difficulty}Wins`]: result.outcome === 'win' 
-        ? admin.firestore.FieldValue.increment(1) 
-        : admin.firestore.FieldValue.increment(0),
       lastPlayed: admin.firestore.FieldValue.serverTimestamp()
     }, { merge: true });
-
-    // Store game result
-    await db.collection('nuke_games').add({
-      ...result,
-      timestamp: admin.firestore.FieldValue.serverTimestamp()
-    });
 
     return NextResponse.json({ success: true });
   } catch (error) {
