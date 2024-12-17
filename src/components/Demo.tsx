@@ -167,7 +167,7 @@ export default function Demo() {
         </div>
 
         {/* NUKE Button */}
-        <div className="absolute top-16 right-2 flex justify-end w-32">
+        <div className="absolute bottom-4 right-4 flex justify-end w-32">
           <button
             onClick={handleNukeClick}
             disabled={!gameData.playerHasNuke || gameData.cpuDeck.length < 10}
