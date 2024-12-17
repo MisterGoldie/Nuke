@@ -7,11 +7,11 @@ export async function GET() {
     },
     frame: {
       version: "1",
-      name: "Example Frame",
+      name: "Nuke",
       iconUrl: "https://nuke-podplay.vercel.app/icon.png",
       homeUrl: "https://nuke-podplay.vercel.app",
       imageUrl: "https://nuke-podplay.vercel.app/image.png",
-      buttonTitle: "Check this out",
+      buttonTitle: "Play Now",
       splashImageUrl: "https://nuke-podplay.vercel.app/splash.png",
       splashBackgroundColor: "#000000",
       webhookUrl: "https://nuke-podplay.vercel.app/api/webhook"
