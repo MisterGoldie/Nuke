@@ -214,7 +214,6 @@ export default function Demo() {
 
         {/* Player Card Area */}
         <div className="text-center w-full">
-          <p className="arcade-text text-lg mb-4">Your Card</p>
           <CardComponent
             suit={gameData.playerCard?.suit || ''}
             rank={gameData.playerCard?.display || ''}
@@ -222,6 +221,7 @@ export default function Demo() {
             isPlayerCard={true}
             onClick={handleDrawCard}
           />
+          <p className="arcade-text text-lg mt-4">Your Card</p>
         </div>
       </div>
     );
