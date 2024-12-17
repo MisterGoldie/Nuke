@@ -137,18 +137,18 @@ export default function Demo() {
 
   useEffect(() => {
     if (gameData.readyForNextCard) {
-      // Auto-flip cards back after 1.5 seconds
-      const timer = setTimeout(() => {
-        setGameData(prevState => ({
-          ...prevState,
-          playerCard: null,
-          cpuCard: null,
-          readyForNextCard: false,
-          message: "Draw a card to continue!"
-        }));
-      }, 1500);
+        // Changed from 1500 to 2000 for 2 second delay
+        const timer = setTimeout(() => {
+            setGameData(prevState => ({
+                ...prevState,
+                playerCard: null,
+                cpuCard: null,
+                readyForNextCard: false,
+                message: "Draw a card to continue!"
+            }));
+        }, 2000);
 
-      return () => clearTimeout(timer);
+        return () => clearTimeout(timer);
     }
   }, [gameData.readyForNextCard]);
 
@@ -219,20 +219,28 @@ export default function Demo() {
         </div>
 
         {/* NUKE Button */}
-        <div className="absolute bottom-4 right-4 flex justify-end w-32">
+        <div className="absolute bottom-4 right-0 flex justify-end w-32">
           <button
             onClick={handleNukeClick}
             disabled={!gameData.playerHasNuke || gameData.cpuDeck.length < 10}
             className={`
-              arcade-button text-lg py-2 px-4
+              text-lg py-2 px-4
               ${gameData.playerHasNuke 
-                ? 'border-red-500' 
-                : 'border-green-500'}
+                ? 'text-red-500 font-bold' 
+                : 'text-green-500'}
               ${gameData.playerHasNuke && gameData.cpuDeck.length >= 10 
                 ? 'animate-pulse' 
                 : ''}
               ml-auto
+              ${gameData.playerHasNuke 
+                ? 'text-shadow-red' 
+                : 'text-shadow-green'}
             `}
+            style={{
+              textShadow: gameData.playerHasNuke 
+                ? '0 0 10px #ff0000, 0 0 20px #ff0000, 0 0 30px #ff0000'
+                : '0 0 10px #00ff00, 0 0 20px #00ff00, 0 0 30px #00ff00'
+            }}
           >
             {gameData.playerHasNuke ? 'NUKE!' : 'NUKE USED'}
           </button>

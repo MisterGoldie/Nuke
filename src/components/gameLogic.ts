@@ -83,10 +83,10 @@ export function drawCards(state: LocalState): LocalState {
             const cpuRank = newState.cpuCard.rank;
             
             if (playerRank > cpuRank) {
-                newState.message = "You win this round!";
+                newState.message = `You win with ${newState.playerCard.display}${newState.playerCard.suit} over CPU's ${newState.cpuCard.display}${newState.cpuCard.suit}!`;
                 newState.readyForNextCard = true;
             } else if (cpuRank > playerRank) {
-                newState.message = "CPU wins this round!";
+                newState.message = `CPU wins with ${newState.cpuCard.display}${newState.cpuCard.suit} over your ${newState.playerCard.display}${newState.playerCard.suit}!`;
                 newState.readyForNextCard = true;
             } else {
                 newState.message = "WAR!";
