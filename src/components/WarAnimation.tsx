@@ -7,15 +7,19 @@ export default function WarAnimation({ isVisible }: WarAnimationProps) {
 
   return (
     <div className="absolute inset-0 flex items-center justify-center z-50">
-      {/* Dark overlay with blur */}
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
       
-      {/* WAR text with explosion effect */}
       <div className="relative">
-        <div className="text-[150px] font-bold text-red-500" style={{ textShadow: 'none' }}>
+        <div 
+          className="text-[150px] font-bold text-red-500" 
+          style={{ 
+            textShadow: 'none',
+            WebkitTextStroke: 'none',
+            filter: 'none'
+          }}
+        >
           WAR!
         </div>
-        {/* Explosive particles */}
         <div className="absolute inset-0 flex items-center justify-center">
           {[...Array(8)].map((_, i) => (
             <div

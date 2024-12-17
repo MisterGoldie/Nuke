@@ -97,7 +97,7 @@ export default function Demo() {
       playTheme();
     }
     return () => {
-      stopTheme(); // Using the properly destructured stop function
+      stopTheme();
     };
   }, [gameState, playTheme, stopTheme]);
 
@@ -111,7 +111,7 @@ export default function Demo() {
           <div className="flex flex-col items-center gap-16">
             <div className="text-center">
               <h1 className="arcade-text text-6xl mb-2">NUKE</h1>
-              <p className="arcade-text text-2xl">WAR CARD GAME</p>
+              <p className="arcade-text text-2xl">WAR STYLE CARD GAME</p>
             </div>
 
             {/* Nuclear Hazard Symbol (Trefoil) */}
@@ -201,10 +201,12 @@ export default function Demo() {
         </div>
 
         {/* Game Status */}
-        <div className="text-center arcade-text text-xl my-4">
-          {gameData.message}
+        <div className="text-center text-xl my-4 relative">
+          <div className="text-[#00ff00]" style={{ textShadow: 'none', position: 'relative', zIndex: 1 }}>
+            {gameData.message}
+          </div>
           {gameData.isWar && gameData.warPile.length > 0 && (
-            <div className="text-sm mt-2">
+            <div className="text-sm mt-2 text-green-500" style={{ textShadow: 'none', position: 'relative', zIndex: 1 }}>
               Cards at stake: {gameData.warPile.length + 2}
             </div>
           )}
