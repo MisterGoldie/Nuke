@@ -152,3 +152,125 @@ body {
 .card-face-back {
   transform: rotateY(180deg);
 }
+
+@keyframes glow {
+  0%, 100% {
+    text-shadow: 
+      0 0 4px #00ff00,
+      0 0 8px #00ff00,
+      0 0 12px #00ff00;
+  }
+  50% {
+    text-shadow: 
+      0 0 8px #00ff00,
+      0 0 16px #00ff00,
+      0 0 24px #00ff00;
+  }
+}
+
+.animate-glow {
+  animation: glow 2s ease-in-out infinite;
+}
+
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+.backface-hidden {
+  backface-visibility: hidden;
+}
+
+.rotate-y-180 {
+  transform: rotateY(180deg);
+}
+
+.transform-style-preserve-3d {
+  transform-style: preserve-3d;
+}
+
+/* WAR Animation Styles */
+@keyframes warPulse {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes particle {
+  0% {
+    transform: rotate(var(--rotation)) translateY(0);
+    opacity: 1;
+  }
+  100% {
+    transform: rotate(var(--rotation)) translateY(-200px);
+    opacity: 0;
+  }
+}
+
+.animate-war-pulse {
+  animation: warPulse 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.animate-particle {
+  animation: particle 0.8s ease-out forwards;
+}
+
+.war-text-stroke {
+  -webkit-text-stroke: 4px #ff0000;
+  text-shadow: 
+    0 0 20px #ff0000,
+    0 0 40px #ff0000,
+    0 0 60px #ff0000;
+}
+
+@keyframes nukePulse {
+  0% {
+    transform: scale(0.8);
+    text-shadow: 0 0 20px #ff0000;
+  }
+  50% {
+    transform: scale(1.2);
+    text-shadow: 
+      0 0 20px #ff0000,
+      0 0 40px #ff0000,
+      0 0 60px #ff0000;
+  }
+  100% {
+    transform: scale(1);
+    text-shadow: 0 0 20px #ff0000;
+  }
+}
+
+.animate-nuke-pulse {
+  animation: nukePulse 0.8s ease-in-out infinite;
+}
+
+.nuke-text {
+  -webkit-text-stroke: 4px #ff0000;
+}
+
+.nuke-explosion {
+  width: 100px;
+  height: 100px;
+  background: radial-gradient(circle, #ff0000 0%, transparent 70%);
+  animation: explode 1s ease-out forwards;
+}
+
+@keyframes explode {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(20);
+    opacity: 0;
+  }
+}

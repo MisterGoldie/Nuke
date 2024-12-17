@@ -4,57 +4,83 @@ interface CardProps {
   suit: string;
   rank: string;
   isFlipped: boolean;
+  isPlayerCard: boolean;
   onClick?: () => void;
-  isPlayerCard?: boolean;
 }
 
-const Card: FC<CardProps> = ({ suit, rank, isFlipped, onClick, isPlayerCard }) => {
-  const getColor = () => {
-    return suit === '♥️' || suit === '♦️' ? 'text-red-600' : 'text-black';
-  };
-
+export default function Card({ suit, rank, isFlipped, isPlayerCard, onClick }: CardProps) {
   return (
-    <div 
-      className={`w-40 h-56 relative ${isPlayerCard ? 'cursor-pointer hover:scale-105' : ''}`}
+    <div
       onClick={isPlayerCard ? onClick : undefined}
-      style={{ transformStyle: 'preserve-3d', transition: 'transform 0.6s' }}
+      className={`
+        relative w-[120px] h-[168px] 
+        transform transition-transform duration-300 ease-in-out
+        ${isPlayerCard ? 'hover:scale-105 cursor-pointer' : ''}
+        perspective-1000
+        mx-auto
+      `}
     >
-      {/* Card Back */}
-      <div 
-        className="absolute w-full h-full"
-        style={{ 
-          backfaceVisibility: 'hidden',
-          transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)'
-        }}
+      <div
+        className={`
+          relative w-full h-full
+          transition-transform duration-500 ease-in-out
+          transform-style-preserve-3d
+          ${isFlipped ? 'rotate-y-0' : 'rotate-y-180'}
+        `}
       >
-        <div className="w-full h-full rounded-xl bg-white border-4 border-green-500 
-          shadow-lg shadow-green-500/50 flex items-center justify-center p-2">
-          <div className="w-full h-full rounded-lg bg-green-900 
-            flex items-center justify-center">
-            <div className="text-green-500 text-5xl font-bold">N</div>
-          </div>
+        {/* Front of card */}
+        <div
+          className={`
+            absolute w-full h-full
+            bg-white rounded-xl shadow-xl
+            border-2 border-green-500
+            flex flex-col justify-between p-4
+            backface-hidden
+            ${suit.includes('♥️') || suit.includes('♦️') ? 'text-red-600' : 'text-black'}
+          `}
+        >
+          <div className="self-start text-xl">{rank}{suit}</div>
+          <div className="text-4xl self-center">{suit}</div>
+          <div className="self-end text-xl rotate-180">{rank}{suit}</div>
         </div>
-      </div>
-      
-      {/* Card Front */}
-      <div 
-        className="absolute w-full h-full"
-        style={{ 
-          backfaceVisibility: 'hidden',
-          transform: isFlipped ? 'rotateY(0deg)' : 'rotateY(-180deg)'
-        }}
-      >
-        <div className="w-full h-full rounded-xl bg-white
-          border-4 border-green-500 shadow-lg shadow-green-500/50 flex flex-col p-4">
-          <div className={`text-2xl font-bold ${getColor()}`}>{rank}{suit}</div>
-          <div className={`text-6xl font-bold flex-1 flex items-center justify-center ${getColor()}`}>
-            {rank}{suit}
+
+        {/* Back of card */}
+        <div
+          className={`
+            absolute w-full h-full
+            bg-[#1a237e] rounded-xl
+            border-2 border-green-500
+            flex justify-center items-center
+            backface-hidden rotate-y-180
+            overflow-hidden
+          `}
+        >
+          <div className="relative w-full h-full flex justify-center items-center">
+            {/* Glowing border effect */}
+            <div className="absolute inset-0 border-4 border-green-500 rounded-xl animate-pulse"></div>
+            
+            {/* Center design */}
+            <div className="absolute inset-0 flex justify-center items-center">
+              <div className="text-6xl font-bold text-green-500 animate-glow">N</div>
+            </div>
+            
+            {/* Corner patterns */}
+            <div className="absolute top-4 left-4 text-green-500 text-xl">♠️</div>
+            <div className="absolute top-4 right-4 text-green-500 text-xl">♣️</div>
+            <div className="absolute bottom-4 left-4 text-green-500 text-xl">♥️</div>
+            <div className="absolute bottom-4 right-4 text-green-500 text-xl">♦️</div>
+            
+            {/* Diagonal patterns */}
+            <div className="absolute inset-0 grid grid-cols-3 grid-rows-3 opacity-20">
+              {Array.from({ length: 9 }).map((_, i) => (
+                <div key={i} className="flex justify-center items-center text-green-500">
+                  {i % 2 === 0 ? '★' : '•'}
+                </div>
+              ))}
+            </div>
           </div>
-          <div className={`text-2xl font-bold self-end ${getColor()}`}>{rank}{suit}</div>
         </div>
       </div>
     </div>
   );
-};
-
-export default Card; 
+} 

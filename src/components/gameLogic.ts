@@ -14,6 +14,9 @@ export interface LocalState {
     isWar: boolean;
     gameOver: boolean;
     message: string;
+    playerHasNuke: boolean;
+    cpuHasNuke: boolean;
+    isNukeActive: boolean;
 }
   
 export function createDeck(): Card[] {
@@ -46,7 +49,10 @@ export function initializeGame(): LocalState {
         warPile: [],
         isWar: false,
         gameOver: false,
-        message: 'Draw a card to begin!'
+        message: 'Draw a card to begin!',
+        playerHasNuke: true,
+        cpuHasNuke: true,
+        isNukeActive: false
     };
 }
   
@@ -109,6 +115,33 @@ export function drawCards(state: LocalState): LocalState {
     if (newState.playerDeck.length === 0 || newState.cpuDeck.length === 0) {
         newState.gameOver = true;
         newState.message = newState.playerDeck.length === 0 ? "Game Over - CPU Wins!" : "Game Over - You Win!";
+    }
+
+    // Random CPU NUKE (5% chance if CPU has nuke)
+    if (newState.cpuHasNuke && newState.playerDeck.length >= 10 && Math.random() < 0.05) {
+        return handleNuke(newState, 'cpu');
+    }
+
+    return newState;
+} 
+
+export function handleNuke(state: LocalState, initiator: 'player' | 'cpu'): LocalState {
+    const newState = { ...state };
+    
+    if (initiator === 'player' && newState.playerHasNuke && newState.cpuDeck.length >= 10) {
+        // Player initiates nuke
+        const stolenCards = newState.cpuDeck.splice(-10);
+        newState.playerDeck.unshift(...stolenCards);
+        newState.playerHasNuke = false;
+        newState.message = "NUKE LAUNCHED! You stole 10 cards!";
+        newState.isNukeActive = true;
+    } else if (initiator === 'cpu' && newState.cpuHasNuke && newState.playerDeck.length >= 10) {
+        // CPU initiates nuke
+        const stolenCards = newState.playerDeck.splice(-10);
+        newState.cpuDeck.unshift(...stolenCards);
+        newState.cpuHasNuke = false;
+        newState.message = "CPU LAUNCHED A NUKE! Lost 10 cards!";
+        newState.isNukeActive = true;
     }
 
     return newState;

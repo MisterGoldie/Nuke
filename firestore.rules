@@ -1,0 +1,18 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Nuke game collections
+    match /nuke_games/{gameId} {
+      allow read: true;
+      allow write: if request.auth != null;
+    }
+    
+    match /nuke_players/{playerId} {
+      allow read: true;
+      allow write: if request.auth != null 
+        && request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['totalGames', 'wins', 'losses', 'ties', 'highScore', 
+                     'easyWins', 'mediumWins', 'hardWins', 'lastPlayed']);
+    }
+  }
+} 
