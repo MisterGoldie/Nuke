@@ -70,6 +70,18 @@ function shuffle<T>(array: T[]): T[] {
 export function drawCards(state: LocalState): LocalState {
     const newState = { ...state };
 
+    // Validate card counts
+    const totalCards = newState.playerDeck.length + 
+                      newState.cpuDeck.length + 
+                      newState.warPile.length + 
+                      (newState.playerCard ? 1 : 0) + 
+                      (newState.cpuCard ? 1 : 0);
+
+    if (totalCards !== 52) {
+        console.error('Invalid card count:', totalCards);
+        return initializeGame(); // Reset if counts are wrong
+    }
+
     if (!newState.isWar) {
         newState.playerCard = newState.playerDeck.pop() || null;
         newState.cpuCard = newState.cpuDeck.pop() || null;
@@ -100,7 +112,7 @@ export function drawCards(state: LocalState): LocalState {
         }
     } else {
         // Handle war
-        for (let i = 0; i < 3; i++) {
+        for (let i = 0; i < 3 && newState.playerDeck.length > 0 && newState.cpuDeck.length > 0; i++) {
             const playerWarCard = newState.playerDeck.pop();
             const cpuWarCard = newState.cpuDeck.pop();
             if (playerWarCard && cpuWarCard) {
@@ -112,14 +124,12 @@ export function drawCards(state: LocalState): LocalState {
     }
 
     // Check for game over
-    if (newState.playerDeck.length === 0 || newState.cpuDeck.length === 0) {
+    if (newState.playerDeck.length === 52) {
         newState.gameOver = true;
-        newState.message = newState.playerDeck.length === 0 ? "Game Over - CPU Wins!" : "Game Over - You Win!";
-    }
-
-    // Random CPU NUKE (5% chance if CPU has nuke)
-    if (newState.cpuHasNuke && newState.playerDeck.length >= 10 && Math.random() < 0.05) {
-        return handleNuke(newState, 'cpu');
+        newState.message = "Game Over - You Win! You've captured all cards!";
+    } else if (newState.cpuDeck.length === 52) {
+        newState.gameOver = true;
+        newState.message = "Game Over - CPU Wins! They've captured all cards!";
     }
 
     return newState;

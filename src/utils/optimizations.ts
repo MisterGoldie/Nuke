@@ -1,5 +1,5 @@
 // Asset and sound preloading
-const soundCache = new Map();
+export const soundCache = new Map();
 const assetCache = new Map();
 
 export const preloadAssets = () => {
@@ -9,13 +9,17 @@ export const preloadAssets = () => {
     '/sounds/click.mp3',
     '/sounds/win.mp3',
     '/sounds/lose.mp3',
-    '/sounds/draw.mp3'
+    '/sounds/draw.mp3',
+    '/sounds/theme.mp3'
   ];
   
   assets.forEach(asset => {
     if (asset.endsWith('.mp3')) {
       if (!soundCache.has(asset)) {
         const audio = new Audio(asset);
+        if (asset.includes('theme')) {
+          audio.loop = true;
+        }
         soundCache.set(asset, audio);
       }
     } else {

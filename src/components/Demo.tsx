@@ -23,6 +23,10 @@ export default function Demo() {
   const [showNukeAnimation, setShowNukeAnimation] = useState(false);
   const [nukeInitiator, setNukeInitiator] = useState<'player' | 'cpu'>('player');
   const [playNukeSound] = useSound('/sounds/nuke.mp3', { volume: 0.75 });
+  const [playTheme, { stop: stopTheme }] = useSound('/sounds/theme.mp3', { 
+    volume: 0.5,
+    loop: true
+  });
 
   const handleDrawCard = () => {
     console.log('Card clicked!');
@@ -86,6 +90,16 @@ export default function Demo() {
       playNukeSound();
     }
   }, [gameData.isNukeActive, gameData.cpuHasNuke]);
+
+  // Add effect to play theme on mount
+  useEffect(() => {
+    if (gameState === 'menu') {
+      playTheme();
+    }
+    return () => {
+      stopTheme(); // Using the properly destructured stop function
+    };
+  }, [gameState, playTheme, stopTheme]);
 
   // Menu State
   if (gameState === 'menu') {

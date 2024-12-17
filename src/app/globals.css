@@ -485,6 +485,7 @@ body {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+  animation: colorCycle 6s linear infinite;
 }
 
 .trefoil .blade {
@@ -495,6 +496,7 @@ body {
   left: 45px;
   top: 0;
   border-radius: 15px 15px 0 0;
+  animation: colorCycle 6s linear infinite;
 }
 
 .trefoil .blade:nth-child(2) {
@@ -507,27 +509,26 @@ body {
   transform-origin: center 60px;
 }
 
+@keyframes colorCycle {
+  0%, 100% {
+    background: #00ff00;
+    filter: drop-shadow(0 0 15px #00ff00);
+  }
+  33% {
+    background: #ff0000;
+    filter: drop-shadow(0 0 15px #ff0000);
+  }
+  66% {
+    background: #ff6600;
+    filter: drop-shadow(0 0 15px #ff6600);
+  }
+}
+
 @keyframes spin {
   from {
     transform: rotate(0deg);
   }
   to {
     transform: rotate(360deg);
-  }
-}
-
-.trefoil {
-  filter: drop-shadow(0 0 15px #00ff00);
-  animation: spin 10s linear infinite, glow 2s ease-in-out infinite;
-}
-
-@keyframes glow {
-  0%, 100% {
-    filter: drop-shadow(0 0 15px #00ff00) 
-            drop-shadow(0 0 30px #00ff00);
-  }
-  50% {
-    filter: drop-shadow(0 0 20px #00ff00) 
-            drop-shadow(0 0 40px #00ff00);
   }
 }
