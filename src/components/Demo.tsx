@@ -387,27 +387,36 @@ export default function Demo() {
             BACK
           </button>
 
-          <button
-            onClick={handleNukeClick}
-            disabled={!gameData.playerHasNuke || gameData.cpuDeck.length < 10}
-            className={`
-              text-lg py-2 px-4 rounded
-              border-2
-              ${gameData.playerHasNuke ? 'text-red-500 border-red-500 font-bold' : 'text-green-500 border-green-500'}
-              ${gameData.playerHasNuke && gameData.cpuDeck.length >= 10 ? 'animate-pulse' : ''}
-            `}
+          {/* Only show NUKE button if it's available */}
+          {gameData.playerHasNuke && (
+            <button
+              onClick={handleNukeClick}
+              disabled={gameData.cpuDeck.length < 10}
+              className={`
+                text-lg py-2 px-4 rounded
+                border-2 text-red-500 border-red-500 font-bold
+                ${gameData.cpuDeck.length >= 10 ? 'animate-pulse' : ''}
+              `}
+              style={{
+                textShadow: '0 0 10px #ff0000, 0 0 20px #ff0000, 0 0 30px #ff0000',
+                boxShadow: '0 0 10px rgba(255, 0, 0, 0.3), inset 0 0 10px rgba(255, 0, 0, 0.2)'
+              }}
+            >
+              NUKE!
+            </button>
+          )}
+        </div>
+
+        {/* Nuke Used Status Message - Show when nuke is not available */}
+        {!gameData.playerHasNuke && (
+          <div className="absolute bottom-24 right-4 text-lg text-green-500"
             style={{
-              textShadow: gameData.playerHasNuke 
-                ? '0 0 10px #ff0000, 0 0 20px #ff0000, 0 0 30px #ff0000'
-                : '0 0 10px #00ff00, 0 0 20px #00ff00, 0 0 30px #00ff00',
-              boxShadow: gameData.playerHasNuke
-                ? '0 0 10px rgba(255, 0, 0, 0.3), inset 0 0 10px rgba(255, 0, 0, 0.2)'
-                : '0 0 10px rgba(0, 255, 0, 0.3), inset 0 0 10px rgba(0, 255, 0, 0.2)'
+              textShadow: '0 0 10px #00ff00, 0 0 20px #00ff00, 0 0 30px #00ff00',
             }}
           >
-            {gameData.playerHasNuke ? 'NUKE!' : 'NUKE USED'}
-          </button>
-        </div>
+            NUKE USED
+          </div>
+        )}
 
         {/* WAR Animation */}
         <WarAnimation isVisible={showWarAnimation} />
