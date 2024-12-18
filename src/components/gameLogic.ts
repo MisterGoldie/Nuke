@@ -107,7 +107,7 @@ export function drawCards(state: LocalState): LocalState {
                 newState.cpuDeck.push(newState.playerCard, newState.cpuCard);
                 newState.readyForNextCard = true;
             } else {
-                newState.message = "WAR!";
+                newState.message = "WAR! 3 cards each drawn";
                 newState.isWar = true;
                 
                 if (newState.playerDeck.length >= 3 && newState.cpuDeck.length >= 3) {
