@@ -92,7 +92,7 @@ export function drawCards(state: LocalState): LocalState {
                     newState.playerDeck.push(...newState.warPile);
                     newState.warPile = [];
                 } else {
-                    newState.message = `You win with ${newState.playerCard.display}${newState.playerCard.suit}`;
+                    newState.message = `You wins with ${newState.playerCard.display}${newState.playerCard.suit}`;
                 }
                 newState.playerDeck.push(newState.cpuCard, newState.playerCard);
                 newState.readyForNextCard = true;
