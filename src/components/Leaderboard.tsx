@@ -53,17 +53,21 @@ export default function Leaderboard({ isMuted, playGameJingle, currentUserFid, p
     const fetchLeaderboard = async () => {
       try {
         const url = currentUserFid 
-          ? `/api/firebase?userFid=${currentUserFid}`
-          : '/api/firebase';
+          ? `/api/leaderboard?userFid=${currentUserFid}`
+          : '/api/leaderboard';
           
         const response = await fetch(url);
-        const data = await response.json();
-        setLeaderboard(data.leaderboard);
-        if (data.userData) {
-          setCurrentUserData(data.userData);
+        if (!response.ok) {
+          throw new Error('Failed to fetch leaderboard');
         }
+        const data = await response.json();
+        
+        setLeaderboard(data.leaderboard || []);
+        setCurrentUserData(data.userData || null);
       } catch (error) {
         console.error('Error fetching leaderboard:', error);
+        setLeaderboard([]);
+        setCurrentUserData(null);
       } finally {
         setIsLoading(false);
       }
@@ -73,7 +77,22 @@ export default function Leaderboard({ isMuted, playGameJingle, currentUserFid, p
   }, [currentUserFid]);
 
   if (isLoading) {
-    return <div>Loading leaderboard...</div>;
+    return (
+      <div className="arcade-container flex items-center justify-center">
+        <h1 className="arcade-text text-4xl animate-pulse">Loading...</h1>
+      </div>
+    );
+  }
+
+  // If no data, show empty state
+  if (!leaderboard.length) {
+    return (
+      <div className="arcade-container flex flex-col items-center justify-center p-8">
+        <h1 className="arcade-text text-4xl mb-6">Leaderboard</h1>
+        <p className="arcade-text text-xl">No scores yet!</p>
+        <p className="arcade-text text-lg mt-4">Be the first to play!</p>
+      </div>
+    );
   }
 
   return (
