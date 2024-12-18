@@ -466,7 +466,13 @@ export default function Demo() {
 
   // Leaderboard State
   if (gameState === 'leaderboard') {
-    return <Leaderboard isMuted={false} playGameJingle={() => {}} />;
+    return (
+      <Leaderboard 
+        isMuted={false} 
+        playGameJingle={() => {}} 
+        onBack={() => setGameState('menu')}
+      />
+    );
   }
 
   // Add condition to check for frame loaded state
