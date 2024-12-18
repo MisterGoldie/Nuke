@@ -374,21 +374,27 @@ export default function Demo() {
           <span>Your Cards: {gameData.playerDeck.length}</span>
         </div>
 
-        {/* NUKE Button - Added border */}
-        <div className="absolute bottom-4 right-0 flex justify-end w-32">
+        {/* Bottom Action Buttons - Raised higher */}
+        <div className="absolute bottom-24 left-4 right-4 flex justify-between items-center">
+          <button
+            onClick={() => setGameState('menu')}
+            className="text-lg py-2 px-4 text-yellow-400 font-bold border-2 border-yellow-400 rounded"
+            style={{
+              textShadow: '0 0 10px #ffd700, 0 0 20px #ffd700, 0 0 30px #ffd700',
+              boxShadow: '0 0 10px rgba(255, 215, 0, 0.3), inset 0 0 10px rgba(255, 215, 0, 0.2)'
+            }}
+          >
+            BACK
+          </button>
+
           <button
             onClick={handleNukeClick}
             disabled={!gameData.playerHasNuke || gameData.cpuDeck.length < 10}
             className={`
               text-lg py-2 px-4 rounded
               border-2
-              ${gameData.playerHasNuke 
-                ? 'text-red-500 border-red-500 font-bold' 
-                : 'text-green-500 border-green-500'}
-              ${gameData.playerHasNuke && gameData.cpuDeck.length >= 10 
-                ? 'animate-pulse' 
-                : ''}
-              mr-4
+              ${gameData.playerHasNuke ? 'text-red-500 border-red-500 font-bold' : 'text-green-500 border-green-500'}
+              ${gameData.playerHasNuke && gameData.cpuDeck.length >= 10 ? 'animate-pulse' : ''}
             `}
             style={{
               textShadow: gameData.playerHasNuke 
@@ -400,20 +406,6 @@ export default function Demo() {
             }}
           >
             {gameData.playerHasNuke ? 'NUKE!' : 'NUKE USED'}
-          </button>
-        </div>
-
-        {/* BACK Button - Added border */}
-        <div className="absolute bottom-4 left-0 flex justify-start w-32">
-          <button
-            onClick={() => setGameState('menu')}
-            className="text-lg py-2 px-4 text-yellow-400 font-bold ml-4 border-2 border-yellow-400 rounded"
-            style={{
-              textShadow: '0 0 10px #ffd700, 0 0 20px #ffd700, 0 0 30px #ffd700',
-              boxShadow: '0 0 10px rgba(255, 215, 0, 0.3), inset 0 0 10px rgba(255, 215, 0, 0.2)'
-            }}
-          >
-            BACK
           </button>
         </div>
 
