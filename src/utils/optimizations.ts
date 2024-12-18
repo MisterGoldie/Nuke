@@ -1,24 +1,30 @@
 // Asset and sound preloading
-export const soundCache = new Map();
+export const soundCache = new Map<string, HTMLAudioElement>();
 const assetCache = new Map();
 
 export const preloadAssets = () => {
+  console.log('Preloading assets...'); // Debug log
+  
   const assets = [
     '/game-board.png',
     '/splash.png',
     '/sounds/click.mp3',
     '/sounds/win.mp3',
     '/sounds/lose.mp3',
-    '/sounds/draw.mp3',
-    '/sounds/theme.mp3'
+    '/sounds/theme.mp3',
+    '/sounds/war.mp3',
+    '/sounds/gameplay.mp3'
   ];
   
   assets.forEach(asset => {
     if (asset.endsWith('.mp3')) {
       if (!soundCache.has(asset)) {
+        console.log('Loading audio:', asset); // Debug log
         const audio = new Audio(asset);
-        if (asset.includes('theme')) {
+        if (asset.includes('gameplay')) {
           audio.loop = true;
+          audio.volume = 0.4;
+          console.log('Configured gameplay music:', audio); // Debug log
         }
         soundCache.set(asset, audio);
       }
@@ -30,12 +36,16 @@ export const preloadAssets = () => {
       }
     }
   });
+  
+  console.log('Assets preloaded, soundCache:', soundCache); // Debug log
 };
 
 export const playSound = (soundUrl: string) => {
   if (soundCache.has(soundUrl)) {
     const audio = soundCache.get(soundUrl);
-    audio.currentTime = 0;
-    audio.play();
+    if (audio) {
+      audio.currentTime = 0;
+      audio.play();
+    }
   }
 }; 

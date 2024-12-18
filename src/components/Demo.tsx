@@ -10,6 +10,7 @@ import { LocalState, Card, initializeGame, drawCards, handleNuke } from './gameL
 import CardComponent from './Card';
 import WarAnimation from './WarAnimation';
 import NukeAnimation from './NukeAnimation';
+import { soundCache, preloadAssets } from '~/utils/optimizations';
 
 type GameState = 'menu' | 'game' | 'leaderboard';
 
@@ -32,6 +33,7 @@ export default function Demo() {
     volume: 0.5,
     loop: true
   });
+  const [playWarSound] = useSound('/sounds/war.mp3', { volume: 0.75 });
 
   const handleGameEnd = async (outcome: 'win' | 'loss') => {
     if (!context?.fid) return;
@@ -59,17 +61,17 @@ export default function Demo() {
   };
 
   const handleDrawCard = () => {
-    setGameData(prevState => {
-      const newState = drawCards(prevState);
-      
-      // Check if game ended and store result
-      if (newState.gameOver) {
-        const outcome = newState.playerDeck.length === 52 ? 'win' : 'loss';
-        handleGameEnd(outcome);
-      }
-      
-      return newState;
-    });
+    if (!gameData.playerCard && !gameData.cpuCard) {
+        setGameData(prevState => {
+            const newState = drawCards(prevState);
+            // Force immediate state update for deck counts
+            return {
+                ...newState,
+                playerDeck: [...newState.playerDeck],  // Create new array references
+                cpuDeck: [...newState.cpuDeck]        // to ensure React sees the change
+            };
+        });
+    }
   };
 
   const handleNukeClick = () => {
@@ -109,13 +111,14 @@ export default function Demo() {
   useEffect(() => {
     if (gameData.isWar) {
       setShowWarAnimation(true);
+      playWarSound();
       // Hide animation after 1.5 seconds
       const timer = setTimeout(() => {
         setShowWarAnimation(false);
       }, 1500);
       return () => clearTimeout(timer);
     }
-  }, [gameData.isWar]);
+  }, [gameData.isWar, playWarSound]);
 
   // Add effect to handle CPU NUKE sound
   useEffect(() => {
@@ -129,6 +132,8 @@ export default function Demo() {
   useEffect(() => {
     if (gameState === 'menu') {
       playTheme();
+    } else {
+      stopTheme();
     }
     return () => {
       stopTheme();
@@ -151,6 +156,48 @@ export default function Demo() {
         return () => clearTimeout(timer);
     }
   }, [gameData.readyForNextCard]);
+
+  // Start gameplay music when game starts
+  useEffect(() => {
+    console.log('Game State Changed:', gameState); // Debug log
+    const gameplayMusic = soundCache.get('/sounds/gameplay.mp3');
+    console.log('Gameplay Music Object:', gameplayMusic); // Debug log
+    
+    if (gameState === 'game') {
+      if (gameplayMusic) {
+        console.log('Attempting to play gameplay music'); // Debug log
+        gameplayMusic.volume = 0.4;
+        gameplayMusic.loop = true;
+        
+        const playPromise = gameplayMusic.play();
+        
+        if (playPromise !== undefined) {
+          playPromise
+            .then(() => {
+              console.log('Gameplay music started successfully'); // Debug log
+            })
+            .catch((error: Error) => {
+              console.error('Gameplay music failed to play:', error); // Debug error
+            });
+        }
+      } else {
+        console.error('Gameplay music not found in cache'); // Debug error
+      }
+
+      return () => {
+        if (gameplayMusic) {
+          console.log('Cleaning up gameplay music'); // Debug log
+          gameplayMusic.pause();
+          gameplayMusic.currentTime = 0;
+        }
+      };
+    }
+  }, [gameState]);
+
+  // Make sure preloadAssets is called when component mounts
+  useEffect(() => {
+    preloadAssets();
+  }, []);
 
   // Menu State
   if (gameState === 'menu') {

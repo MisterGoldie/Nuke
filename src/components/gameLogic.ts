@@ -51,7 +51,7 @@ export function initializeGame(): LocalState {
         warPile: [],
         isWar: false,
         gameOver: false,
-        message: 'Draw a card to begin!',
+        message: 'Draw a card to begin',
         playerHasNuke: true,
         cpuHasNuke: true,
         isNukeActive: false,
@@ -71,9 +71,12 @@ function shuffle<T>(array: T[]): T[] {
 }
   
 export function drawCards(state: LocalState): LocalState {
-    const newState = { ...state };
+    const newState = {
+        ...state,
+        playerDeck: [...state.playerDeck],
+        cpuDeck: [...state.cpuDeck]
+    };
 
-    // If cards are face down, flip them up
     if (!newState.playerCard && !newState.cpuCard) {
         newState.playerCard = newState.playerDeck.shift() || null;
         newState.cpuCard = newState.cpuDeck.shift() || null;
@@ -83,56 +86,48 @@ export function drawCards(state: LocalState): LocalState {
             const cpuRank = newState.cpuCard.rank;
             
             if (playerRank > cpuRank) {
-                newState.message = `You win with ${newState.playerCard.display}${newState.playerCard.suit} over CPU's ${newState.cpuCard.display}${newState.cpuCard.suit}!`;
+                newState.message = `You win with ${newState.playerCard.display}${newState.playerCard.suit}`;
+                newState.playerDeck.push(newState.cpuCard);
+                newState.playerDeck.push(newState.playerCard);
                 newState.readyForNextCard = true;
             } else if (cpuRank > playerRank) {
-                newState.message = `CPU wins with ${newState.cpuCard.display}${newState.cpuCard.suit} over your ${newState.playerCard.display}${newState.playerCard.suit}!`;
+                newState.message = `CPU wins with ${newState.cpuCard.display}${newState.cpuCard.suit}`;
+                newState.cpuDeck.push(newState.playerCard);
+                newState.cpuDeck.push(newState.cpuCard);
                 newState.readyForNextCard = true;
             } else {
                 newState.message = "WAR!";
                 newState.isWar = true;
+                newState.warPile.push(newState.playerCard, newState.cpuCard);
+                newState.playerCard = null;
+                newState.cpuCard = null;
             }
         }
-        return newState;
-    }
-
-    // Handle previous round cleanup
-    if (newState.playerCard && newState.cpuCard) {
-        // Move cards to appropriate decks
-        if (newState.playerCard.rank > newState.cpuCard.rank) {
-            newState.playerDeck = [...newState.playerDeck, newState.playerCard, newState.cpuCard];
-        } else if (newState.cpuCard.rank > newState.playerCard.rank) {
-            newState.cpuDeck = [...newState.cpuDeck, newState.playerCard, newState.cpuCard];
-        }
-        
-        // Clear cards and prepare for next round
-        newState.playerCard = null;
-        newState.cpuCard = null;
-        newState.message = "Draw a card to continue!";
-        newState.readyForNextCard = false;
     }
 
     return newState;
 }
   
 export function handleNuke(state: LocalState, initiator: 'player' | 'cpu'): LocalState {
-    const newState = { ...state };
+    const newState = {
+        ...state,
+        playerDeck: [...state.playerDeck],
+        cpuDeck: [...state.cpuDeck]
+    };
     
     if (initiator === 'player' && newState.playerHasNuke && newState.cpuDeck.length >= 10) {
-        // Player initiates nuke
-        const stolenCards = newState.cpuDeck.splice(-10);
+        const stolenCards = newState.cpuDeck.splice(-10, 10);
         newState.playerDeck.unshift(...stolenCards);
         newState.playerHasNuke = false;
-        newState.message = "NUKE LAUNCHED! You stole 10 cards!";
         newState.isNukeActive = true;
+        newState.message = "NUKE LAUNCHED! You stole 10 cards!";
     } else if (initiator === 'cpu' && newState.cpuHasNuke && newState.playerDeck.length >= 10) {
-        // CPU initiates nuke
-        const stolenCards = newState.playerDeck.splice(-10);
+        const stolenCards = newState.playerDeck.splice(-10, 10);
         newState.cpuDeck.unshift(...stolenCards);
         newState.cpuHasNuke = false;
-        newState.message = "CPU LAUNCHED A NUKE! Lost 10 cards!";
         newState.isNukeActive = true;
+        newState.message = "CPU LAUNCHED A NUKE! You lost 10 cards";
     }
-
+    
     return newState;
 } 
