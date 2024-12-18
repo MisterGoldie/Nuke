@@ -25,8 +25,11 @@ export default function Card({ suit, rank, isFlipped, isPlayerCard, onClick }: C
           relative w-full h-full
           transition-transform duration-500 ease-in-out
           transform-style-preserve-3d
-          ${isFlipped ? 'rotate-y-180' : 'rotate-y-0'}
+          ${isFlipped ? `rotate-y-180 ${isPlayerCard ? '' : 'delay-300'}` : 'rotate-y-0'}
         `}
+        style={{
+          transitionDelay: isPlayerCard ? '0ms' : '300ms'
+        }}
       >
         {/* Front of card (back design) */}
         <div

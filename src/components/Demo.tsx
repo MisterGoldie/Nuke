@@ -34,6 +34,8 @@ export default function Demo() {
     loop: true
   });
   const [playWarSound] = useSound('/sounds/war.mp3', { volume: 0.75 });
+  const [delayedMessage, setDelayedMessage] = useState<string>("Draw card to begin");
+  const [isFirstCard, setIsFirstCard] = useState(true);
 
   const handleGameEnd = async (outcome: 'win' | 'loss') => {
     if (!context?.fid) return;
@@ -198,6 +200,40 @@ export default function Demo() {
     preloadAssets();
   }, []);
 
+  // Handle the initial card flip messages
+  useEffect(() => {
+    if (gameData.playerCard && gameData.cpuCard) {
+      // Clear first card state
+      if (isFirstCard) {
+        setIsFirstCard(false);
+      }
+      
+      // Clear any existing message first
+      setDelayedMessage("");
+      
+      // Wait for CPU card flip animation before showing result
+      const resultTimer = setTimeout(() => {
+        setDelayedMessage(gameData.message);
+        
+        // Then set timer for "draw next" message
+        const drawNextTimer = setTimeout(() => {
+          setDelayedMessage("Draw next card to continue");
+        }, 2000);
+        
+        return () => clearTimeout(drawNextTimer);
+      }, 400);
+      
+      return () => clearTimeout(resultTimer);
+    }
+  }, [gameData.playerCard, gameData.cpuCard, gameData.message]);
+
+  // Special handling for WAR messages
+  useEffect(() => {
+    if (gameData.isWar) {
+      setDelayedMessage("WAR!");
+    }
+  }, [gameData.isWar]);
+
   // Menu State
   if (gameState === 'menu') {
     return (
@@ -309,7 +345,7 @@ export default function Demo() {
         {/* Game Status */}
         <div className="text-center text-xl my-4 relative">
           <div className="text-[#00ff00]" style={{ textShadow: 'none', position: 'relative', zIndex: 1 }}>
-            {gameData.message}
+            {isFirstCard ? "Draw card to begin" : delayedMessage}
           </div>
         </div>
 

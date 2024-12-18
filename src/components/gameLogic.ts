@@ -74,7 +74,8 @@ export function drawCards(state: LocalState): LocalState {
     const newState = {
         ...state,
         playerDeck: [...state.playerDeck],
-        cpuDeck: [...state.cpuDeck]
+        cpuDeck: [...state.cpuDeck],
+        warPile: [...state.warPile]
     };
 
     if (!newState.playerCard && !newState.cpuCard) {
@@ -89,37 +90,38 @@ export function drawCards(state: LocalState): LocalState {
                 if (newState.warPile.length > 0) {
                     newState.message = `You win WAR with ${newState.playerCard.display}${newState.playerCard.suit}! (8 cards won)`;
                     newState.playerDeck.push(...newState.warPile);
-                    newState.warPile = []; // Clear war pile
+                    newState.warPile = [];
                 } else {
                     newState.message = `You win with ${newState.playerCard.display}${newState.playerCard.suit}`;
                 }
-                newState.playerDeck.push(newState.cpuCard);
-                newState.playerDeck.push(newState.playerCard);
+                newState.playerDeck.push(newState.cpuCard, newState.playerCard);
                 newState.readyForNextCard = true;
             } else if (cpuRank > playerRank) {
                 if (newState.warPile.length > 0) {
                     newState.message = `CPU wins WAR with ${newState.cpuCard.display}${newState.cpuCard.suit}! (8 cards won)`;
                     newState.cpuDeck.push(...newState.warPile);
-                    newState.warPile = []; // Clear war pile
+                    newState.warPile = [];
                 } else {
                     newState.message = `CPU wins with ${newState.cpuCard.display}${newState.cpuCard.suit}`;
                 }
-                newState.cpuDeck.push(newState.playerCard);
-                newState.cpuDeck.push(newState.cpuCard);
+                newState.cpuDeck.push(newState.playerCard, newState.cpuCard);
                 newState.readyForNextCard = true;
             } else {
                 newState.message = "WAR!";
                 newState.isWar = true;
-                // Add face-down cards for WAR (2 from each player)
-                if (newState.playerDeck.length >= 2 && newState.cpuDeck.length >= 2) {
-                    newState.warPile.push(
-                        newState.playerDeck.shift()!, // Face down
-                        newState.playerDeck.shift()!, // Face down
-                        newState.cpuDeck.shift()!,    // Face down
-                        newState.cpuDeck.shift()!     // Face down
-                    );
+                
+                if (newState.playerDeck.length >= 3 && newState.cpuDeck.length >= 3) {
+                    for (let i = 0; i < 3; i++) {
+                        newState.warPile.push(newState.playerDeck.shift()!);
+                        newState.warPile.push(newState.cpuDeck.shift()!);
+                    }
+                    newState.warPile.push(newState.playerCard, newState.cpuCard);
+                } else {
+                    newState.gameOver = true;
+                    newState.message = newState.playerDeck.length < 3 
+                        ? "Game Over - Not enough cards for WAR! CPU wins!" 
+                        : "Game Over - Not enough cards for WAR! You win!";
                 }
-                newState.warPile.push(newState.playerCard, newState.cpuCard);
                 newState.playerCard = null;
                 newState.cpuCard = null;
             }
