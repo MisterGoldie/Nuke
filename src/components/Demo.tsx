@@ -308,6 +308,14 @@ export default function Demo() {
 
           <div />
         </div>
+
+        {/* Version number in its own div at the bottom */}
+        <div className="absolute bottom-4 arcade-text text-xs" style={{ 
+          textShadow: '0 0 5px #00ff00, 0 0 10px #00ff00',
+          opacity: 0.8 
+        }}>
+          version 1.0
+        </div>
       </div>
     );
   }
@@ -409,12 +417,14 @@ export default function Demo() {
 
         {/* Nuke Used Status Message - Show when nuke is not available */}
         {!gameData.playerHasNuke && (
-          <div className="absolute bottom-24 right-4 text-lg text-green-500"
+          <div 
+            className="absolute bottom-24 right-12 text-lg text-green-500 flex flex-col items-center pointer-events-none"
             style={{
               textShadow: '0 0 10px #00ff00, 0 0 20px #00ff00, 0 0 30px #00ff00',
             }}
           >
-            NUKE USED
+            <span>NUKE</span>
+            <span>USED</span>
           </div>
         )}
 
