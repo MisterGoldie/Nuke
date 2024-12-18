@@ -35,7 +35,7 @@ export default function Card({ suit, rank, isFlipped, isPlayerCard, onClick }: C
         <div
           className={`
             absolute w-full h-full
-            bg-[#1a237e] rounded-xl
+            bg-[#3f51b5] rounded-xl
             border-2 border-green-500
             flex justify-center items-center
             backface-hidden
