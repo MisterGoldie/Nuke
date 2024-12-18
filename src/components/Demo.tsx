@@ -12,6 +12,7 @@ import WarAnimation from './WarAnimation';
 import NukeAnimation from './NukeAnimation';
 import { soundCache, preloadAssets } from '~/utils/optimizations';
 import HowToPlay from './HowToPlay';
+import { fetchUserDataByFid } from '../utils/neynarUtils';
 
 type GameState = 'menu' | 'game' | 'leaderboard' | 'tutorial';
 
@@ -33,6 +34,7 @@ export default function Demo() {
   const [playWarSound] = useSound('/sounds/war.mp3', { volume: 0.75 });
   const [delayedMessage, setDelayedMessage] = useState<string>("Draw card to begin");
   const [isFirstCard, setIsFirstCard] = useState(true);
+  const [username, setUsername] = useState<string>('');
 
   const handleGameEnd = async (outcome: 'win' | 'loss') => {
     if (!context?.fid) return;
@@ -91,6 +93,37 @@ export default function Demo() {
         const ctx = await sdk.context;
         console.log("Got context:", ctx);
         setContext(ctx);
+        // Get FID from context
+        const fid = ctx?.user?.fid;
+        if (fid) {
+          // Use the same query method from the Frog app
+          const query = `
+            query ($fid: String!) {
+              Socials(input: {filter: {dappName: {_eq: farcaster}, userId: {_eq: $fid}}, blockchain: ethereum}) {
+                Social {
+                  profileName
+                }
+              }
+            }
+          `;
+
+          const response = await fetch(process.env.NEXT_PUBLIC_AIRSTACK_API_URL!, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': process.env.NEXT_PUBLIC_AIRSTACK_API_KEY!,
+            },
+            body: JSON.stringify({ 
+              query, 
+              variables: { fid: fid.toString() } 
+            }),
+          });
+
+          const data = await response.json();
+          const username = data?.data?.Socials?.Social?.[0]?.profileName || `Player ${fid}`;
+          setUsername(username);
+        }
+
         await sdk.actions.ready();
         console.log("SDK Ready - Game State:", gameState);
         setTimeout(() => {
@@ -198,7 +231,9 @@ export default function Demo() {
       
       // Wait for CPU card flip animation before showing result
       const resultTimer = setTimeout(() => {
-        setDelayedMessage(gameData.message);
+        // Replace "You" with username in messages
+        const message = gameData.message.replace(/You/g, username);
+        setDelayedMessage(message);
         
         // Then set timer for "draw next" message
         const drawNextTimer = setTimeout(() => {
@@ -210,7 +245,7 @@ export default function Demo() {
       
       return () => clearTimeout(resultTimer);
     }
-  }, [gameData.playerCard, gameData.cpuCard, gameData.message]);
+  }, [gameData.playerCard, gameData.cpuCard, gameData.message, username]);
 
   // Special handling for WAR messages
   useEffect(() => {
@@ -412,7 +447,7 @@ export default function Demo() {
             isPlayerCard={true}
             onClick={handleDrawCard}
           />
-          <p className="arcade-text text-lg mt-4">Your Card</p>
+          <p className="arcade-text text-lg mt-4">{username}'s Card</p>
         </div>
       </div>
     );
