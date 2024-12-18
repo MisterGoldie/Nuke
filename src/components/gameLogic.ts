@@ -86,18 +86,39 @@ export function drawCards(state: LocalState): LocalState {
             const cpuRank = newState.cpuCard.rank;
             
             if (playerRank > cpuRank) {
-                newState.message = `You win with ${newState.playerCard.display}${newState.playerCard.suit}`;
+                if (newState.warPile.length > 0) {
+                    newState.message = `You win WAR with ${newState.playerCard.display}${newState.playerCard.suit}! (8 cards won)`;
+                    newState.playerDeck.push(...newState.warPile);
+                    newState.warPile = []; // Clear war pile
+                } else {
+                    newState.message = `You win with ${newState.playerCard.display}${newState.playerCard.suit}`;
+                }
                 newState.playerDeck.push(newState.cpuCard);
                 newState.playerDeck.push(newState.playerCard);
                 newState.readyForNextCard = true;
             } else if (cpuRank > playerRank) {
-                newState.message = `CPU wins with ${newState.cpuCard.display}${newState.cpuCard.suit}`;
+                if (newState.warPile.length > 0) {
+                    newState.message = `CPU wins WAR with ${newState.cpuCard.display}${newState.cpuCard.suit}! (8 cards won)`;
+                    newState.cpuDeck.push(...newState.warPile);
+                    newState.warPile = []; // Clear war pile
+                } else {
+                    newState.message = `CPU wins with ${newState.cpuCard.display}${newState.cpuCard.suit}`;
+                }
                 newState.cpuDeck.push(newState.playerCard);
                 newState.cpuDeck.push(newState.cpuCard);
                 newState.readyForNextCard = true;
             } else {
                 newState.message = "WAR!";
                 newState.isWar = true;
+                // Add face-down cards for WAR (2 from each player)
+                if (newState.playerDeck.length >= 2 && newState.cpuDeck.length >= 2) {
+                    newState.warPile.push(
+                        newState.playerDeck.shift()!, // Face down
+                        newState.playerDeck.shift()!, // Face down
+                        newState.cpuDeck.shift()!,    // Face down
+                        newState.cpuDeck.shift()!     // Face down
+                    );
+                }
                 newState.warPile.push(newState.playerCard, newState.cpuCard);
                 newState.playerCard = null;
                 newState.cpuCard = null;

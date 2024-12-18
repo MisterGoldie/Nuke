@@ -112,10 +112,10 @@ export default function Demo() {
     if (gameData.isWar) {
       setShowWarAnimation(true);
       playWarSound();
-      // Hide animation after 1.5 seconds
+      // Extend WAR animation to 2.5 seconds
       const timer = setTimeout(() => {
         setShowWarAnimation(false);
-      }, 1500);
+      }, 2500);  // Changed from 1500 to 2500
       return () => clearTimeout(timer);
     }
   }, [gameData.isWar, playWarSound]);
@@ -142,16 +142,15 @@ export default function Demo() {
 
   useEffect(() => {
     if (gameData.readyForNextCard) {
-        // Changed from 1500 to 2000 for 2 second delay
         const timer = setTimeout(() => {
             setGameData(prevState => ({
                 ...prevState,
                 playerCard: null,
                 cpuCard: null,
                 readyForNextCard: false,
-                message: "Draw a card to continue!"
+                message: "Draw next card to continue"
             }));
-        }, 2000);
+        }, gameData.warPile.length > 0 ? 4000 : 2000);  // 4 seconds for WAR, 2 seconds for normal
 
         return () => clearTimeout(timer);
     }
@@ -166,7 +165,7 @@ export default function Demo() {
     if (gameState === 'game') {
       if (gameplayMusic) {
         console.log('Attempting to play gameplay music'); // Debug log
-        gameplayMusic.volume = 0.4;
+        gameplayMusic.volume = 0.5;
         gameplayMusic.loop = true;
         
         const playPromise = gameplayMusic.play();
@@ -312,11 +311,6 @@ export default function Demo() {
           <div className="text-[#00ff00]" style={{ textShadow: 'none', position: 'relative', zIndex: 1 }}>
             {gameData.message}
           </div>
-          {gameData.isWar && gameData.warPile.length > 0 && (
-            <div className="text-sm mt-2 text-green-500" style={{ textShadow: 'none', position: 'relative', zIndex: 1 }}>
-              Cards at stake: {gameData.warPile.length + 2}
-            </div>
-          )}
         </div>
 
         {/* Player Card Area */}
