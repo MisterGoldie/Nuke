@@ -11,8 +11,9 @@ import CardComponent from './Card';
 import WarAnimation from './WarAnimation';
 import NukeAnimation from './NukeAnimation';
 import { soundCache, preloadAssets } from '~/utils/optimizations';
+import HowToPlay from './HowToPlay';
 
-type GameState = 'menu' | 'game' | 'leaderboard';
+type GameState = 'menu' | 'game' | 'leaderboard' | 'tutorial';
 
 // Add interface for your context type
 interface ExtendedFrameContext extends FrameContext {
@@ -29,10 +30,6 @@ export default function Demo() {
   const [showNukeAnimation, setShowNukeAnimation] = useState(false);
   const [nukeInitiator, setNukeInitiator] = useState<'player' | 'cpu'>('player');
   const [playNukeSound] = useSound('/sounds/nuke.mp3', { volume: 0.75 });
-  const [playTheme, { stop: stopTheme }] = useSound('/sounds/theme.mp3', { 
-    volume: 0.5,
-    loop: true
-  });
   const [playWarSound] = useSound('/sounds/war.mp3', { volume: 0.75 });
   const [delayedMessage, setDelayedMessage] = useState<string>("Draw card to begin");
   const [isFirstCard, setIsFirstCard] = useState(true);
@@ -130,18 +127,6 @@ export default function Demo() {
     }
   }, [gameData.isNukeActive, gameData.cpuHasNuke]);
 
-  // Add effect to play theme on mount
-  useEffect(() => {
-    if (gameState === 'menu') {
-      playTheme();
-    } else {
-      stopTheme();
-    }
-    return () => {
-      stopTheme();
-    };
-  }, [gameState, playTheme, stopTheme]);
-
   useEffect(() => {
     if (gameData.readyForNextCard) {
         const timer = setTimeout(() => {
@@ -158,36 +143,36 @@ export default function Demo() {
     }
   }, [gameData.readyForNextCard]);
 
-  // Start gameplay music when game starts
+  // Start gameplay music when tutorial starts and keep it playing through game
   useEffect(() => {
-    console.log('Game State Changed:', gameState); // Debug log
+    console.log('Game State Changed:', gameState);
     const gameplayMusic = soundCache.get('/sounds/gameplay.mp3');
-    console.log('Gameplay Music Object:', gameplayMusic); // Debug log
     
-    if (gameState === 'game') {
-      if (gameplayMusic) {
-        console.log('Attempting to play gameplay music'); // Debug log
-        gameplayMusic.volume = 0.5;
-        gameplayMusic.loop = true;
-        
+    // Start music on tutorial, keep playing through game
+    if ((gameState === 'tutorial' || gameState === 'game') && gameplayMusic) {
+      console.log('Attempting to play gameplay music');
+      gameplayMusic.volume = 0.5;
+      gameplayMusic.loop = true;
+      
+      // Only play if not already playing
+      if (gameplayMusic.paused) {
         const playPromise = gameplayMusic.play();
         
         if (playPromise !== undefined) {
           playPromise
             .then(() => {
-              console.log('Gameplay music started successfully'); // Debug log
+              console.log('Gameplay music started successfully');
             })
             .catch((error: Error) => {
-              console.error('Gameplay music failed to play:', error); // Debug error
+              console.error('Gameplay music failed to play:', error);
             });
         }
-      } else {
-        console.error('Gameplay music not found in cache'); // Debug error
       }
 
+      // Only cleanup when returning to menu or leaderboard
       return () => {
-        if (gameplayMusic) {
-          console.log('Cleaning up gameplay music'); // Debug log
+        if (['menu', 'leaderboard'].includes(gameState)) {
+          console.log('Cleaning up gameplay music');
           gameplayMusic.pause();
           gameplayMusic.currentTime = 0;
         }
@@ -234,6 +219,17 @@ export default function Demo() {
     }
   }, [gameData.isWar]);
 
+  // Handle game start flow
+  const handleStartGame = () => {
+    setGameData(initializeGame());
+    setGameState('tutorial'); // Show tutorial first
+  };
+
+  // Handle tutorial completion
+  const handleTutorialComplete = () => {
+    setGameState('game');
+  };
+
   // Menu State
   if (gameState === 'menu') {
     return (
@@ -259,10 +255,7 @@ export default function Demo() {
               <Button 
                 data-action="start-game"
                 className="arcade-button glow-blue text-2xl py-3"
-                onClick={() => {
-                  setGameData(initializeGame());
-                  setGameState('game');
-                }}
+                onClick={handleStartGame}
               >
                 START GAME
               </Button>
@@ -284,6 +277,52 @@ export default function Demo() {
     );
   }
 
+  // Tutorial State
+  if (gameState === 'tutorial') {
+    return (
+      <div className="arcade-container flex flex-col items-center p-8">
+        <h1 className="arcade-text text-4xl mb-6 title-glow">HOW TO PLAY</h1>
+        
+        <div className="space-y-6 text-[#00ff00] max-w-[350px]">
+          <section>
+            <h2 className="text-2xl mb-2">Basic Rules</h2>
+            <p className="text-sm leading-relaxed">
+              Each player starts with 26 cards. Players draw cards simultaneously. Higher card wins both cards!
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-2xl mb-2">WAR!</h2>
+            <p className="text-sm leading-relaxed">
+              When cards match, it's WAR! Each player puts down 3 face-down cards and 1 face-up card. Winner takes all 8 cards!
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-2xl mb-2">NUKE Power!</h2>
+            <p className="text-sm leading-relaxed">
+              Each player has one NUKE. Use it to steal 10 cards from your opponent! Use wisely - you only get one.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-2xl mb-2">Winning</h2>
+            <p className="text-sm leading-relaxed">
+              Collect all cards to win! If a player doesn't have enough cards for WAR, they lose.
+            </p>
+          </section>
+        </div>
+
+        <Button 
+          className="arcade-button glow-blue text-xl py-2 mt-8"
+          onClick={handleTutorialComplete}
+        >
+          START PLAYING
+        </Button>
+      </div>
+    );
+  }
+
   // Game State
   if (gameState === 'game') {
     return (
@@ -300,31 +339,46 @@ export default function Demo() {
           <span>Your Cards: {gameData.playerDeck.length}</span>
         </div>
 
-        {/* NUKE Button */}
+        {/* NUKE Button - Added border */}
         <div className="absolute bottom-4 right-0 flex justify-end w-32">
           <button
             onClick={handleNukeClick}
             disabled={!gameData.playerHasNuke || gameData.cpuDeck.length < 10}
             className={`
-              text-lg py-2 px-4
+              text-lg py-2 px-4 rounded
+              border-2
               ${gameData.playerHasNuke 
-                ? 'text-red-500 font-bold' 
-                : 'text-green-500'}
+                ? 'text-red-500 border-red-500 font-bold' 
+                : 'text-green-500 border-green-500'}
               ${gameData.playerHasNuke && gameData.cpuDeck.length >= 10 
                 ? 'animate-pulse' 
                 : ''}
-              ml-auto
-              ${gameData.playerHasNuke 
-                ? 'text-shadow-red' 
-                : 'text-shadow-green'}
+              mr-4
             `}
             style={{
               textShadow: gameData.playerHasNuke 
                 ? '0 0 10px #ff0000, 0 0 20px #ff0000, 0 0 30px #ff0000'
-                : '0 0 10px #00ff00, 0 0 20px #00ff00, 0 0 30px #00ff00'
+                : '0 0 10px #00ff00, 0 0 20px #00ff00, 0 0 30px #00ff00',
+              boxShadow: gameData.playerHasNuke
+                ? '0 0 10px rgba(255, 0, 0, 0.3), inset 0 0 10px rgba(255, 0, 0, 0.2)'
+                : '0 0 10px rgba(0, 255, 0, 0.3), inset 0 0 10px rgba(0, 255, 0, 0.2)'
             }}
           >
             {gameData.playerHasNuke ? 'NUKE!' : 'NUKE USED'}
+          </button>
+        </div>
+
+        {/* BACK Button - Added border */}
+        <div className="absolute bottom-4 left-0 flex justify-start w-32">
+          <button
+            onClick={() => setGameState('menu')}
+            className="text-lg py-2 px-4 text-yellow-400 font-bold ml-4 border-2 border-yellow-400 rounded"
+            style={{
+              textShadow: '0 0 10px #ffd700, 0 0 20px #ffd700, 0 0 30px #ffd700',
+              boxShadow: '0 0 10px rgba(255, 215, 0, 0.3), inset 0 0 10px rgba(255, 215, 0, 0.2)'
+            }}
+          >
+            BACK
           </button>
         </div>
 
@@ -378,6 +432,11 @@ export default function Demo() {
         </div>
       </div>
     );
+  }
+
+  // Add after leaderboard state check
+  if (gameState === 'howToPlay') {
+    return <HowToPlay onBack={() => setGameState('menu')} />;
   }
 
   return null;
