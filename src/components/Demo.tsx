@@ -94,7 +94,7 @@ export default function Demo() {
         console.log("Got context:", ctx);
         setContext(ctx);
         // Get FID from context
-        const fid = ctx?.user?.id;
+        const fid = ctx?.user?.fid;
         if (fid) {
           // Use the same query method from the Frog app
           const query = `
