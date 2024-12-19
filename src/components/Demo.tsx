@@ -194,14 +194,52 @@ export default function Demo() {
   useEffect(() => {
     console.log('Game State Changed:', gameState);
     const gameplayMusic = soundCache.get('/sounds/gameplay.mp3');
+    const leaderboardMusic = soundCache.get('/sounds/boomsback.mp3');
     
-    // Start music on tutorial, keep playing through game
+    // Handle leaderboard music
+    if (gameState === 'leaderboard' && leaderboardMusic) {
+      // Stop gameplay music if playing
+      if (gameplayMusic && !gameplayMusic.paused) {
+        gameplayMusic.pause();
+        gameplayMusic.currentTime = 0;
+      }
+      
+      // Start leaderboard music
+      leaderboardMusic.volume = 0.5;
+      leaderboardMusic.loop = true;
+      
+      if (leaderboardMusic.paused) {
+        const playPromise = leaderboardMusic.play();
+        
+        if (playPromise !== undefined) {
+          playPromise
+            .then(() => {
+              console.log('Leaderboard music started successfully');
+            })
+            .catch((error: Error) => {
+              console.error('Leaderboard music failed to play:', error);
+            });
+        }
+      }
+      
+      return () => {
+        leaderboardMusic.pause();
+        leaderboardMusic.currentTime = 0;
+      };
+    }
+    
+    // Handle gameplay music
     if ((gameState === 'tutorial' || gameState === 'game') && gameplayMusic) {
-      console.log('Attempting to play gameplay music');
+      // Stop leaderboard music if playing
+      if (leaderboardMusic && !leaderboardMusic.paused) {
+        leaderboardMusic.pause();
+        leaderboardMusic.currentTime = 0;
+      }
+      
+      // Start gameplay music
       gameplayMusic.volume = 0.5;
       gameplayMusic.loop = true;
       
-      // Only play if not already playing
       if (gameplayMusic.paused) {
         const playPromise = gameplayMusic.play();
         
@@ -215,11 +253,9 @@ export default function Demo() {
             });
         }
       }
-
-      // Only cleanup when returning to menu or leaderboard
+      
       return () => {
         if (['menu', 'leaderboard'].includes(gameState)) {
-          console.log('Cleaning up gameplay music');
           gameplayMusic.pause();
           gameplayMusic.currentTime = 0;
         }

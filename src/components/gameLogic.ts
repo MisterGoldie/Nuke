@@ -61,59 +61,62 @@ export function initializeGame(): LocalState {
   
 function shuffle<T>(array: T[]): T[] {
     const newArray = [...array];
-    newArray.sort(() => {
-        return Math.random() > 0.6 ? 1 : -1;
-    });
     
+    // First basic shuffle
     for (let i = newArray.length - 1; i > 0; i--) {
-        if (Math.random() < 0.4) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const temp = newArray[i]!;
+        newArray[i] = newArray[j]!;
+        newArray[j] = temp;
+    }
+
+    // Split the deck into two halves
+    const midpoint = Math.floor(newArray.length / 2);
+    const playerHalf = newArray.slice(0, midpoint);
+    const cpuHalf = newArray.slice(midpoint);
+
+    // Sort each half to favor the player
+    playerHalf.sort((a: any, b: any) => b.rank - a.rank); // Higher ranks for player
+    cpuHalf.sort((a: any, b: any) => a.rank - b.rank);   // Lower ranks for CPU
+
+    // Add some randomness back but maintain the general advantage
+    for (let i = playerHalf.length - 1; i > 0; i--) {
+        if (Math.random() < 0.3) { // Only swap 30% of the time
             const j = Math.floor(Math.random() * (i + 1));
-            const temp = newArray[i]!;
-            newArray[i] = newArray[j]!;
-            newArray[j] = temp;
+            const temp = playerHalf[i]!;
+            playerHalf[i] = playerHalf[j]!;
+            playerHalf[j] = temp;
         }
     }
-    return newArray;
+
+    // Combine the halves back together
+    return [...playerHalf, ...cpuHalf];
 }
   
 export function drawCards(state: LocalState): LocalState {
-    if (state.playerCard || state.cpuCard) {
-        return state;
+    const newState = { ...state };
+    
+    // Check for game over conditions first
+    if (newState.playerDeck.length === 0) {
+        newState.gameOver = true;
+        newState.message = "Game Over - CPU wins!";
+        return newState;
+    }
+    
+    if (newState.cpuDeck.length === 0) {
+        newState.gameOver = true;
+        newState.message = "Game Over - You win!";
+        return newState;
     }
 
-    if (state.playerDeck.length === 0 || state.cpuDeck.length === 0) {
-        return state;
-    }
-
-    const newState = {
-        ...state,
-        playerDeck: [...state.playerDeck],
-        cpuDeck: [...state.cpuDeck],
-        warPile: [...state.warPile],
-        isWar: false,
-        readyForNextCard: false
-    };
-
-    if (state.message === 'Draw a card to begin') {
-        do {
-            if (newState.playerCard) {
-                newState.playerDeck.unshift(newState.playerCard);
-            }
-            if (newState.cpuCard) {
-                newState.cpuDeck.unshift(newState.cpuCard);
-            }
-            
-            newState.playerCard = newState.playerDeck.shift()!;
-            newState.cpuCard = newState.cpuDeck.shift()!;
-        } while (newState.playerCard.rank === newState.cpuCard.rank);
-    } else {
-        newState.playerCard = newState.playerDeck.shift()!;
-        newState.cpuCard = newState.cpuDeck.shift()!;
-    }
-
+    // Draw cards
+    newState.playerCard = newState.playerDeck.shift()!;
+    newState.cpuCard = newState.cpuDeck.shift()!;
+    
     const playerRank = newState.playerCard.rank;
     const cpuRank = newState.cpuCard.rank;
-
+    
+    // Compare cards and handle outcomes
     if (playerRank > cpuRank) {
         if (newState.warPile.length > 0) {
             newState.message = `You wins WAR with ${newState.playerCard.display}${newState.playerCard.suit}! (${newState.warPile.length + 2} cards won)`;
@@ -154,7 +157,7 @@ export function drawCards(state: LocalState): LocalState {
                 : "Game Over - Not enough cards for WAR! You win!";
         }
     }
-
+    
     return newState;
 }
   
@@ -171,12 +174,24 @@ export function handleNuke(state: LocalState, initiator: 'player' | 'cpu'): Loca
         newState.playerHasNuke = false;
         newState.isNukeActive = true;
         newState.message = "NUKE LAUNCHED! You stole 10 cards!";
+        
+        // Check if this was a winning move
+        if (newState.cpuDeck.length === 0) {
+            newState.gameOver = true;
+            newState.message = "Game Over - You win with a NUKE!";
+        }
     } else if (initiator === 'cpu' && newState.cpuHasNuke && newState.playerDeck.length >= 10) {
         const stolenCards = newState.playerDeck.splice(-10, 10);
         newState.cpuDeck.unshift(...stolenCards);
         newState.cpuHasNuke = false;
         newState.isNukeActive = true;
         newState.message = "CPU LAUNCHED A NUKE! You lost 10 cards";
+        
+        // Check if this was a winning move
+        if (newState.playerDeck.length === 0) {
+            newState.gameOver = true;
+            newState.message = "Game Over - CPU wins with a NUKE!";
+        }
     }
     
     return newState;
