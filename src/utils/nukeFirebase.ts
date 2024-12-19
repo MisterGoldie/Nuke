@@ -3,10 +3,7 @@ import { FieldValue } from 'firebase-admin/firestore';
 
 interface GameResult {
   playerFid: string;
-  score: number;
-  difficulty: 'easy' | 'medium' | 'hard';
-  outcome: 'win' | 'loss' | 'tie';
-  moves: number;
+  outcome: 'win' | 'loss';
   timestamp?: FieldValue;
 }
 
@@ -14,11 +11,6 @@ interface PlayerStats {
   totalGames: number;
   wins: number;
   losses: number;
-  ties: number;
-  highScore: number;
-  easyWins: number;
-  mediumWins: number;
-  hardWins: number;
   lastPlayed: FieldValue;
 }
 
@@ -30,23 +22,21 @@ export async function storeGameResult(gameResult: GameResult) {
     // Create batch write
     const batch = db.batch();
     
-    // Add to games collection
+    // Add to games collection with simplified data
     const gameRef = db.collection('nuke_games').doc();
     batch.set(gameRef, {
-      ...gameResult,
+      playerFid,
+      outcome: gameResult.outcome,
       timestamp: FieldValue.serverTimestamp()
     });
     
-    // Update player stats
+    // Update player stats with simplified data
     const playerRef = db.collection('nuke_players').doc(playerFid);
     const statsUpdate: Partial<PlayerStats> = {
       totalGames: FieldValue.increment(1) as unknown as number,
       [`${gameResult.outcome}s`]: FieldValue.increment(1) as unknown as number,
       lastPlayed: FieldValue.serverTimestamp()
     };
-    if (gameResult.outcome === 'win') {
-      statsUpdate[`${gameResult.difficulty}Wins`] = FieldValue.increment(1) as unknown as number;
-    }
     
     batch.set(playerRef, statsUpdate, { merge: true });
     await batch.commit();

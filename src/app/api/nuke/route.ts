@@ -9,11 +9,25 @@ import {
 export async function POST(request: NextRequest) {
   try {
     const gameResult = await request.json();
+    
+    // Validate required fields
+    if (!gameResult.playerFid || !gameResult.outcome) {
+      return Response.json({ error: 'Missing required fields' }, { status: 400 });
+    }
+    
+    // Store the result using the existing function
     await storeGameResult(gameResult);
-    return Response.json({ success: true });
+    
+    return Response.json({ 
+      success: true,
+      message: 'Game result stored successfully'
+    });
   } catch (error) {
-    console.error('Error in POST /api/nuke:', error);
-    return Response.json({ error: 'Failed to store game result' }, { status: 500 });
+    console.error('Error storing game result:', error);
+    return Response.json({ 
+      error: 'Failed to store game result',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 });
   }
 }
 

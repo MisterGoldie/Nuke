@@ -45,31 +45,34 @@ export default function Demo() {
   const [delayedMessage, setDelayedMessage] = useState<string>("Draw card to begin");
   const [isFirstCard, setIsFirstCard] = useState(true);
   const [username, setUsername] = useState<string>('Your');
+  const [isFidLoaded, setIsFidLoaded] = useState(false);
 
-  const handleGameEnd = async (outcome: 'win' | 'loss') => {
-    if (!context?.fid) return;
+  const handleGameEnd = useCallback(async (outcome: 'win' | 'loss') => {
+    if (!isFidLoaded || !context?.user?.fid) {
+        console.log("Waiting for FID to load...");
+        return;
+    }
     
     try {
-      const result = {
-        fid: context.fid,
-        outcome: outcome
-      };
-      
-      const response = await fetch('/api/game-result', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(result),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to store game result');
-      }
+        const gameResult = {
+            playerFid: context.user.fid.toString(),
+            outcome: outcome
+        };
+        
+        console.log("Sending game result:", gameResult);
+        const response = await fetch('/api/nuke', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(gameResult),
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to store game result');
+        }
     } catch (error) {
-      console.error('Error storing game result:', error);
+        console.error('Error in handleGameEnd:', error);
     }
-  };
+}, [context, isFidLoaded]);
 
   const handleDrawCard = useCallback(() => {
     // Prevent drawing cards during war or nuke animations
@@ -83,16 +86,32 @@ export default function Demo() {
     }
   }, [gameData, showWarAnimation, showNukeAnimation]);
 
-  const handleNukeClick = () => {
-    setGameData((prevState: LocalState) => {
-      const newState = handleNuke(prevState, 'player');
-      setShowNukeAnimation(true);
-      setNukeInitiator('player');
-      playNukeSound();
-      setTimeout(() => setShowNukeAnimation(false), 2000);
-      return newState;
+  const handleNukeClick = useCallback(() => {
+    if (showNukeAnimation) return;
+    
+    setGameData((prevState) => {
+        const newState = handleNuke(prevState, 'player');
+        
+        // Schedule animation and sound effects
+        setTimeout(() => {
+            setShowNukeAnimation(true);
+            setNukeInitiator('player');
+            playNukeSound();
+            
+            // Clear animation after delay
+            setTimeout(() => {
+                setShowNukeAnimation(false);
+                
+                // Check game over after animation
+                if (newState.gameOver) {
+                    handleGameEnd('win');
+                }
+            }, 2000);
+        }, 0);
+        
+        return newState;
     });
-  };
+}, [showNukeAnimation, playNukeSound, handleGameEnd]);
 
   useEffect(() => {
     const load = async () => {
@@ -101,9 +120,11 @@ export default function Demo() {
         const ctx = await sdk.context;
         console.log("Got context:", ctx);
         setContext(ctx);
+        
         // Get FID from context
         const fid = ctx?.user?.fid;
         if (fid) {
+          setIsFidLoaded(true);  // Mark FID as loaded
           // Use the same query method from the Frog app
           const query = `
             query ($fid: String!) {
@@ -550,6 +571,69 @@ export default function Demo() {
   if (gameState === 'howToPlay') {
     return <HowToPlay onBack={() => setGameState('menu')} />;
   }
+
+  useEffect(() => {
+    // Check for game over after every state change
+    if (gameData.gameOver) {
+        // Set the game over message immediately
+        setDelayedMessage(gameData.message);
+        
+        // Handle the game result
+        if (context?.fid) {
+            const outcome = gameData.message.includes("You win") ? "win" : "loss";
+            handleGameEnd(outcome);
+        }
+        
+        // Keep the game over message displayed
+        // Don't override it with "Draw next card to continue"
+        return;
+    }
+}, [gameData.gameOver, gameData.message, context?.fid, handleGameEnd]);
+
+  useEffect(() => {
+    // Check total cards in play
+    const totalCards = 
+        gameData.playerDeck.length + 
+        gameData.cpuDeck.length + 
+        (gameData.playerCard ? 1 : 0) + 
+        (gameData.cpuCard ? 1 : 0) + 
+        gameData.warPile.length;
+        
+    if (totalCards !== 52) {
+        console.error('Card count error:', {
+            playerDeck: gameData.playerDeck.length,
+            cpuDeck: gameData.cpuDeck.length,
+            playerCard: gameData.playerCard ? 1 : 0,
+            cpuCard: gameData.cpuCard ? 1 : 0,
+            warPile: gameData.warPile.length,
+            total: totalCards
+        });
+    }
+    
+    // Force game over if one player has all cards
+    if (gameData.playerDeck.length === 52 || gameData.cpuDeck.length === 52) {
+        setGameData(prev => ({
+            ...prev,
+            gameOver: true,
+            message: gameData.playerDeck.length === 52 ? 
+                "Game Over - You win!" : 
+                "Game Over - CPU wins!"
+        }));
+        
+        // Trigger game end handling
+        handleGameEnd(gameData.playerDeck.length === 52 ? 'win' : 'loss');
+    }
+  }, [gameData, handleGameEnd]);
+
+  // Add a new effect to handle game over state
+  useEffect(() => {
+    if (gameData.gameOver) {
+        // Determine if it was a nuke win
+        const isNukeWin = gameData.message.includes("NUKE");
+        handleGameEnd(isNukeWin ? 'win' : 
+            gameData.message.includes("You win") ? 'win' : 'loss');
+    }
+  }, [gameData.gameOver, gameData.message, handleGameEnd]);
 
   return null;
 }

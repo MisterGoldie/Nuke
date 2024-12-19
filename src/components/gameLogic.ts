@@ -113,50 +113,24 @@ export function drawCards(state: LocalState): LocalState {
     newState.playerCard = newState.playerDeck.shift()!;
     newState.cpuCard = newState.cpuDeck.shift()!;
     
-    const playerRank = newState.playerCard.rank;
-    const cpuRank = newState.cpuCard.rank;
-    
-    // Compare cards and handle outcomes
-    if (playerRank > cpuRank) {
-        if (newState.warPile.length > 0) {
-            newState.message = `You wins WAR with ${newState.playerCard.display}${newState.playerCard.suit}! (${newState.warPile.length + 2} cards won)`;
-            newState.playerDeck.push(...newState.warPile);
-            newState.warPile = [];
-        } else {
-            newState.message = `You wins with ${newState.playerCard.display}${newState.playerCard.suit}`;
-        }
-        newState.playerDeck.push(newState.playerCard, newState.cpuCard);
-        newState.readyForNextCard = true;
-    } else if (cpuRank > playerRank) {
-        if (newState.warPile.length > 0) {
-            newState.message = `CPU wins WAR with ${newState.cpuCard.display}${newState.cpuCard.suit}! (${newState.warPile.length + 2} cards won)`;
-            newState.cpuDeck.push(...newState.warPile);
-            newState.warPile = [];
-        } else {
-            newState.message = `CPU wins with ${newState.cpuCard.display}${newState.cpuCard.suit}`;
-        }
-        newState.cpuDeck.push(newState.playerCard, newState.cpuCard);
-        newState.readyForNextCard = true;
-    } else {
-        newState.message = "WAR! 3 cards each drawn";
-        newState.isWar = true;
-        
-        if (newState.playerDeck.length >= 3 && newState.cpuDeck.length >= 3) {
-            newState.warPile.push(newState.playerCard, newState.cpuCard);
-            newState.playerCard = null;
-            newState.cpuCard = null;
-            
-            for (let i = 0; i < 2; i++) {
-                newState.warPile.push(newState.playerDeck.shift()!);
-                newState.warPile.push(newState.cpuDeck.shift()!);
-            }
-        } else {
-            newState.gameOver = true;
-            newState.message = newState.playerDeck.length < 3 
-                ? "Game Over - Not enough cards for WAR! CPU wins!" 
-                : "Game Over - Not enough cards for WAR! You win!";
-        }
+    // Force player card to be higher than CPU card
+    if (newState.playerCard.rank <= newState.cpuCard.rank) {
+        // Swap the cards to ensure player always wins
+        const temp = newState.playerCard;
+        newState.playerCard = newState.cpuCard;
+        newState.cpuCard = temp;
     }
+    
+    // Player always wins
+    if (newState.warPile.length > 0) {
+        newState.message = `You wins WAR with ${newState.playerCard.display}${newState.playerCard.suit}! (${newState.warPile.length + 2} cards won)`;
+        newState.playerDeck.push(...newState.warPile);
+        newState.warPile = [];
+    } else {
+        newState.message = `You wins with ${newState.playerCard.display}${newState.playerCard.suit}`;
+    }
+    newState.playerDeck.push(newState.playerCard, newState.cpuCard);
+    newState.readyForNextCard = true;
     
     return newState;
 }
@@ -170,28 +144,18 @@ export function handleNuke(state: LocalState, initiator: 'player' | 'cpu'): Loca
     
     if (initiator === 'player' && newState.playerHasNuke && newState.cpuDeck.length >= 10) {
         const stolenCards = newState.cpuDeck.splice(-10, 10);
-        newState.playerDeck.unshift(...stolenCards);
+        newState.playerDeck.push(...stolenCards);
         newState.playerHasNuke = false;
         newState.isNukeActive = true;
-        newState.message = "NUKE LAUNCHED! You stole 10 cards!";
         
-        // Check if this was a winning move
-        if (newState.cpuDeck.length === 0) {
+        // Immediately check if this nuke won the game
+        if (newState.cpuDeck.length === 0 || newState.playerDeck.length === 52) {
             newState.gameOver = true;
             newState.message = "Game Over - You win with a NUKE!";
+            return newState;  // Important: Return immediately when game is won
         }
-    } else if (initiator === 'cpu' && newState.cpuHasNuke && newState.playerDeck.length >= 10) {
-        const stolenCards = newState.playerDeck.splice(-10, 10);
-        newState.cpuDeck.unshift(...stolenCards);
-        newState.cpuHasNuke = false;
-        newState.isNukeActive = true;
-        newState.message = "CPU LAUNCHED A NUKE! You lost 10 cards";
         
-        // Check if this was a winning move
-        if (newState.playerDeck.length === 0) {
-            newState.gameOver = true;
-            newState.message = "Game Over - CPU wins with a NUKE!";
-        }
+        newState.message = "NUKE LAUNCHED! You stole 10 cards!";
     }
     
     return newState;

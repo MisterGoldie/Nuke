@@ -5,7 +5,6 @@ interface LeaderboardEntry {
   username: string;
   wins: number;
   losses: number;
-  pfp: string;
   lastPlayed: Date;
 }
 
@@ -20,16 +19,52 @@ export default function Leaderboard({ currentUserFid, onBack }: { currentUserFid
         const data = await response.json();
         
         if (data.leaderboard) {
-          const formattedData = data.leaderboard.map((entry: any) => ({
-            fid: entry.fid,
-            username: entry.username || `fid:${entry.fid}`,
-            wins: entry.wins || 0,
-            losses: entry.losses || 0,
-            pfp: entry.pfp || '',
-            lastPlayed: entry.lastPlayed ? new Date(entry.lastPlayed) : new Date()
+          // Fetch usernames for all FIDs
+          const entries = await Promise.all(data.leaderboard.map(async (entry: any) => {
+            // Use the same Airstack query as in Demo.tsx
+            const query = `
+              query ($fid: String!) {
+                Socials(input: {filter: {dappName: {_eq: farcaster}, userId: {_eq: $fid}}, blockchain: ethereum}) {
+                  Social {
+                    profileName
+                  }
+                }
+              }
+            `;
+
+            try {
+              const response = await fetch(process.env.NEXT_PUBLIC_AIRSTACK_API_URL!, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': process.env.NEXT_PUBLIC_AIRSTACK_API_KEY!,
+                },
+                body: JSON.stringify({ 
+                  query, 
+                  variables: { fid: entry.fid.toString() } 
+                }),
+              });
+
+              const data = await response.json();
+              const username = data?.data?.Socials?.Social?.[0]?.profileName;
+
+              return {
+                fid: entry.fid,
+                username: username || `fid:${entry.fid}`,
+                wins: entry.wins || 0,
+                losses: entry.losses || 0,
+                lastPlayed: entry.lastPlayed ? new Date(entry.lastPlayed) : new Date()
+              };
+            } catch (error) {
+              console.error('Error fetching username for FID:', entry.fid, error);
+              return {
+                ...entry,
+                username: `fid:${entry.fid}`
+              };
+            }
           }));
           
-          setLeaderboardData(formattedData);
+          setLeaderboardData(entries);
         }
       } catch (error) {
         console.error('Error fetching leaderboard:', error);
