@@ -83,6 +83,18 @@ function shuffle<T>(array: T[]): T[] {
 export function drawCards(state: LocalState): LocalState {
     const newState = { ...state };
     
+    // Check if this is the first draw of the game
+    const isFirstDraw = !newState.playerCard && !newState.cpuCard && 
+                       newState.playerDeck.length === 26 && 
+                       newState.cpuDeck.length === 26;
+    
+    // Skip CPU NUKE check if it's the first draw
+    if (!isFirstDraw && newState.cpuHasNuke && newState.playerDeck.length >= 10 && Math.random() < 0.10) {
+        const nukeState = handleNuke(newState, 'cpu');
+        nukeState.isNukeActive = true;
+        return nukeState;
+    }
+    
     // Check if previous state was a war
     const wasWar = newState.isWar;
     
@@ -105,13 +117,6 @@ export function drawCards(state: LocalState): LocalState {
             newState.cpuDeck.push(newState.cpuCard);
             attempts++;
         }
-    }
-    
-    // Add CPU NUKE logic with 10% chance if CPU has nuke and player has 10+ cards
-    if (newState.cpuHasNuke && newState.playerDeck.length >= 10 && Math.random() < 0.10) {
-        const nukeState = handleNuke(newState, 'cpu');
-        nukeState.isNukeActive = true; // Ensure animation triggers
-        return nukeState;
     }
     
     // Check for game over conditions first

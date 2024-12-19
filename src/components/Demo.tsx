@@ -569,9 +569,10 @@ export default function Demo() {
           {/* CPU Nuke Used Status Message - Red color */}
           {!gameData.cpuHasNuke && (
             <div 
-              className="absolute bottom-24 left-12 text-lg text-red-500 flex flex-col items-center pointer-events-none"
+              className="absolute bottom-16 left-12 text-lg text-red-500 flex flex-col items-center pointer-events-none"
               style={{
-                textShadow: '0 0 10px #ff0000, 0 0 20px #ff0000, 0 0 30px #ff0000',
+                textShadow: '0 0 10px #ff0000',
+                zIndex: 10
               }}
             >
               <span>NUKE</span>
