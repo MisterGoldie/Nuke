@@ -83,8 +83,32 @@ function shuffle<T>(array: T[]): T[] {
 export function drawCards(state: LocalState): LocalState {
     const newState = { ...state };
     
-    // Add CPU NUKE logic with 15% chance if CPU has nuke and player has 10+ cards
-    if (newState.cpuHasNuke && newState.playerDeck.length >= 10 && Math.random() < 0.15) {
+    // Check if previous state was a war
+    const wasWar = newState.isWar;
+    
+    // Draw cards
+    newState.playerCard = newState.playerDeck.shift()!;
+    newState.cpuCard = newState.cpuDeck.shift()!;
+    
+    const playerRank = newState.playerCard.rank;
+    const cpuRank = newState.cpuCard.rank;
+    
+    // If it was a war or cards are equal, redraw CPU card to prevent consecutive wars
+    if ((wasWar || playerRank === cpuRank) && newState.cpuDeck.length > 0) {
+        newState.cpuDeck.unshift(newState.cpuCard); // Put the card back
+        
+        // Try up to 3 times to get a different card
+        let attempts = 0;
+        while (attempts < 3) {
+            newState.cpuCard = newState.cpuDeck.shift()!;
+            if (newState.cpuCard.rank !== playerRank) break;
+            newState.cpuDeck.push(newState.cpuCard);
+            attempts++;
+        }
+    }
+    
+    // Add CPU NUKE logic with 10% chance if CPU has nuke and player has 10+ cards
+    if (newState.cpuHasNuke && newState.playerDeck.length >= 10 && Math.random() < 0.10) {
         const nukeState = handleNuke(newState, 'cpu');
         nukeState.isNukeActive = true; // Ensure animation triggers
         return nukeState;
@@ -103,13 +127,6 @@ export function drawCards(state: LocalState): LocalState {
         return newState;
     }
 
-    // Draw cards
-    newState.playerCard = newState.playerDeck.shift()!;
-    newState.cpuCard = newState.cpuDeck.shift()!;
-    
-    const playerRank = newState.playerCard.rank;
-    const cpuRank = newState.cpuCard.rank;
-    
     // Compare cards and handle outcomes
     if (playerRank > cpuRank) {
         if (newState.warPile.length > 0) {

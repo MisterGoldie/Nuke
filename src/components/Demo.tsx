@@ -194,20 +194,51 @@ export default function Demo() {
     if (gameData.isWar) {
       setShowWarAnimation(true);
       playWarSound();
-      const timer = setTimeout(() => setShowWarAnimation(false), 2000);
+      
+      // Longer animation duration for war
+      const timer = setTimeout(() => {
+        setShowWarAnimation(false);
+        setGameData(prev => ({
+          ...prev,
+          isWar: false,
+          readyForNextCard: true
+        }));
+      }, 3000); // Increased from 2000 to 3000ms
+      
       return () => clearTimeout(timer);
     }
   }, [gameData.isWar, playWarSound]);
 
-  // Separate effect for Nuke animation
   useEffect(() => {
-    if (gameData.isNukeActive && !gameData.cpuHasNuke) {
+    if (gameData.isNukeActive) {
       setShowNukeAnimation(true);
-      setNukeInitiator('cpu');
+      setNukeInitiator(gameData.message.includes("CPU") ? 'cpu' : 'player');
       playNukeSound();
-      setTimeout(() => setShowNukeAnimation(false), 2000);
+      
+      const timer = setTimeout(() => {
+        setShowNukeAnimation(false);
+        setGameData(prev => {
+          // Ensure all cards are accounted for during nuke
+          const stolenCards = prev.playerCard ? [prev.playerCard] : [];
+          if (prev.cpuCard) stolenCards.push(prev.cpuCard);
+          
+          return {
+            ...prev,
+            isNukeActive: false,
+            playerCard: null,
+            cpuCard: null,
+            // Add any displayed cards back to appropriate decks
+            playerDeck: prev.playerCard ? [...prev.playerDeck, prev.playerCard] : prev.playerDeck,
+            cpuDeck: prev.cpuCard ? [...prev.cpuDeck, prev.cpuCard] : prev.cpuDeck,
+            readyForNextCard: true,
+            message: "Draw next card to continue"
+          };
+        });
+      }, 2000);
+      
+      return () => clearTimeout(timer);
     }
-  }, [gameData.isNukeActive, gameData.cpuHasNuke, playNukeSound]);
+  }, [gameData.isNukeActive, gameData.message, playNukeSound]);
 
   // Add effect to handle CPU NUKE sound
   useEffect(() => {
