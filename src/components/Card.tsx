@@ -18,6 +18,7 @@ export default function Card({ suit, rank, isFlipped, isPlayerCard, onClick }: C
         ${isPlayerCard ? 'hover:scale-105 cursor-pointer' : ''}
         perspective-1000
         mx-auto
+        card ${isFlipped ? 'flipped' : ''}
       `}
     >
       <div
@@ -52,10 +53,10 @@ export default function Card({ suit, rank, isFlipped, isPlayerCard, onClick }: C
             </div>
             
             {/* Corner patterns */}
-            <div className="absolute top-4 left-4 text-green-500 text-xl">♠️</div>
-            <div className="absolute top-4 right-4 text-green-500 text-xl">♣️</div>
-            <div className="absolute bottom-4 left-4 text-green-500 text-xl">♥️</div>
-            <div className="absolute bottom-4 right-4 text-green-500 text-xl">♦️</div>
+            <div className="absolute top-4 left-4 text-green-500 text-xl">♠</div>
+            <div className="absolute top-4 right-4 text-green-500 text-xl">♣</div>
+            <div className="absolute bottom-4 left-4 text-green-500 text-xl">♥</div>
+            <div className="absolute bottom-4 right-4 text-green-500 text-xl">♦</div>
             
             {/* Diagonal patterns */}
             <div className="absolute inset-0 grid grid-cols-3 grid-rows-3 opacity-20">

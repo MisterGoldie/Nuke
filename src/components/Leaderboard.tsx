@@ -1,23 +1,74 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
-type LeaderboardProps = {
-  isMuted: boolean;
-  playGameJingle: () => void;
-  currentUserFid?: string;
-  pfpUrl?: string;
-  onBack: () => void;
-};
+interface LeaderboardEntry {
+  fid: string;
+  username: string;
+  wins: number;
+  losses: number;
+  pfp: string;
+  lastPlayed: Date;
+}
 
-export default function Leaderboard({ isMuted, playGameJingle, currentUserFid, pfpUrl, onBack }: LeaderboardProps) {
+export default function Leaderboard({ currentUserFid, onBack }: { currentUserFid?: string, onBack: () => void }) {
+  const [leaderboardData, setLeaderboardData] = useState<LeaderboardEntry[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchLeaderboard = async () => {
+      try {
+        const response = await fetch('/api/nuke?action=leaderboard&limit=10');
+        const data = await response.json();
+        
+        if (data.leaderboard) {
+          const formattedData = data.leaderboard.map((entry: any) => ({
+            fid: entry.fid,
+            username: entry.username || `fid:${entry.fid}`,
+            wins: entry.wins || 0,
+            losses: entry.losses || 0,
+            pfp: entry.pfp || '',
+            lastPlayed: entry.lastPlayed ? new Date(entry.lastPlayed) : new Date()
+          }));
+          
+          setLeaderboardData(formattedData);
+        }
+      } catch (error) {
+        console.error('Error fetching leaderboard:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchLeaderboard();
+  }, []);
+
   return (
     <div className="arcade-container flex flex-col items-center p-8">
       <h1 className="arcade-text text-4xl mb-6 title-glow">LEADERBOARD</h1>
 
-      <div className="w-full max-w-md space-y-4 mb-8">
-        <div className="arcade-text text-xl text-center">
-          Coming Soon!
+      {isLoading ? (
+        <div className="arcade-text text-xl animate-pulse">Loading...</div>
+      ) : (
+        <div className="w-full max-w-md space-y-4 mb-8">
+          {leaderboardData.map((entry, index) => (
+            <div 
+              key={entry.fid} 
+              className={`flex items-center justify-between p-4 border-2 border-green-500 rounded-lg ${
+                entry.fid === currentUserFid ? 'bg-green-900/30' : ''
+              }`}
+            >
+              <div className="flex items-center gap-4">
+                <span className="arcade-text text-2xl text-green-400">#{index + 1}</span>
+                <span className="arcade-text text-xl">{entry.username}</span>
+              </div>
+              <div className="arcade-text text-xl">
+                <span className="text-green-400">{entry.wins}W</span>
+                {' - '}
+                <span className="text-red-400">{entry.losses}L</span>
+              </div>
+            </div>
+          ))}
         </div>
-      </div>
+      )}
 
       <button
         onClick={onBack}

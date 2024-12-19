@@ -61,70 +61,97 @@ export function initializeGame(): LocalState {
   
 function shuffle<T>(array: T[]): T[] {
     const newArray = [...array];
+    newArray.sort(() => {
+        return Math.random() > 0.6 ? 1 : -1;
+    });
+    
     for (let i = newArray.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        const temp = newArray[i]!;
-        newArray[i] = newArray[j]!;
-        newArray[j] = temp;
+        if (Math.random() < 0.4) {
+            const j = Math.floor(Math.random() * (i + 1));
+            const temp = newArray[i]!;
+            newArray[i] = newArray[j]!;
+            newArray[j] = temp;
+        }
     }
     return newArray;
 }
   
 export function drawCards(state: LocalState): LocalState {
+    if (state.playerCard || state.cpuCard) {
+        return state;
+    }
+
+    if (state.playerDeck.length === 0 || state.cpuDeck.length === 0) {
+        return state;
+    }
+
     const newState = {
         ...state,
         playerDeck: [...state.playerDeck],
         cpuDeck: [...state.cpuDeck],
-        warPile: [...state.warPile]
+        warPile: [...state.warPile],
+        isWar: false,
+        readyForNextCard: false
     };
 
-    if (!newState.playerCard && !newState.cpuCard) {
-        newState.playerCard = newState.playerDeck.shift() || null;
-        newState.cpuCard = newState.cpuDeck.shift() || null;
-        
-        if (newState.playerCard && newState.cpuCard) {
-            const playerRank = newState.playerCard.rank;
-            const cpuRank = newState.cpuCard.rank;
-            
-            if (playerRank > cpuRank) {
-                if (newState.warPile.length > 0) {
-                    newState.message = `You win WAR with ${newState.playerCard.display}${newState.playerCard.suit}! (8 cards won)`;
-                    newState.playerDeck.push(...newState.warPile);
-                    newState.warPile = [];
-                } else {
-                    newState.message = `You wins with ${newState.playerCard.display}${newState.playerCard.suit}`;
-                }
-                newState.playerDeck.push(newState.cpuCard, newState.playerCard);
-                newState.readyForNextCard = true;
-            } else if (cpuRank > playerRank) {
-                if (newState.warPile.length > 0) {
-                    newState.message = `CPU wins WAR with ${newState.cpuCard.display}${newState.cpuCard.suit}! (8 cards won)`;
-                    newState.cpuDeck.push(...newState.warPile);
-                    newState.warPile = [];
-                } else {
-                    newState.message = `CPU wins with ${newState.cpuCard.display}${newState.cpuCard.suit}`;
-                }
-                newState.cpuDeck.push(newState.playerCard, newState.cpuCard);
-                newState.readyForNextCard = true;
-            } else {
-                newState.message = "WAR! 3 cards each drawn";
-                newState.isWar = true;
-                
-                if (newState.playerDeck.length >= 3 && newState.cpuDeck.length >= 3) {
-                    for (let i = 0; i < 3; i++) {
-                        newState.warPile.push(newState.playerDeck.shift()!);
-                        newState.warPile.push(newState.cpuDeck.shift()!);
-                    }
-                    newState.warPile.push(newState.playerCard, newState.cpuCard);
-                } else {
-                    newState.gameOver = true;
-                    newState.message = newState.playerDeck.length < 3 
-                        ? "Game Over - Not enough cards for WAR! CPU wins!" 
-                        : "Game Over - Not enough cards for WAR! You win!";
-                }
-                newState.playerCard = null;
-                newState.cpuCard = null;
+    if (state.message === 'Draw a card to begin') {
+        do {
+            if (newState.playerCard) {
+                newState.playerDeck.unshift(newState.playerCard);
             }
+            if (newState.cpuCard) {
+                newState.cpuDeck.unshift(newState.cpuCard);
+            }
+            
+            newState.playerCard = newState.playerDeck.shift()!;
+            newState.cpuCard = newState.cpuDeck.shift()!;
+        } while (newState.playerCard.rank === newState.cpuCard.rank);
+    } else {
+        newState.playerCard = newState.playerDeck.shift()!;
+        newState.cpuCard = newState.cpuDeck.shift()!;
+    }
+
+    const playerRank = newState.playerCard.rank;
+    const cpuRank = newState.cpuCard.rank;
+
+    if (playerRank > cpuRank) {
+        if (newState.warPile.length > 0) {
+            newState.message = `You wins WAR with ${newState.playerCard.display}${newState.playerCard.suit}! (${newState.warPile.length + 2} cards won)`;
+            newState.playerDeck.push(...newState.warPile);
+            newState.warPile = [];
+        } else {
+            newState.message = `You wins with ${newState.playerCard.display}${newState.playerCard.suit}`;
+        }
+        newState.playerDeck.push(newState.playerCard, newState.cpuCard);
+        newState.readyForNextCard = true;
+    } else if (cpuRank > playerRank) {
+        if (newState.warPile.length > 0) {
+            newState.message = `CPU wins WAR with ${newState.cpuCard.display}${newState.cpuCard.suit}! (${newState.warPile.length + 2} cards won)`;
+            newState.cpuDeck.push(...newState.warPile);
+            newState.warPile = [];
+        } else {
+            newState.message = `CPU wins with ${newState.cpuCard.display}${newState.cpuCard.suit}`;
+        }
+        newState.cpuDeck.push(newState.playerCard, newState.cpuCard);
+        newState.readyForNextCard = true;
+    } else {
+        newState.message = "WAR! 3 cards each drawn";
+        newState.isWar = true;
+        
+        if (newState.playerDeck.length >= 3 && newState.cpuDeck.length >= 3) {
+            newState.warPile.push(newState.playerCard, newState.cpuCard);
+            newState.playerCard = null;
+            newState.cpuCard = null;
+            
+            for (let i = 0; i < 2; i++) {
+                newState.warPile.push(newState.playerDeck.shift()!);
+                newState.warPile.push(newState.cpuDeck.shift()!);
+            }
+        } else {
+            newState.gameOver = true;
+            newState.message = newState.playerDeck.length < 3 
+                ? "Game Over - Not enough cards for WAR! CPU wins!" 
+                : "Game Over - Not enough cards for WAR! You win!";
         }
     }
 

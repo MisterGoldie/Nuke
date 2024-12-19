@@ -6,13 +6,15 @@ export const assetManifest = {
   images: [
     '/game-board.png',
     '/splash.png',
-    // Add all image assets here
+    '/icon.png',
+    '/urlimage.png',
+    '/bomb.svg'
   ],
   sounds: [
     '/sounds/click.mp3',
     '/sounds/win.mp3',
     '/sounds/lose.mp3',
-    '/sounds/theme.mp3',
+    '/sounds/boomsback.mp3',
     '/sounds/war.mp3',
     '/sounds/gameplay.mp3',
     '/sounds/nuke.mp3'

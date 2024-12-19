@@ -44,7 +44,7 @@ export default function Demo() {
   const [playWarSound] = useSound('/sounds/war.mp3', { volume: 0.75 });
   const [delayedMessage, setDelayedMessage] = useState<string>("Draw card to begin");
   const [isFirstCard, setIsFirstCard] = useState(true);
-  const [username, setUsername] = useState<string>('');
+  const [username, setUsername] = useState<string>('Your');
 
   const handleGameEnd = async (outcome: 'win' | 'loss') => {
     if (!context?.fid) return;
@@ -72,17 +72,16 @@ export default function Demo() {
   };
 
   const handleDrawCard = useCallback(() => {
-    if (!gameData.playerCard && !gameData.cpuCard) {
-      setGameData(prevState => {
-        const newState = drawCards(prevState);
-        return {
-          ...newState,
-          playerDeck: [...newState.playerDeck],
-          cpuDeck: [...newState.cpuDeck]
-        };
-      });
+    // Prevent drawing cards during war or nuke animations
+    if (showWarAnimation || showNukeAnimation) {
+        return;
     }
-  }, [gameData.playerCard, gameData.cpuCard]);
+
+    if (!gameData.playerCard && !gameData.cpuCard) {
+        const newState = drawCards(gameData);
+        setGameData(newState);
+    }
+  }, [gameData, showWarAnimation, showNukeAnimation]);
 
   const handleNukeClick = () => {
     setGameData((prevState: LocalState) => {
@@ -116,21 +115,26 @@ export default function Demo() {
             }
           `;
 
-          const response = await fetch(process.env.NEXT_PUBLIC_AIRSTACK_API_URL!, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': process.env.NEXT_PUBLIC_AIRSTACK_API_KEY!,
-            },
-            body: JSON.stringify({ 
-              query, 
-              variables: { fid: fid.toString() } 
-            }),
-          });
+          try {
+            const response = await fetch(process.env.NEXT_PUBLIC_AIRSTACK_API_URL!, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': process.env.NEXT_PUBLIC_AIRSTACK_API_KEY!,
+              },
+              body: JSON.stringify({ 
+                query, 
+                variables: { fid: fid.toString() } 
+              }),
+            });
 
-          const data = await response.json();
-          const username = data?.data?.Socials?.Social?.[0]?.profileName || `Player ${fid}`;
-          setUsername(username);
+            const data = await response.json();
+            const fetchedUsername = data?.data?.Socials?.Social?.[0]?.profileName;
+            setUsername(fetchedUsername || 'Your');
+          } catch (error) {
+            console.error('Error fetching username:', error);
+            setUsername('Your');
+          }
         }
 
         await sdk.actions.ready();
@@ -140,6 +144,7 @@ export default function Demo() {
         }, 1000);
       } catch (err) {
         console.error("SDK Error:", err);
+        setUsername('Your');
       }
     };
     if (sdk && !isSDKLoaded) {
@@ -230,29 +235,29 @@ export default function Demo() {
   // Handle the initial card flip messages
   useEffect(() => {
     if (gameData.playerCard && gameData.cpuCard) {
-      // Clear first card state
-      if (isFirstCard) {
-        setIsFirstCard(false);
-      }
-      
-      // Clear any existing message first
-      setDelayedMessage("");
-      
-      // Wait for CPU card flip animation before showing result
-      const resultTimer = setTimeout(() => {
-        // Replace "You" with username in messages
-        const message = gameData.message.replace(/You/g, username);
-        setDelayedMessage(message);
+        if (isFirstCard) {
+            setIsFirstCard(false);
+        }
         
-        // Then set timer for "draw next" message
-        const drawNextTimer = setTimeout(() => {
-          setDelayedMessage("Draw next card to continue");
-        }, 2000);
+        setDelayedMessage("");
         
-        return () => clearTimeout(drawNextTimer);
-      }, 400);
-      
-      return () => clearTimeout(resultTimer);
+        const resultTimer = setTimeout(() => {
+            // If no username found (username === 'Your'), replace "You" with "Player"
+            // Otherwise, replace "You" with the actual username
+            const message = username === 'Your' 
+                ? gameData.message.replace(/You/g, 'Player')
+                : gameData.message.replace(/You/g, username);
+            
+            setDelayedMessage(message);
+            
+            const drawNextTimer = setTimeout(() => {
+                setDelayedMessage("Draw next card to continue");
+            }, 2000);
+            
+            return () => clearTimeout(drawNextTimer);
+        }, 400);
+        
+        return () => clearTimeout(resultTimer);
     }
   }, [gameData.playerCard, gameData.cpuCard, gameData.message, username]);
 
@@ -476,7 +481,9 @@ export default function Demo() {
             isPlayerCard={true}
             onClick={handleDrawCard}
           />
-          <p className="arcade-text text-lg mt-4">{username}'s Card</p>
+          <p className="arcade-text text-lg mt-4">
+            {username === 'Your' ? 'Your Card' : `${username}'s Card`}
+          </p>
         </div>
       </div>
     );
@@ -486,8 +493,6 @@ export default function Demo() {
   if (gameState === 'leaderboard') {
     return (
       <Leaderboard 
-        isMuted={false} 
-        playGameJingle={() => {}} 
         onBack={() => setGameState('menu')}
       />
     );
