@@ -6,9 +6,14 @@ interface CardProps {
   isFlipped: boolean;
   isPlayerCard: boolean;
   onClick?: () => void;
+  isNukeActive?: boolean;
 }
 
-export default function Card({ suit, rank, isFlipped, isPlayerCard, onClick }: CardProps) {
+export default function Card({ suit, rank, isFlipped, isPlayerCard, onClick, isNukeActive }: CardProps) {
+  const borderClass = isNukeActive 
+    ? 'border-2 border-red-500 animate-nuke-border' 
+    : 'border-2 border-green-500';
+
   return (
     <div
       onClick={isPlayerCard ? onClick : undefined}
@@ -22,10 +27,10 @@ export default function Card({ suit, rank, isFlipped, isPlayerCard, onClick }: C
       `}
     >
       {/* Stack effect - bottom card */}
-      <div className="absolute top-2 left-1 w-full h-full bg-[#3f51b5] rounded-xl border-2 border-green-500 opacity-40" />
+      <div className={`absolute top-2 left-1 w-full h-full bg-[#3f51b5] rounded-xl ${borderClass} opacity-40`} />
       
       {/* Stack effect - middle card */}
-      <div className="absolute top-1 left-0.5 w-full h-full bg-[#3f51b5] rounded-xl border-2 border-green-500 opacity-60" />
+      <div className={`absolute top-1 left-0.5 w-full h-full bg-[#3f51b5] rounded-xl ${borderClass} opacity-60`} />
 
       <div
         className={`
@@ -43,7 +48,7 @@ export default function Card({ suit, rank, isFlipped, isPlayerCard, onClick }: C
           className={`
             absolute w-full h-full
             bg-[#3f51b5] rounded-xl
-            border-2 border-green-500
+            ${borderClass}
             flex justify-center items-center
             backface-hidden
             overflow-hidden

@@ -620,3 +620,42 @@ div[class*="text-"] .nuke-text-orange {
     transform: translate3d(0, 0, 0) scale(1.2);
   }
 }
+
+@keyframes nuke-border-glow {
+  0%, 100% {
+    border-color: #ff0000;
+    box-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000;
+  }
+  50% {
+    border-color: #ff6666;
+    box-shadow: 0 0 20px #ff0000, 0 0 40px #ff0000;
+  }
+}
+
+.animate-nuke-border {
+  animation: nuke-border-glow 0.5s ease-in-out infinite;
+}
+
+@keyframes nuke-border-flash {
+  0%, 100% {
+    border: 6px solid #00ff00 !important;
+    box-shadow: 
+      0 0 20px rgba(0, 255, 0, 0.7),
+      0 0 40px rgba(0, 255, 0, 0.4),
+      inset 0 0 20px rgba(0, 255, 0, 0.4) !important;
+  }
+  50% {
+    border: 6px solid #ff0000 !important;
+    box-shadow: 
+      0 0 20px rgba(255, 0, 0, 0.7),
+      0 0 40px rgba(255, 0, 0, 0.4),
+      inset 0 0 20px rgba(255, 0, 0, 0.4) !important;
+  }
+}
+
+.nuke-border-flash {
+  animation: nuke-border-flash 0.5s ease-in-out infinite !important;
+  /* Remove any other styles that might interfere */
+  transition: none !important;
+  will-change: border, box-shadow;
+}

@@ -392,7 +392,7 @@ export default function Demo() {
   // Game State
   if (gameState === 'game') {
     return (
-      <div className="arcade-container w-[420px] h-[685px] bg-black relative overflow-hidden flex flex-col items-center justify-between p-6">
+      <div className={`arcade-container w-[420px] h-[685px] bg-black relative overflow-hidden flex flex-col items-center justify-between p-6 ${showNukeAnimation ? 'nuke-border-flash' : ''}`}>
         {/* Nuke Animation */}
         <NukeAnimation 
           isVisible={showNukeAnimation} 
@@ -456,7 +456,7 @@ export default function Demo() {
         
         {/* CPU Card Area */}
         <div className="text-center w-full mt-8 flex flex-col items-center">
-          <p className="arcade-text text-lg mb-4">CPU's Card</p>
+          <p className="arcade-text text-lg mb-4">CPU's card</p>
           <CardComponent
             suit={gameData.cpuCard?.suit || ''}
             rank={gameData.cpuCard?.display || ''}
@@ -480,9 +480,10 @@ export default function Demo() {
             isFlipped={gameData.playerCard !== null}
             isPlayerCard={true}
             onClick={handleDrawCard}
+            isNukeActive={showNukeAnimation}
           />
           <p className="arcade-text text-lg mt-4">
-            {username === 'Your' ? 'Your Card' : `${username}'s Card`}
+            {username === 'Your' ? 'Your card' : `${username}'s card`}
           </p>
         </div>
       </div>
