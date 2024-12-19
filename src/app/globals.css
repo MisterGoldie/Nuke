@@ -103,6 +103,16 @@ body {
   text-shadow: var(--neon-glow);
 }
 
+.arcade-text-green {
+  color: #00ff00 !important;
+  text-shadow: 0 0 10px #00ff00, 0 0 20px #00ff00 !important;
+}
+
+.arcade-text-orange {
+  color: #ff6600 !important;
+  text-shadow: 0 0 10px #ff6600, 0 0 20px #ff6600 !important;
+}
+
 .arcade-button {
   background: #000000 !important;
   border: 2px solid !important;
@@ -140,7 +150,6 @@ body {
 .arcade-button:hover:not(:disabled) {
   transform: scale(1.05);
 }
-
 /* Card Flip Animations */
 .perspective-1000 {
   perspective: 1000px;
@@ -572,4 +581,42 @@ body {
 
 .title-glow {
   animation: title-glow 2s ease-in-out infinite;
+}
+
+.nuke-text-orange {
+  color: #ff6600 !important;
+  text-shadow: 0 0 10px #ff6600, 0 0 20px #ff6600, 0 0 30px #ff6600 !important;
+  -webkit-text-fill-color: #ff6600 !important;
+}
+
+/* Override any parent text color */
+div[class*="text-"] .nuke-text-orange {
+  color: #ff6600 !important;
+  -webkit-text-fill-color: #ff6600 !important;
+}
+
+.animation-gpu {
+  transform: translateZ(0);
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+@keyframes optimized-war-pulse {
+  0%, 100% { 
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 1;
+  }
+  50% { 
+    transform: translate3d(0, 0, 0) scale(1.2);
+    opacity: 0.8;
+  }
+}
+
+@keyframes optimized-nuke-pulse {
+  0%, 100% { 
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% { 
+    transform: translate3d(0, 0, 0) scale(1.2);
+  }
 }

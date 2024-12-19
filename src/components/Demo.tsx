@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useCallback, useState, useContext } from "react";
+import { useEffect, useCallback, useState, useContext, useMemo } from "react";
 import sdk, { FrameContext } from "@farcaster/frame-sdk";
 import { Button } from "~/components/ui/Button";
 import useSound from 'use-sound';
@@ -8,8 +8,7 @@ import Leaderboard from './Leaderboard';
 import Image from 'next/image';
 import { LocalState, Card, initializeGame, drawCards, handleNuke } from './gameLogic';
 import CardComponent from './Card';
-import WarAnimation from './WarAnimation';
-import NukeAnimation from './NukeAnimation';
+import dynamic from 'next/dynamic';
 import { soundCache, preloadAssets } from '~/utils/optimizations';
 import HowToPlay from './HowToPlay';
 import { fetchUserDataByFid } from '../utils/neynarUtils';
@@ -20,6 +19,17 @@ type GameState = 'menu' | 'game' | 'leaderboard' | 'tutorial';
 interface ExtendedFrameContext extends FrameContext {
   fid?: string;  // Add fid as optional property
 }
+
+// Add dynamic imports for animations
+const WarAnimation = dynamic(() => import('./WarAnimation'), {
+  ssr: false,
+  loading: () => null
+});
+
+const NukeAnimation = dynamic(() => import('./NukeAnimation'), {
+  ssr: false,
+  loading: () => null
+});
 
 export default function Demo() {
   const [gameState, setGameState] = useState<GameState>('menu');
@@ -61,19 +71,18 @@ export default function Demo() {
     }
   };
 
-  const handleDrawCard = () => {
+  const handleDrawCard = useCallback(() => {
     if (!gameData.playerCard && !gameData.cpuCard) {
-        setGameData(prevState => {
-            const newState = drawCards(prevState);
-            // Force immediate state update for deck counts
-            return {
-                ...newState,
-                playerDeck: [...newState.playerDeck],  // Create new array references
-                cpuDeck: [...newState.cpuDeck]        // to ensure React sees the change
-            };
-        });
+      setGameData(prevState => {
+        const newState = drawCards(prevState);
+        return {
+          ...newState,
+          playerDeck: [...newState.playerDeck],
+          cpuDeck: [...newState.cpuDeck]
+        };
+      });
     }
-  };
+  }, [gameData.playerCard, gameData.cpuCard]);
 
   const handleNukeClick = () => {
     setGameData((prevState: LocalState) => {
@@ -137,7 +146,7 @@ export default function Demo() {
       setIsSDKLoaded(true);
       load();
     }
-  }, [isSDKLoaded, gameState]);
+  }, [isSDKLoaded, gameState, fetchUserDataByFid]);
 
   // Add effect to handle WAR state changes
   useEffect(() => {
@@ -265,6 +274,15 @@ export default function Demo() {
     setGameState('game');
   };
 
+  const memoizedGameData = useMemo(() => ({
+    playerDeck: gameData.playerDeck,
+    cpuDeck: gameData.cpuDeck,
+    cardCounts: {
+      player: gameData.playerDeck.length,
+      cpu: gameData.cpuDeck.length
+    }
+  }), [gameData.playerDeck, gameData.cpuDeck]);
+
   // Menu State
   if (gameState === 'menu') {
     return (
@@ -326,31 +344,31 @@ export default function Demo() {
       <div className="arcade-container flex flex-col items-center p-8">
         <h1 className="arcade-text text-4xl mb-6 title-glow">HOW TO PLAY</h1>
         
-        <div className="space-y-6 text-[#00ff00] max-w-[350px]">
+        <div className="space-y-6 max-w-[350px]">
           <section>
-            <h2 className="text-2xl mb-2">Basic Rules</h2>
-            <p className="text-sm leading-relaxed">
+            <h2 className="arcade-text-green text-2xl mb-2">Basic Rules</h2>
+            <p className="arcade-text-green text-sm leading-relaxed">
               Each player starts with 26 cards. Players draw cards simultaneously. Higher card wins both cards!
             </p>
           </section>
 
           <section>
-            <h2 className="text-2xl mb-2">WAR!</h2>
-            <p className="text-sm leading-relaxed">
+            <h2 className="arcade-text-green text-2xl mb-2">WAR!</h2>
+            <p className="arcade-text-green text-sm leading-relaxed">
               When cards match, it's WAR! Each player puts down 3 face-down cards and 1 face-up card. Winner takes all 8 cards!
             </p>
           </section>
 
           <section>
-            <h2 className="text-2xl mb-2">NUKE Power!</h2>
-            <p className="text-sm leading-relaxed">
+            <h2 className="arcade-text-orange text-2xl mb-2">NUKE Power!</h2>
+            <p className="arcade-text-orange text-sm leading-relaxed">
               Each player has one NUKE. Use it to steal 10 cards from your opponent! Use wisely - you only get one.
             </p>
           </section>
 
           <section>
-            <h2 className="text-2xl mb-2">Winning</h2>
-            <p className="text-sm leading-relaxed">
+            <h2 className="arcade-text-green text-2xl mb-2">Winning</h2>
+            <p className="arcade-text-green text-sm leading-relaxed">
               Collect all cards to win! If a player doesn't have enough cards for WAR, they lose.
             </p>
           </section>

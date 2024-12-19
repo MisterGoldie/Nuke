@@ -2,42 +2,52 @@
 export const soundCache = new Map<string, HTMLAudioElement>();
 const assetCache = new Map();
 
-export const preloadAssets = () => {
-  console.log('Preloading assets...'); // Debug log
-  
-  const assets = [
+export const assetManifest = {
+  images: [
     '/game-board.png',
     '/splash.png',
+    // Add all image assets here
+  ],
+  sounds: [
     '/sounds/click.mp3',
     '/sounds/win.mp3',
     '/sounds/lose.mp3',
     '/sounds/theme.mp3',
     '/sounds/war.mp3',
-    '/sounds/gameplay.mp3'
-  ];
-  
-  assets.forEach(asset => {
-    if (asset.endsWith('.mp3')) {
-      if (!soundCache.has(asset)) {
-        console.log('Loading audio:', asset); // Debug log
-        const audio = new Audio(asset);
-        if (asset.includes('gameplay')) {
-          audio.loop = true;
-          audio.volume = 0.4;
-          console.log('Configured gameplay music:', audio); // Debug log
-        }
-        soundCache.set(asset, audio);
-      }
-    } else {
-      if (!assetCache.has(asset)) {
-        const img = new Image();
-        img.src = asset;
-        assetCache.set(asset, img);
-      }
-    }
+    '/sounds/gameplay.mp3',
+    '/sounds/nuke.mp3'
+  ]
+};
+
+export const preloadAssets = async () => {
+  const imagePromises = assetManifest.images.map(src => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = reject;
+      img.src = src;
+    });
   });
-  
-  console.log('Assets preloaded, soundCache:', soundCache); // Debug log
+
+  const audioPromises = assetManifest.sounds.map(src => {
+    return new Promise((resolve, reject) => {
+      const audio = new Audio();
+      audio.oncanplaythrough = () => {
+        soundCache.set(src, audio);
+        resolve(audio);
+      };
+      audio.onerror = reject;
+      audio.src = src;
+      audio.load();
+    });
+  });
+
+  try {
+    await Promise.all([...imagePromises, ...audioPromises]);
+    console.log('All assets preloaded successfully');
+  } catch (error) {
+    console.error('Error preloading assets:', error);
+  }
 };
 
 export const playSound = (soundUrl: string) => {
@@ -48,4 +58,12 @@ export const playSound = (soundUrl: string) => {
       audio.play();
     }
   }
+};
+
+export const debounceAnimation = (fn: Function, delay: number) => {
+  let timeoutId: NodeJS.Timeout;
+  return (...args: any[]) => {
+    if (timeoutId) clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => fn(...args), delay);
+  };
 }; 
