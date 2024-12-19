@@ -21,6 +21,12 @@ export default function Card({ suit, rank, isFlipped, isPlayerCard, onClick }: C
         card ${isFlipped ? 'flipped' : ''}
       `}
     >
+      {/* Stack effect - bottom card */}
+      <div className="absolute top-2 left-1 w-full h-full bg-[#3f51b5] rounded-xl border-2 border-green-500 opacity-40" />
+      
+      {/* Stack effect - middle card */}
+      <div className="absolute top-1 left-0.5 w-full h-full bg-[#3f51b5] rounded-xl border-2 border-green-500 opacity-60" />
+
       <div
         className={`
           relative w-full h-full
@@ -52,11 +58,11 @@ export default function Card({ suit, rank, isFlipped, isPlayerCard, onClick }: C
               <div className="text-6xl font-bold text-green-500 animate-glow">N</div>
             </div>
             
-            {/* Corner patterns */}
-            <div className="absolute top-4 left-4 text-green-500 text-xl">♠</div>
-            <div className="absolute top-4 right-4 text-green-500 text-xl">♣</div>
-            <div className="absolute bottom-4 left-4 text-green-500 text-xl">♥</div>
-            <div className="absolute bottom-4 right-4 text-green-500 text-xl">♦</div>
+            {/* Corner patterns with correct colors */}
+            <div className="absolute top-4 left-4 text-black text-xl">♠</div>
+            <div className="absolute top-4 right-4 text-black text-xl">♣</div>
+            <div className="absolute bottom-4 left-4 text-red-500 text-xl">♥</div>
+            <div className="absolute bottom-4 right-4 text-red-500 text-xl">♦</div>
             
             {/* Diagonal patterns */}
             <div className="absolute inset-0 grid grid-cols-3 grid-rows-3 opacity-20">

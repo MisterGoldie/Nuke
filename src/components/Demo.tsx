@@ -353,7 +353,7 @@ export default function Demo() {
           <section>
             <h2 className="arcade-text-green text-2xl mb-2">Basic Rules</h2>
             <p className="arcade-text-green text-sm leading-relaxed">
-              Each player starts with 26 cards. Players draw cards simultaneously. Higher card wins both cards!
+              Each player starts with 26 cards. Players draw cards simultaneously. Higher card takes both cards!
             </p>
           </section>
 
@@ -367,14 +367,14 @@ export default function Demo() {
           <section>
             <h2 className="arcade-text-orange text-2xl mb-2">NUKE Power!</h2>
             <p className="arcade-text-orange text-sm leading-relaxed">
-              Each player has one NUKE. Use it to steal 10 cards from your opponent! Use wisely - you only get one.
+              Each player has one NUKE. Use it to steal 10 cards from the opponent! Use wisely - you only get one.
             </p>
           </section>
 
           <section>
             <h2 className="arcade-text-green text-2xl mb-2">Winning</h2>
             <p className="arcade-text-green text-sm leading-relaxed">
-              Collect all cards to win! If a player doesn't have enough cards for WAR, they lose.
+              Collect all cards to win! If a player doesn't have enough cards for WAR or NUKE, they automatically lose.
             </p>
           </section>
         </div>
