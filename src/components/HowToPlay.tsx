@@ -27,7 +27,7 @@ export default function HowToPlay({ onBack }: HowToPlayProps) {
         <section>
           <h2 className="nuke-text-orange text-2xl mb-2">NUKE Power!</h2>
           <p className="nuke-text-orange text-sm leading-relaxed">
-            Each player has one NUKE. Use it to steal 10 cards from your opponent! Use wisely - you only get one.
+            Each player has one NUKE. Use it anytime to steal 10 cards! If opponent has less than 10 cards, they automatically lose!
           </p>
         </section>
 

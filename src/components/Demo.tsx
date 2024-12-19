@@ -189,18 +189,25 @@ export default function Demo() {
     }
   }, [isSDKLoaded, gameState, fetchUserDataByFid]);
 
-  // Add effect to handle WAR state changes
+  // Effect for War animation
   useEffect(() => {
     if (gameData.isWar) {
       setShowWarAnimation(true);
       playWarSound();
-      // Extend WAR animation to 2.5 seconds
-      const timer = setTimeout(() => {
-        setShowWarAnimation(false);
-      }, 2500);  // Changed from 1500 to 2500
+      const timer = setTimeout(() => setShowWarAnimation(false), 2000);
       return () => clearTimeout(timer);
     }
   }, [gameData.isWar, playWarSound]);
+
+  // Separate effect for Nuke animation
+  useEffect(() => {
+    if (gameData.isNukeActive && !gameData.cpuHasNuke) {
+      setShowNukeAnimation(true);
+      setNukeInitiator('cpu');
+      playNukeSound();
+      setTimeout(() => setShowNukeAnimation(false), 2000);
+    }
+  }, [gameData.isNukeActive, gameData.cpuHasNuke, playNukeSound]);
 
   // Add effect to handle CPU NUKE sound
   useEffect(() => {
@@ -494,11 +501,9 @@ export default function Demo() {
           {gameData.playerHasNuke && (
             <button
               onClick={handleNukeClick}
-              disabled={gameData.cpuDeck.length < 10}
               className={`
                 text-lg py-2 px-4 rounded
                 border-2 text-red-500 border-red-500 font-bold
-                ${gameData.cpuDeck.length >= 10 ? 'animate-pulse' : ''}
               `}
               style={{
                 textShadow: '0 0 10px #ff0000, 0 0 20px #ff0000, 0 0 30px #ff0000',
@@ -527,8 +532,22 @@ export default function Demo() {
         <WarAnimation isVisible={showWarAnimation} />
         
         {/* CPU Card Area */}
-        <div className="text-center w-full mt-8 flex flex-col items-center">
+        <div className="text-center w-full mt-8 flex flex-col items-center relative">
           <p className="arcade-text text-lg mb-4">CPU's card</p>
+          
+          {/* CPU Nuke Used Status Message - Red color */}
+          {!gameData.cpuHasNuke && (
+            <div 
+              className="absolute bottom-24 left-12 text-lg text-red-500 flex flex-col items-center pointer-events-none"
+              style={{
+                textShadow: '0 0 10px #ff0000, 0 0 20px #ff0000, 0 0 30px #ff0000',
+              }}
+            >
+              <span>NUKE</span>
+              <span>USED</span>
+            </div>
+          )}
+          
           <CardComponent
             suit={gameData.cpuCard?.suit || ''}
             rank={gameData.cpuCard?.display || ''}
@@ -589,40 +608,24 @@ export default function Demo() {
 
   useEffect(() => {
     if (gameData.gameOver) {
-        // Set game over message and prevent it from being overridden
-        const gameOverMessage = gameData.message.includes("You win") ? 
-            `Game Over - ${username} wins!` : 
+        // Set game over message immediately and prominently
+        const gameOverMessage = gameData.message.includes("You win") || gameData.message.includes("NUKE") ?
+            `Game Over - ${username} wins!` :
             "Game Over - CPU wins!";
             
+        console.log("Setting game over message:", gameOverMessage);
         setDelayedMessage(gameOverMessage);
         
-        // Don't allow any other message updates
-        return;
-    }
-
-    // Only handle regular message updates if game isn't over
-    if (gameData.playerCard && gameData.cpuCard) {
-        setDelayedMessage("");
-        
-        const resultTimer = setTimeout(() => {
-            const message = username === 'Your' 
-                ? gameData.message.replace(/You/g, 'Player')
-                : gameData.message.replace(/You/g, username);
-            
-            setDelayedMessage(message);
-            
-            // Only set "Draw next card" if game isn't over
-            if (!gameData.gameOver) {
-                const drawNextTimer = setTimeout(() => {
-                    setDelayedMessage("Draw next card to continue");
-                }, 2000);
-                return () => clearTimeout(drawNextTimer);
+        // Cancel any pending message updates
+        return () => {
+            // Clear any existing timeouts from other effects
+            const timeouts = window.setTimeout(() => {}, 0);
+            for (let i = 0; i < timeouts; i++) {
+                window.clearTimeout(i);
             }
-        }, 400);
-        
-        return () => clearTimeout(resultTimer);
+        };
     }
-}, [gameData.playerCard, gameData.cpuCard, gameData.message, gameData.gameOver, username]);
+}, [gameData.gameOver, gameData.message, username]);
 
   useEffect(() => {
     // Check total cards in play
