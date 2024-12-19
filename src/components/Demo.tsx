@@ -46,36 +46,45 @@ export default function Demo() {
   const [isFirstCard, setIsFirstCard] = useState(true);
   const [username, setUsername] = useState<string>('Your');
   const [isFidLoaded, setIsFidLoaded] = useState(false);
+  const [hasSubmittedResult, setHasSubmittedResult] = useState(false);
 
   const handleGameEnd = useCallback(async (outcome: 'win' | 'loss') => {
-    if (!isFidLoaded || !context?.user?.fid) {
-        console.log("Waiting for FID to load...");
-        return;
+    if (hasSubmittedResult) {
+      console.log("Game result already submitted, skipping...");
+      return;
+    }
+
+    if (!context?.user?.fid) {
+      console.log("Waiting for FID to load...");
+      return;
     }
     
     try {
-        const gameResult = {
-            playerFid: context.user.fid.toString(),
-            outcome: outcome
-        };
-        
-        console.log("Sending game result:", gameResult);
-        const response = await fetch('/api/nuke', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(gameResult),
-        });
-        
-        if (!response.ok) {
-            throw new Error('Failed to store game result');
-        }
+      const gameResult = {
+        playerFid: context.user.fid.toString(),
+        outcome: outcome
+      };
+      
+      console.log("Sending game result:", gameResult);
+      const response = await fetch('/api/nuke', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(gameResult),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to store game result');
+      }
+      
+      setHasSubmittedResult(true);
+      console.log('Game result stored successfully!');
+      
     } catch (error) {
-        console.error('Error in handleGameEnd:', error);
+      console.error('Error in handleGameEnd:', error);
     }
-}, [context, isFidLoaded]);
+  }, [context, hasSubmittedResult]);
 
   const handleDrawCard = useCallback(() => {
-    // Prevent drawing cards during war or nuke animations
     if (showWarAnimation || showNukeAnimation) {
         return;
     }
@@ -83,8 +92,14 @@ export default function Demo() {
     if (!gameData.playerCard && !gameData.cpuCard) {
         const newState = drawCards(gameData);
         setGameData(newState);
+        
+        // Check for game over after drawing cards
+        if (newState.gameOver) {
+            const outcome = newState.message.includes("You win") ? "win" : "loss";
+            handleGameEnd(outcome);
+        }
     }
-  }, [gameData, showWarAnimation, showNukeAnimation]);
+  }, [gameData, showWarAnimation, showNukeAnimation, handleGameEnd]);
 
   const handleNukeClick = useCallback(() => {
     if (showNukeAnimation) return;
@@ -573,22 +588,41 @@ export default function Demo() {
   }
 
   useEffect(() => {
-    // Check for game over after every state change
     if (gameData.gameOver) {
-        // Set the game over message immediately
-        setDelayedMessage(gameData.message);
+        // Set game over message and prevent it from being overridden
+        const gameOverMessage = gameData.message.includes("You win") ? 
+            `Game Over - ${username} wins!` : 
+            "Game Over - CPU wins!";
+            
+        setDelayedMessage(gameOverMessage);
         
-        // Handle the game result
-        if (context?.fid) {
-            const outcome = gameData.message.includes("You win") ? "win" : "loss";
-            handleGameEnd(outcome);
-        }
-        
-        // Keep the game over message displayed
-        // Don't override it with "Draw next card to continue"
+        // Don't allow any other message updates
         return;
     }
-}, [gameData.gameOver, gameData.message, context?.fid, handleGameEnd]);
+
+    // Only handle regular message updates if game isn't over
+    if (gameData.playerCard && gameData.cpuCard) {
+        setDelayedMessage("");
+        
+        const resultTimer = setTimeout(() => {
+            const message = username === 'Your' 
+                ? gameData.message.replace(/You/g, 'Player')
+                : gameData.message.replace(/You/g, username);
+            
+            setDelayedMessage(message);
+            
+            // Only set "Draw next card" if game isn't over
+            if (!gameData.gameOver) {
+                const drawNextTimer = setTimeout(() => {
+                    setDelayedMessage("Draw next card to continue");
+                }, 2000);
+                return () => clearTimeout(drawNextTimer);
+            }
+        }, 400);
+        
+        return () => clearTimeout(resultTimer);
+    }
+}, [gameData.playerCard, gameData.cpuCard, gameData.message, gameData.gameOver, username]);
 
   useEffect(() => {
     // Check total cards in play
@@ -634,6 +668,13 @@ export default function Demo() {
             gameData.message.includes("You win") ? 'win' : 'loss');
     }
   }, [gameData.gameOver, gameData.message, handleGameEnd]);
+
+  // Reset submission flag when starting a new game
+  useEffect(() => {
+    if (!gameData.gameOver) {
+      setHasSubmittedResult(false);
+    }
+  }, [gameData.gameOver]);
 
   return null;
 }
