@@ -259,7 +259,7 @@ export default function Demo() {
   // Special handling for WAR messages
   useEffect(() => {
     if (gameData.isWar) {
-      setDelayedMessage("WAR!");
+      setDelayedMessage("WAR! 3 cards each drawn");
     }
   }, [gameData.isWar]);
 
