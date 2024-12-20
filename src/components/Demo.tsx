@@ -103,31 +103,28 @@ export default function Demo() {
   }, [gameData, showWarAnimation, showNukeAnimation, isProcessing, handleGameEnd]);
 
   const handleNukeClick = useCallback(() => {
-    if (showNukeAnimation) return;
+    if (showNukeAnimation || isProcessing) return;
     
+    setIsProcessing(true);
     setGameData((prevState) => {
         const newState = handleNuke(prevState, 'player');
+        setShowNukeAnimation(true);
+        setNukeInitiator('player');
+        playNukeSound();
         
-        // Schedule animation and sound effects
+        // Clear animation after delay
         setTimeout(() => {
-            setShowNukeAnimation(true);
-            setNukeInitiator('player');
-            playNukeSound();
+            setShowNukeAnimation(false);
+            setIsProcessing(false);
             
-            // Clear animation after delay
-            setTimeout(() => {
-                setShowNukeAnimation(false);
-                
-                // Check game over after animation
-                if (newState.gameOver) {
-                    handleGameEnd('win');
-                }
-            }, 2000);
-        }, 0);
+            if (newState.gameOver) {
+                handleGameEnd('win');
+            }
+        }, 2000);
         
         return newState;
     });
-}, [showNukeAnimation, playNukeSound, handleGameEnd]);
+}, [showNukeAnimation, isProcessing, playNukeSound, handleGameEnd]);
 
   useEffect(() => {
     const load = async () => {
@@ -192,56 +189,57 @@ export default function Demo() {
 
   // Effect for War animation
   useEffect(() => {
-    if (gameData.isWar) {
+    let warTimer: NodeJS.Timeout;
+    
+    if (gameData.isWar && !gameData.gameOver) {
       setIsProcessing(true);
       setShowWarAnimation(true);
       playWarSound();
       
-      const timer = setTimeout(() => {
-        setShowWarAnimation(false);
-        setGameData(prev => ({
-          ...prev,
-          isWar: false,
-          readyForNextCard: true
-        }));
-        setIsProcessing(false);
+      warTimer = setTimeout(() => {
+        if (!gameData.gameOver) {  // Additional check before updating state
+          setShowWarAnimation(false);
+          setGameData(prev => ({
+            ...prev,
+            isWar: false,
+            readyForNextCard: true
+          }));
+          setIsProcessing(false);
+        }
       }, 3000);
-      
-      return () => {
-        clearTimeout(timer);
-        setIsProcessing(false);
-      };
     }
-  }, [gameData.isWar, playWarSound]);
+    
+    return () => {
+      if (warTimer) {
+        clearTimeout(warTimer);
+      }
+      setIsProcessing(false);
+    };
+  }, [gameData.isWar, gameData.gameOver, playWarSound]);
 
   useEffect(() => {
     if (gameData.isNukeActive) {
-      setShowNukeAnimation(true);
-      setNukeInitiator(gameData.message.includes("CPU") ? 'cpu' : 'player');
-      playNukeSound();
-      
-      const timer = setTimeout(() => {
-        setShowNukeAnimation(false);
-        setGameData(prev => {
-          // Ensure all cards are accounted for during nuke
-          const stolenCards = prev.playerCard ? [prev.playerCard] : [];
-          if (prev.cpuCard) stolenCards.push(prev.cpuCard);
-          
-          return {
-            ...prev,
-            isNukeActive: false,
-            playerCard: null,
-            cpuCard: null,
-            // Add any displayed cards back to appropriate decks
-            playerDeck: prev.playerCard ? [...prev.playerDeck, prev.playerCard] : prev.playerDeck,
-            cpuDeck: prev.cpuCard ? [...prev.cpuDeck, prev.cpuCard] : prev.cpuDeck,
-            readyForNextCard: true,
-            message: "Draw next card to continue"
-          };
-        });
-      }, 2000);
-      
-      return () => clearTimeout(timer);
+        setShowNukeAnimation(true);
+        setNukeInitiator(gameData.message.includes("CPU") ? 'cpu' : 'player');
+        playNukeSound();
+        
+        const timer = setTimeout(() => {
+            setShowNukeAnimation(false);
+            setGameData(prev => ({
+                ...prev,
+                isNukeActive: false,
+                playerCard: null,
+                cpuCard: null,
+                readyForNextCard: true,
+                message: "Draw next card to continue"
+            }));
+            setIsProcessing(false);
+        }, 2000);
+        
+        return () => {
+            clearTimeout(timer);
+            setIsProcessing(false);
+        };
     }
   }, [gameData.isNukeActive, gameData.message, playNukeSound]);
 
@@ -643,26 +641,40 @@ export default function Demo() {
     return <HowToPlay onBack={() => setGameState('menu')} />;
   }
 
+  // Single game over effect to replace all three game over effects
   useEffect(() => {
-    if (gameData.gameOver) {
-        // Set game over message immediately and prominently
-        const gameOverMessage = gameData.message.includes("You win") || gameData.message.includes("NUKE") ?
-            `Game Over - ${username} wins!` :
-            "Game Over - CPU wins!";
-            
-        console.log("Setting game over message:", gameOverMessage);
-        setDelayedMessage(gameOverMessage);
-        
-        // Cancel any pending message updates
-        return () => {
-            // Clear any existing timeouts from other effects
-            const timeouts = window.setTimeout(() => {}, 0);
-            for (let i = 0; i < timeouts; i++) {
-                window.clearTimeout(i);
-            }
-        };
+    if (gameData.gameOver && !hasSubmittedResult) {
+      // Clear all pending timeouts first
+      const highestId = window.setTimeout(() => {}, 0);
+      for (let i = 0; i < highestId; i++) {
+        window.clearTimeout(i);
+      }
+
+      // Reset all animation states
+      setShowWarAnimation(false);
+      setShowNukeAnimation(false);
+      setIsProcessing(false);
+
+      // Set final game over message
+      const gameOverMessage = gameData.message.includes("You win") || gameData.message.includes("NUKE") ?
+        `Game Over - ${username} wins!` :
+        "Game Over - CPU wins!";
+      setDelayedMessage(gameOverMessage);
+
+      // Handle game end once
+      const outcome = gameData.message.includes("You win") || gameData.message.includes("NUKE") ? 
+        'win' : 'loss';
+      handleGameEnd(outcome);
     }
-}, [gameData.gameOver, gameData.message, username]);
+
+    // Cleanup function
+    return () => {
+      const highestId = window.setTimeout(() => {}, 0);
+      for (let i = 0; i < highestId; i++) {
+        window.clearTimeout(i);
+      }
+    };
+  }, [gameData.gameOver, gameData.message, username, handleGameEnd, hasSubmittedResult]);
 
   useEffect(() => {
     // Check total cards in play
@@ -698,16 +710,6 @@ export default function Demo() {
         handleGameEnd(gameData.playerDeck.length === 52 ? 'win' : 'loss');
     }
   }, [gameData, handleGameEnd]);
-
-  // Add a new effect to handle game over state
-  useEffect(() => {
-    if (gameData.gameOver) {
-        // Determine if it was a nuke win
-        const isNukeWin = gameData.message.includes("NUKE");
-        handleGameEnd(isNukeWin ? 'win' : 
-            gameData.message.includes("You win") ? 'win' : 'loss');
-    }
-  }, [gameData.gameOver, gameData.message, handleGameEnd]);
 
   // Reset submission flag when starting a new game
   useEffect(() => {

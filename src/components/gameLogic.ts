@@ -82,37 +82,8 @@ function shuffle<T>(array: T[]): T[] {
   
 export function drawCards(state: LocalState): LocalState {
     const newState = { ...state };
-    
-    // Check if game has been running for more than 2 minutes
-    const gameRunningTime = Date.now() - (newState.gameStartTime || Date.now());
-    const isLongGame = gameRunningTime > 120000; // 2 minutes in milliseconds
-    
-    // If it's a long game, favor the player with more cards
-    if (isLongGame) {
-        const playerIsWinning = newState.playerDeck.length > newState.cpuDeck.length;
-        const leaderDeckSize = Math.max(newState.playerDeck.length, newState.cpuDeck.length);
-        const followerDeckSize = Math.min(newState.playerDeck.length, newState.cpuDeck.length);
-        
-        // Higher chance to favor leader as their advantage grows
-        const advantage = (leaderDeckSize - followerDeckSize) / 52; // normalized difference
-        const favorChance = Math.min(0.5, 0.3 + advantage); // 30-50% chance based on lead
-        
-        if (Math.random() < favorChance) {
-            // Draw cards first to see outcome
-            newState.playerCard = newState.playerDeck.shift()!;
-            newState.cpuCard = newState.cpuDeck.shift()!;
-            
-            // If result doesn't favor leader, swap cards
-            const playerWinsNaturally = newState.playerCard.rank > newState.cpuCard.rank;
-            if (playerIsWinning !== playerWinsNaturally) {
-                const temp = newState.playerCard;
-                newState.playerCard = newState.cpuCard;
-                newState.cpuCard = temp;
-            }
-            
-            return newState;
-        }
-    }
+    let playerRank: number;
+    let cpuRank: number;
     
     // Check if this is the first draw of the game
     const isFirstDraw = !newState.playerCard && !newState.cpuCard && 
@@ -126,21 +97,61 @@ export function drawCards(state: LocalState): LocalState {
         return nukeState;
     }
     
+    // Draw player card first
+    newState.playerCard = newState.playerDeck.shift()!;
+    playerRank = newState.playerCard.rank;
+    
+    // If it's the first draw, make sure CPU draws a different card
+    if (isFirstDraw) {
+        let cpuCard;
+        do {
+            cpuCard = newState.cpuDeck.shift()!;
+            if (cpuCard.rank === playerRank) {
+                newState.cpuDeck.push(cpuCard);
+            } else {
+                break;
+            }
+        } while (newState.cpuDeck.length > 0);
+        newState.cpuCard = cpuCard;
+    } else {
+        newState.cpuCard = newState.cpuDeck.shift()!;
+    }
+    
+    cpuRank = newState.cpuCard.rank;
+    
+    // Check if game has been running for more than 2 minutes
+    const gameRunningTime = Date.now() - (newState.gameStartTime || Date.now());
+    const isLongGame = gameRunningTime > 120000; // 2 minutes in milliseconds
+    
+    // If it's a long game, favor the player with more cards
+    if (isLongGame) {
+        const playerIsWinning = newState.playerDeck.length > newState.cpuDeck.length;
+        const leaderDeckSize = Math.max(newState.playerDeck.length, newState.cpuDeck.length);
+        const followerDeckSize = Math.min(newState.playerDeck.length, newState.cpuDeck.length);
+        
+        const advantage = (leaderDeckSize - followerDeckSize) / 52;
+        const favorChance = Math.min(0.5, 0.3 + advantage);
+        
+        if (Math.random() < favorChance) {
+            const playerWinsNaturally = playerRank > cpuRank;
+            if (playerIsWinning !== playerWinsNaturally) {
+                const temp = newState.playerCard;
+                newState.playerCard = newState.cpuCard;
+                newState.cpuCard = temp;
+                const tempRank = playerRank;
+                playerRank = cpuRank;
+                cpuRank = tempRank;
+            }
+        }
+    }
+    
     // Check if previous state was a war
     const wasWar = newState.isWar;
     
-    // Draw cards
-    newState.playerCard = newState.playerDeck.shift()!;
-    newState.cpuCard = newState.cpuDeck.shift()!;
-    
-    const playerRank = newState.playerCard.rank;
-    const cpuRank = newState.cpuCard.rank;
-    
     // If it was a war or cards are equal, redraw CPU card to prevent consecutive wars
     if ((wasWar || playerRank === cpuRank) && newState.cpuDeck.length > 0) {
-        newState.cpuDeck.unshift(newState.cpuCard); // Put the card back
+        newState.cpuDeck.unshift(newState.cpuCard);
         
-        // Keep drawing until we get a card that won't cause war
         let foundDifferentCard = false;
         const tempDeck = [...newState.cpuDeck];
         
@@ -149,11 +160,11 @@ export function drawCards(state: LocalState): LocalState {
             if (nextCard.rank !== playerRank) {
                 newState.cpuCard = nextCard;
                 newState.cpuDeck = tempDeck;
+                cpuRank = nextCard.rank;
                 foundDifferentCard = true;
             }
         }
         
-        // If we couldn't find a different card, CPU loses
         if (!foundDifferentCard) {
             newState.gameOver = true;
             newState.message = "Game Over - You win! CPU couldn't avoid WAR!";
@@ -161,19 +172,6 @@ export function drawCards(state: LocalState): LocalState {
         }
     }
     
-    // Check for game over conditions first
-    if (newState.playerDeck.length === 0) {
-        newState.gameOver = true;
-        newState.message = "Game Over - CPU wins!";
-        return newState;
-    }
-    
-    if (newState.cpuDeck.length === 0) {
-        newState.gameOver = true;
-        newState.message = "Game Over - You win!";
-        return newState;
-    }
-
     // Compare cards and handle outcomes
     if (playerRank > cpuRank) {
         if (newState.warPile.length > 0) {
@@ -213,6 +211,23 @@ export function drawCards(state: LocalState): LocalState {
             newState.message = newState.playerDeck.length < 3 ? 
                 "Game Over - Not enough cards for WAR! CPU wins!" : 
                 "Game Over - Not enough cards for WAR! You win!";
+        }
+    }
+    
+    // Inside drawCards function, after drawing initial cards
+    if (isFirstDraw && playerRank === cpuRank) {
+        // On first draw, if cards match, redraw CPU card
+        if (newState.cpuCard) {
+            newState.cpuDeck.unshift(newState.cpuCard); // Put the card back
+        }
+        
+        // Keep drawing until we get a non-matching card
+        while (newState.cpuDeck.length > 0) {
+            newState.cpuCard = newState.cpuDeck.shift()!;
+            if (newState.cpuCard.rank !== playerRank) {
+                break;
+            }
+            newState.cpuDeck.push(newState.cpuCard);
         }
     }
     
