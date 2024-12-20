@@ -238,7 +238,8 @@ export function handleNuke(state: LocalState, initiator: 'player' | 'cpu'): Loca
     const newState = {
         ...state,
         playerDeck: [...state.playerDeck],
-        cpuDeck: [...state.cpuDeck]
+        cpuDeck: [...state.cpuDeck],
+        warPile: [...state.warPile]
     };
 
     // First, return any active cards to their respective decks
@@ -251,17 +252,43 @@ export function handleNuke(state: LocalState, initiator: 'player' | 'cpu'): Loca
         newState.cpuCard = null;
     }
 
-    // Also return any war pile cards to the initiator's deck
+    // Return any war pile cards
     if (newState.warPile.length > 0) {
-        if (initiator === 'player') {
-            newState.playerDeck.push(...newState.warPile);
-        } else {
+        if (initiator === 'cpu') {
             newState.cpuDeck.push(...newState.warPile);
+        } else {
+            newState.playerDeck.push(...newState.warPile);
         }
         newState.warPile = [];
     }
 
-    if (initiator === 'player' && newState.playerHasNuke) {
+    if (initiator === 'cpu' && newState.cpuHasNuke) {
+        // Verify card count before NUKE
+        const totalBefore = newState.playerDeck.length + newState.cpuDeck.length;
+        
+        // If player has less than 10 cards, they lose immediately
+        if (newState.playerDeck.length < 10) {
+            newState.gameOver = true;
+            newState.message = "Game Over - CPU wins with a NUKE!";
+            return newState;
+        }
+        
+        // Otherwise, steal exactly 10 cards
+        const stolenCards = newState.playerDeck.splice(-10, 10);
+        if (stolenCards.length === 10) {
+            newState.cpuDeck.push(...stolenCards);
+        }
+        
+        // Verify card count after NUKE
+        const totalAfter = newState.playerDeck.length + newState.cpuDeck.length;
+        if (totalBefore !== totalAfter) {
+            console.error('Card count mismatch:', { totalBefore, totalAfter });
+        }
+        
+        newState.cpuHasNuke = false;
+        newState.isNukeActive = true;
+        newState.message = "CPU LAUNCHED A NUKE! You lost 10 cards";
+    } else if (initiator === 'player' && newState.playerHasNuke) {
         // If CPU has less than 10 cards, they lose immediately
         if (newState.cpuDeck.length < 10) {
             newState.gameOver = true;
@@ -275,20 +302,6 @@ export function handleNuke(state: LocalState, initiator: 'player' | 'cpu'): Loca
         newState.playerHasNuke = false;
         newState.isNukeActive = true;
         newState.message = "NUKE LAUNCHED! You stole 10 cards!";
-    } else if (initiator === 'cpu' && newState.cpuHasNuke) {
-        // If player has less than 10 cards, they lose immediately
-        if (newState.playerDeck.length < 10) {
-            newState.gameOver = true;
-            newState.message = "Game Over - CPU wins with a NUKE!";
-            return newState;
-        }
-        
-        // Otherwise, steal 10 cards
-        const stolenCards = newState.playerDeck.splice(-10, 10);
-        newState.cpuDeck.push(...stolenCards);
-        newState.cpuHasNuke = false;
-        newState.isNukeActive = true;
-        newState.message = "CPU LAUNCHED A NUKE! You lost 10 cards";
     }
     
     return newState;
