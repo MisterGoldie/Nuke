@@ -240,7 +240,27 @@ export function handleNuke(state: LocalState, initiator: 'player' | 'cpu'): Loca
         playerDeck: [...state.playerDeck],
         cpuDeck: [...state.cpuDeck]
     };
-    
+
+    // First, return any active cards to their respective decks
+    if (newState.playerCard) {
+        newState.playerDeck.push(newState.playerCard);
+        newState.playerCard = null;
+    }
+    if (newState.cpuCard) {
+        newState.cpuDeck.push(newState.cpuCard);
+        newState.cpuCard = null;
+    }
+
+    // Also return any war pile cards to the initiator's deck
+    if (newState.warPile.length > 0) {
+        if (initiator === 'player') {
+            newState.playerDeck.push(...newState.warPile);
+        } else {
+            newState.cpuDeck.push(...newState.warPile);
+        }
+        newState.warPile = [];
+    }
+
     if (initiator === 'player' && newState.playerHasNuke) {
         // If CPU has less than 10 cards, they lose immediately
         if (newState.cpuDeck.length < 10) {
