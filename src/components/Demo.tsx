@@ -526,7 +526,7 @@ export default function Demo() {
             backgroundColor: 'rgba(0, 0, 0, 0.5)',
           }}
           onClick={() => {
-            const shareText = 'Have you played NUKE WAR CARDS? 🕹️';
+            const shareText = 'Play "Nuke" by @goldie and The POD team 🃏';
             const shareUrl = 'nuke-podplay.vercel.app';
             sdk.actions.openUrl(`https://warpcast.com/~/compose?text=${encodeURIComponent(shareText)}&embeds[]=${encodeURIComponent(shareUrl)}`);
           }}
