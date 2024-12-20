@@ -83,18 +83,6 @@ function shuffle<T>(array: T[]): T[] {
 export function drawCards(state: LocalState): LocalState {
     const newState = { ...state };
     
-    // Check if this is the first draw of the game
-    const isFirstDraw = !newState.playerCard && !newState.cpuCard && 
-                       newState.playerDeck.length === 26 && 
-                       newState.cpuDeck.length === 26;
-    
-    // Skip CPU NUKE check if it's the first draw
-    if (!isFirstDraw && newState.cpuHasNuke && newState.playerDeck.length >= 10 && Math.random() < 0.10) {
-        const nukeState = handleNuke(newState, 'cpu');
-        nukeState.isNukeActive = true;
-        return nukeState;
-    }
-    
     // Check if game has been running for more than 2 minutes
     const gameRunningTime = Date.now() - (newState.gameStartTime || Date.now());
     const isLongGame = gameRunningTime > 120000; // 2 minutes in milliseconds
@@ -126,6 +114,18 @@ export function drawCards(state: LocalState): LocalState {
         }
     }
     
+    // Check if this is the first draw of the game
+    const isFirstDraw = !newState.playerCard && !newState.cpuCard && 
+                       newState.playerDeck.length === 26 && 
+                       newState.cpuDeck.length === 26;
+    
+    // Skip CPU NUKE check if it's the first draw
+    if (!isFirstDraw && newState.cpuHasNuke && newState.playerDeck.length >= 10 && Math.random() < 0.10) {
+        const nukeState = handleNuke(newState, 'cpu');
+        nukeState.isNukeActive = true;
+        return nukeState;
+    }
+    
     // Check if previous state was a war
     const wasWar = newState.isWar;
     
@@ -140,13 +140,24 @@ export function drawCards(state: LocalState): LocalState {
     if ((wasWar || playerRank === cpuRank) && newState.cpuDeck.length > 0) {
         newState.cpuDeck.unshift(newState.cpuCard); // Put the card back
         
-        // Try up to 3 times to get a different card
-        let attempts = 0;
-        while (attempts < 3) {
-            newState.cpuCard = newState.cpuDeck.shift()!;
-            if (newState.cpuCard.rank !== playerRank) break;
-            newState.cpuDeck.push(newState.cpuCard);
-            attempts++;
+        // Keep drawing until we get a card that won't cause war
+        let foundDifferentCard = false;
+        const tempDeck = [...newState.cpuDeck];
+        
+        while (tempDeck.length > 0 && !foundDifferentCard) {
+            const nextCard = tempDeck.shift()!;
+            if (nextCard.rank !== playerRank) {
+                newState.cpuCard = nextCard;
+                newState.cpuDeck = tempDeck;
+                foundDifferentCard = true;
+            }
+        }
+        
+        // If we couldn't find a different card, CPU loses
+        if (!foundDifferentCard) {
+            newState.gameOver = true;
+            newState.message = "Game Over - You win! CPU couldn't avoid WAR!";
+            return newState;
         }
     }
     

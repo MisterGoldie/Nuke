@@ -48,6 +48,7 @@ export default function Demo() {
   const [username, setUsername] = useState<string>('Your');
   const [isFidLoaded, setIsFidLoaded] = useState(false);
   const [hasSubmittedResult, setHasSubmittedResult] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const handleGameEnd = useCallback(async (outcome: 'win' | 'loss') => {
     if (hasSubmittedResult) {
@@ -86,21 +87,20 @@ export default function Demo() {
   }, [context, hasSubmittedResult]);
 
   const handleDrawCard = useCallback(() => {
-    if (showWarAnimation || showNukeAnimation) {
-        return;
+    if (showWarAnimation || showNukeAnimation || isProcessing) {
+      return;
     }
 
     if (!gameData.playerCard && !gameData.cpuCard) {
-        const newState = drawCards(gameData);
-        setGameData(newState);
-        
-        // Check for game over after drawing cards
-        if (newState.gameOver) {
-            const outcome = newState.message.includes("You win") ? "win" : "loss";
-            handleGameEnd(outcome);
-        }
+      const newState = drawCards(gameData);
+      setGameData(newState);
+      
+      if (newState.gameOver) {
+        const outcome = newState.message.includes("You win") ? "win" : "loss";
+        handleGameEnd(outcome);
+      }
     }
-  }, [gameData, showWarAnimation, showNukeAnimation, handleGameEnd]);
+  }, [gameData, showWarAnimation, showNukeAnimation, isProcessing, handleGameEnd]);
 
   const handleNukeClick = useCallback(() => {
     if (showNukeAnimation) return;
@@ -193,10 +193,10 @@ export default function Demo() {
   // Effect for War animation
   useEffect(() => {
     if (gameData.isWar) {
+      setIsProcessing(true);
       setShowWarAnimation(true);
       playWarSound();
       
-      // Longer animation duration for war
       const timer = setTimeout(() => {
         setShowWarAnimation(false);
         setGameData(prev => ({
@@ -204,9 +204,13 @@ export default function Demo() {
           isWar: false,
           readyForNextCard: true
         }));
-      }, 3000); // Increased from 2000 to 3000ms
+        setIsProcessing(false);
+      }, 3000);
       
-      return () => clearTimeout(timer);
+      return () => {
+        clearTimeout(timer);
+        setIsProcessing(false);
+      };
     }
   }, [gameData.isWar, playWarSound]);
 
