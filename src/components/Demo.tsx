@@ -520,10 +520,10 @@ export default function Demo() {
         </div>
 
         <button 
-          className="absolute top-4 right-4 px-3 py-1 text-sm border border-gray-400 rounded-md text-gray-400 hover:bg-gray-800 transition-colors"
+          className="absolute top-4 right-4 px-3 py-1 text-sm border border-purple-400 rounded-md text-purple-400 hover:bg-gray-800 transition-colors arcade-button glow-purple"
           style={{
             zIndex: 50,
-            backgroundColor: 'rgba(0, 0, 0, 0.5)'
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
           }}
           onClick={() => {
             const shareText = 'Have you played NUKE WAR CARDS? 🕹️';

@@ -659,3 +659,14 @@ div[class*="text-"] .nuke-text-orange {
   transition: none !important;
   will-change: border, box-shadow;
 }
+
+/* Purple glow for Share Frame */
+.arcade-button.glow-purple {
+  border-color: #8b5cf6 !important;
+  color: #8b5cf6 !important;
+  text-shadow: 0 0 10px #8b5cf6;
+  box-shadow: 
+    0 0 10px rgba(139, 92, 246, 0.5),
+    0 0 20px rgba(139, 92, 246, 0.3),
+    inset 0 0 15px rgba(139, 92, 246, 0.3);
+}
