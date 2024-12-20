@@ -95,10 +95,8 @@ export default function Leaderboard({ currentUserFid, onBack }: { currentUserFid
                 <span className="arcade-text text-2xl text-green-400">#{index + 1}</span>
                 <span className="arcade-text text-xl">{entry.username}</span>
               </div>
-              <div className="arcade-text text-xl">
-                <span className="text-green-400">{entry.wins}W</span>
-                {' - '}
-                <span className="text-red-400">{entry.losses}L</span>
+              <div className="arcade-text text-xl text-green-400">
+                {entry.wins} wins
               </div>
             </div>
           ))}

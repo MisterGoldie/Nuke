@@ -49,56 +49,81 @@ export default function Demo() {
   const [isFidLoaded, setIsFidLoaded] = useState(false);
   const [hasSubmittedResult, setHasSubmittedResult] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [timeRemaining, setTimeRemaining] = useState<number>(180); // 180 seconds = 3 minutes
 
-  const handleGameEnd = useCallback(async (outcome: 'win' | 'loss') => {
+  const handleGameEnd = useCallback(async (outcome: 'win' | 'loss', isTimeUp: boolean = false) => {
     if (hasSubmittedResult) {
-      console.log("Game result already submitted, skipping...");
-      return;
+        console.log("Game result already submitted, skipping...");
+        return;
     }
 
     if (!context?.user?.fid) {
-      console.log("Waiting for FID to load...");
-      return;
+        console.log("Waiting for FID to load...");
+        return;
     }
+
+    // Calculate final scores
+    const playerTotal = gameData.playerDeck.length + (gameData.playerCard ? 1 : 0);
+    const cpuTotal = gameData.cpuDeck.length + (gameData.cpuCard ? 1 : 0);
     
+    // Create appropriate message based on game end condition
+    let winnerMessage = isTimeUp
+        ? `Time's Up! ${playerTotal > cpuTotal 
+            ? `${username} wins with ${playerTotal} cards!` 
+            : `CPU wins with ${cpuTotal} cards!`}`
+        : `Game Over! ${playerTotal > cpuTotal 
+            ? `${username} wins with ${playerTotal} cards!` 
+            : `CPU wins with ${cpuTotal} cards!`}`;
+
+    // Update game state
+    setGameData(prev => ({
+        ...prev,
+        gameOver: true,
+        message: winnerMessage,
+        readyForNextCard: false
+    }));
+
     try {
-      const gameResult = {
-        playerFid: context.user.fid.toString(),
-        outcome: outcome
-      };
-      
-      console.log("Sending game result:", gameResult);
-      const response = await fetch('/api/nuke', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(gameResult),
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to store game result');
-      }
-      
-      setHasSubmittedResult(true);
-      console.log('Game result stored successfully!');
-      
+        const gameResult = {
+            playerFid: context.user.fid.toString(),
+            outcome: outcome
+        };
+        
+        console.log("Sending game result:", gameResult);
+        const response = await fetch('/api/nuke', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(gameResult),
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to store game result');
+        }
+
+        setHasSubmittedResult(true);
+        console.log('Game result stored successfully!');
     } catch (error) {
-      console.error('Error in handleGameEnd:', error);
+        console.error('Error in handleGameEnd:', error);
     }
-  }, [context, hasSubmittedResult]);
+}, [context, hasSubmittedResult, gameData, username]);
 
   const handleDrawCard = useCallback(() => {
     if (showWarAnimation || showNukeAnimation || isProcessing) {
-      return;
+        return;
     }
 
     if (!gameData.playerCard && !gameData.cpuCard) {
-      const newState = drawCards(gameData);
-      setGameData(newState);
-      
-      if (newState.gameOver) {
-        const outcome = newState.message.includes("You win") ? "win" : "loss";
-        handleGameEnd(outcome);
-      }
+        if (isFirstCard) {
+            setIsFirstCard(false);
+        }
+        
+        const newState = drawCards(gameData);
+        setGameData(newState);
+        
+        if (newState.gameOver) {
+            const outcome = newState.message.includes("You win") ? "win" : "loss";
+            handleGameEnd(outcome);
+        }
     }
   }, [gameData, showWarAnimation, showNukeAnimation, isProcessing, handleGameEnd]);
 
@@ -384,12 +409,15 @@ export default function Demo() {
   // Handle game start flow
   const handleStartGame = () => {
     setGameData(initializeGame());
-    setGameState('tutorial'); // Show tutorial first
+    setIsFirstCard(true);
+    setGameState('tutorial');
   };
 
   // Handle tutorial completion
   const handleTutorialComplete = () => {
     setGameState('game');
+    setTimeRemaining(180);  // Reset to 3 minutes
+    setIsFirstCard(true);   // Reset first card state
   };
 
   const memoizedGameData = useMemo(() => ({
@@ -400,6 +428,44 @@ export default function Demo() {
       cpu: gameData.cpuDeck.length
     }
   }), [gameData.playerDeck, gameData.cpuDeck]);
+
+  // Update timer effect
+  useEffect(() => {
+    if (gameState === 'game') {
+        const timerInterval = setInterval(() => {
+            setTimeRemaining(prevTime => {
+                if (prevTime <= 1) {
+                    clearInterval(timerInterval);
+                    const playerTotal = gameData.playerDeck.length + (gameData.playerCard ? 1 : 0);
+                    const cpuTotal = gameData.cpuDeck.length + (gameData.cpuCard ? 1 : 0);
+                    
+                    // Update game state and message
+                    setGameData(prev => ({
+                        ...prev,
+                        gameOver: true,
+                        readyForNextCard: false,
+                        message: playerTotal > cpuTotal ? 
+                            `GAME OVER - Time's Up! ${username} wins with ${playerTotal} cards!` : 
+                            `GAME OVER - Time's Up! CPU wins with ${cpuTotal} cards!`
+                    }));
+                    
+                    // Set the delayed message for display
+                    setDelayedMessage(playerTotal > cpuTotal ? 
+                        `GAME OVER - Time's Up! ${username} wins with ${playerTotal} cards!` : 
+                        `GAME OVER - Time's Up! CPU wins with ${cpuTotal} cards!`
+                    );
+                    
+                    // Handle game end with isTimeUp flag
+                    handleGameEnd(playerTotal > cpuTotal ? 'win' : 'loss', true);
+                    return 0;
+                }
+                return prevTime - 1;
+            });
+        }, 1000);
+        
+        return () => clearInterval(timerInterval);
+    }
+}, [gameState, gameData, username, handleGameEnd]);
 
   // Menu State
   if (gameState === 'menu') {
@@ -466,7 +532,7 @@ export default function Demo() {
           <section>
             <h2 className="arcade-text-green text-2xl mb-2">Basic Rules</h2>
             <p className="arcade-text-green text-sm leading-relaxed">
-              Each player starts with 26 cards. Players draw cards simultaneously. Higher card takes both cards!
+              Each player starts with 26 cards. Players draw cards simultaneously. Higher card takes both cards! Be aware of the 3 minute timer.
             </p>
           </section>
 
@@ -487,7 +553,7 @@ export default function Demo() {
           <section>
             <h2 className="arcade-text-green text-2xl mb-2">Winning</h2>
             <p className="arcade-text-green text-sm leading-relaxed">
-              Collect all cards to win! If a player doesn't have enough cards for WAR or NUKE, they automatically lose.
+              Collect all cards to win! If a player doesn't have enough cards for WAR or NUKE, they automatically lose. Whoever has the most cards when the timer runs out is also declared the winner.
             </p>
           </section>
         </div>
@@ -513,63 +579,19 @@ export default function Demo() {
         />
 
         {/* Card Count Display */}
-        <div className="absolute top-4 left-4 right-4 flex justify-between arcade-text text-lg">
-          <span>CPU Cards: {gameData.cpuDeck.length}</span>
-          <span>Your Cards: {gameData.playerDeck.length}</span>
+        <div className="absolute top-4 left-4 right-4 flex justify-between">
+          <span className="arcade-text text-lg">CPU Cards: {gameData.cpuDeck.length}</span>
+          <span className="text-yellow-500 text-lg" style={{ textShadow: 'none' }}>
+            {Math.floor(timeRemaining / 60)}:{(timeRemaining % 60).toString().padStart(2, '0')}
+          </span>
+          <span className="arcade-text text-lg">Your Cards: {gameData.playerDeck.length}</span>
         </div>
 
-        {/* Bottom Action Buttons - Raised higher */}
-        <div className="absolute bottom-24 left-4 right-4 flex justify-between items-center">
-          <button
-            onClick={() => setGameState('menu')}
-            className="text-lg py-2 px-4 text-yellow-400 font-bold border-2 border-yellow-400 rounded"
-            style={{
-              textShadow: '0 0 10px #ffd700, 0 0 20px #ffd700, 0 0 30px #ffd700',
-              boxShadow: '0 0 10px rgba(255, 215, 0, 0.3), inset 0 0 10px rgba(255, 215, 0, 0.2)'
-            }}
-          >
-            BACK
-          </button>
-
-          {/* Only show NUKE button if it's available */}
-          {gameData.playerHasNuke && (
-            <button
-              onClick={handleNukeClick}
-              className={`
-                text-lg py-2 px-4 rounded
-                border-2 text-red-500 border-red-500 font-bold
-              `}
-              style={{
-                textShadow: '0 0 10px #ff0000, 0 0 20px #ff0000, 0 0 30px #ff0000',
-                boxShadow: '0 0 10px rgba(255, 0, 0, 0.3), inset 0 0 10px rgba(255, 0, 0, 0.2)'
-              }}
-            >
-              NUKE!
-            </button>
-          )}
-        </div>
-
-        {/* Nuke Used Status Message - Show when nuke is not available */}
-        {!gameData.playerHasNuke && (
-          <div 
-            className="absolute bottom-24 right-12 text-lg text-green-500 flex flex-col items-center pointer-events-none"
-            style={{
-              textShadow: '0 0 10px #00ff00, 0 0 20px #00ff00, 0 0 30px #00ff00',
-            }}
-          >
-            <span>NUKE</span>
-            <span>USED</span>
-          </div>
-        )}
-
-        {/* WAR Animation */}
-        <WarAnimation isVisible={showWarAnimation} />
-        
         {/* CPU Card Area */}
         <div className="text-center w-full mt-8 flex flex-col items-center relative">
           <p className="arcade-text text-lg mb-4">CPU's card</p>
           
-          {/* CPU Nuke Used Status Message - Red color */}
+          {/* CPU Nuke Used Status Message */}
           {!gameData.cpuHasNuke && (
             <div 
               className="absolute bottom-16 left-12 text-lg text-red-500 flex flex-col items-center pointer-events-none"
@@ -612,6 +634,47 @@ export default function Demo() {
             {username === 'Your' ? 'Your card' : `${username}'s card`}
           </p>
         </div>
+
+        {/* Bottom Action Buttons */}
+        <div className="absolute bottom-24 left-4 right-4 flex justify-between items-center">
+          <button
+            onClick={() => setGameState('menu')}
+            className="text-lg py-2 px-4 text-yellow-400 font-bold border-2 border-yellow-400 rounded"
+            style={{
+              textShadow: '0 0 10px #ffd700, 0 0 20px #ffd700, 0 0 30px #ffd700',
+              boxShadow: '0 0 10px rgba(255, 215, 0, 0.3), inset 0 0 10px rgba(255, 215, 0, 0.2)'
+            }}
+          >
+            BACK
+          </button>
+
+          {/* Only show NUKE button if it's available */}
+          {gameData.playerHasNuke && !gameData.gameOver && (
+            <button
+              onClick={handleNukeClick}
+              className="text-lg py-2 px-4 rounded border-2 text-red-500 border-red-500 font-bold"
+              style={{
+                textShadow: '0 0 10px #ff0000, 0 0 20px #ff0000, 0 0 30px #ff0000',
+                boxShadow: '0 0 10px rgba(255, 0, 0, 0.3), inset 0 0 10px rgba(255, 0, 0, 0.2)'
+              }}
+            >
+              NUKE!
+            </button>
+          )}
+
+          {/* Nuke Used Status Message */}
+          {!gameData.playerHasNuke && (
+            <div 
+              className="text-lg text-green-500 flex flex-col items-center pointer-events-none"
+              style={{
+                textShadow: '0 0 10px #00ff00, 0 0 20px #00ff00, 0 0 30px #00ff00',
+              }}
+            >
+              <span>NUKE</span>
+              <span>USED</span>
+            </div>
+          )}
+        </div>
       </div>
     );
   }
@@ -644,14 +707,37 @@ export default function Demo() {
   // Single game over effect to replace all three game over effects
   useEffect(() => {
     if (gameData.gameOver && !hasSubmittedResult) {
+      // First, ensure all cards are properly allocated
+      const newState = { ...gameData };
+      
+      // Move any remaining active cards to the appropriate deck
+      if (newState.playerCard) {
+        newState.playerDeck.push(newState.playerCard);
+        newState.playerCard = null;
+      }
+      if (newState.cpuCard) {
+        newState.cpuDeck.push(newState.cpuCard);
+        newState.cpuCard = null;
+      }
+      
+      // Move any war pile cards to the winner's deck
+      if (newState.warPile.length > 0) {
+        if (newState.message.includes("You win")) {
+          newState.playerDeck.push(...newState.warPile);
+        } else {
+          newState.cpuDeck.push(...newState.warPile);
+        }
+        newState.warPile = [];
+      }
+
       // Allow current animations to complete
       setTimeout(() => {
-        // Reset animation states after current animations finish
+        setGameData(newState);
         setShowWarAnimation(false);
         setShowNukeAnimation(false);
         setIsProcessing(false);
 
-        // Set final game over message and ensure it persists
+        // Set final game over message
         const gameOverMessage = gameData.message.includes("You win") || gameData.message.includes("NUKE") ?
           `GAME OVER - ${username} WINS!` :
           "GAME OVER - CPU WINS!";
@@ -662,7 +748,7 @@ export default function Demo() {
         const outcome = gameData.message.includes("You win") || gameData.message.includes("NUKE") ? 
           'win' : 'loss';
         handleGameEnd(outcome);
-      }, 1000); // Wait for current animations to complete
+      }, 1000);
 
       return () => {
         setIsProcessing(false);
@@ -713,6 +799,48 @@ export default function Demo() {
       setHasSubmittedResult(false);
     }
   }, [gameData.gameOver]);
+
+  // Single timer effect that starts when game state changes to 'game'
+  useEffect(() => {
+    console.log('Timer Effect Running:', { gameState, gameOver: gameData.gameOver });
+    
+    if (gameState === 'game') {
+        console.log('Game started - initializing timer');
+        // Reset timer to 3 minutes (180 seconds)
+        setTimeRemaining(180);
+        
+        // Create interval that ticks every second
+        const timerInterval = setInterval(() => {
+            setTimeRemaining(prevTime => {
+                console.log('Current time:', prevTime);
+                // If time is up, handle game end
+                if (prevTime <= 0) {
+                    clearInterval(timerInterval);
+                    const playerTotal = gameData.playerDeck.length + (gameData.playerCard ? 1 : 0);
+                    const cpuTotal = gameData.cpuDeck.length + (gameData.cpuCard ? 1 : 0);
+                    
+                    setGameData(prev => ({
+                        ...prev,
+                        gameOver: true,
+                        message: playerTotal > cpuTotal ? 
+                            `Time's Up - ${username} wins with ${playerTotal} cards!` : 
+                            `Time's Up - CPU wins with ${cpuTotal} cards!`
+                    }));
+                    
+                    handleGameEnd(playerTotal > cpuTotal ? 'win' : 'loss');
+                    return 0;
+                }
+                return prevTime - 1;
+            });
+        }, 1000);
+        
+        // Cleanup function
+        return () => {
+            console.log('Cleaning up timer interval');
+            clearInterval(timerInterval);
+        };
+    }
+}, [gameState]); // Only depend on gameState to prevent unnecessary re-renders
 
   return null;
 }

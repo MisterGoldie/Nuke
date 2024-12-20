@@ -13,7 +13,7 @@ export default function HowToPlay({ onBack }: HowToPlayProps) {
         <section>
           <h2 className="text-2xl mb-2">Basic Rules</h2>
           <p className="text-sm leading-relaxed">
-            Each player starts with 26 cards. Players draw cards simultaneously. Higher card wins both cards!
+            Each player starts with 26 cards. Players draw cards simultaneously. Higher card wins both cards! Be aware of the 3 minute timer, whoever has the higher score when the timer runs out wins.
           </p>
         </section>
 
