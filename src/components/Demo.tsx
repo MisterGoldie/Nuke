@@ -857,5 +857,35 @@ export default function Demo() {
     }
 }, [gameState]); // Only depend on gameState to prevent unnecessary re-renders
 
+  const sendGameNotification = async () => {
+    if (!context?.user?.fid) {
+      console.log('No FID available, cannot send notification');
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/send-notification', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          fid: context.user.fid.toString(),
+          title: 'Nuke',
+          body: 'Thanks for playing Nuke!',
+          targetUrl: process.env.NEXT_PUBLIC_URL
+        })
+      });
+
+      const data = await response.json();
+      if (data.error === "Rate limited") {
+        console.log('Notification rate limited - user is playing too frequently');
+        return;
+      }
+    } catch (error) {
+      console.error('Failed to send notification:', error);
+    }
+  };
+
   return null;
 }
