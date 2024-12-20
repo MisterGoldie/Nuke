@@ -51,26 +51,16 @@ export default function Demo() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState<number>(240); // 240 seconds = 4 minutes
 
-  const checkCardCount = (gameData: LocalState) => {
-    const totalCards = 
-        gameData.playerDeck.length + 
-        gameData.cpuDeck.length + 
-        (gameData.playerCard ? 1 : 0) + 
-        (gameData.cpuCard ? 1 : 0) + 
-        gameData.warPile.length;
-
-    if (totalCards !== 52) {
-        console.error('Card count error:', {
-            playerDeck: gameData.playerDeck.length,
-            cpuDeck: gameData.cpuDeck.length,
-            playerCard: gameData.playerCard ? 1 : 0,
-            cpuCard: gameData.cpuCard ? 1 : 0,
-            warPile: gameData.warPile.length,
-            total: totalCards,
-            state: gameData.message // Add current game state message for context
-        });
-    }
-    return totalCards;
+  const logCardCounts = (gameData: LocalState) => {
+    console.log('Card Counts:', {
+        playerDeckCount: gameData.playerDeck.length,
+        cpuDeckCount: gameData.cpuDeck.length,
+        playerCard: gameData.playerCard ? 1 : 0,
+        cpuCard: gameData.cpuCard ? 1 : 0,
+        warPileCount: gameData.warPile.length,
+        totalCards: gameData.playerDeck.length + gameData.cpuDeck.length + (gameData.playerCard ? 1 : 0) + (gameData.cpuCard ? 1 : 0) + gameData.warPile.length,
+        gameState: gameData.message // Add current game state for context
+    });
   };
 
   const handleGameEnd = useCallback(async (outcome: 'win' | 'loss', isTimeUp: boolean = false) => {
@@ -729,7 +719,10 @@ export default function Demo() {
   // Add card count check to game over effect
   useEffect(() => {
     if (gameData.gameOver && !hasSubmittedResult) {
-        // First, ensure all cards are properly allocated
+        // Log card counts before final state update
+        console.log('Before Game Over:');
+        logCardCounts(gameData);
+        
         const newState = { ...gameData };
         
         // Move any remaining active cards to the appropriate deck
@@ -751,6 +744,10 @@ export default function Demo() {
             }
             newState.warPile = [];
         }
+
+        // Log card counts after final state update
+        console.log('After Game Over:');
+        logCardCounts(newState);
 
         // Check card count before final state update
         checkCardCount(newState);
@@ -791,8 +788,9 @@ export default function Demo() {
         setNukeInitiator(gameData.message.includes("CPU") ? 'cpu' : 'player');
         playNukeSound();
         
-        // Check card count before NUKE animation
-        checkCardCount(gameData);
+        // Log card counts before NUKE
+        console.log('Before NUKE:');
+        logCardCounts(gameData);
         
         const timer = setTimeout(() => {
             setShowNukeAnimation(false);
@@ -805,8 +803,9 @@ export default function Demo() {
                     readyForNextCard: true,
                     message: "Draw next card to continue"
                 };
-                // Check card count after NUKE completion
-                checkCardCount(newState);
+                // Log card counts after NUKE
+                console.log('After NUKE:');
+                logCardCounts(newState);
                 return newState;
             });
             setIsProcessing(false);
@@ -825,8 +824,9 @@ export default function Demo() {
         setShowWarAnimation(true);
         playWarSound();
         
-        // Check card count before WAR
-        checkCardCount(gameData);
+        // Log card counts before WAR
+        console.log('Before WAR:');
+        logCardCounts(gameData);
         
         const timer = setTimeout(() => {
             setShowWarAnimation(false);
@@ -836,8 +836,9 @@ export default function Demo() {
                     isWar: false,
                     readyForNextCard: true
                 };
-                // Check card count after WAR
-                checkCardCount(newState);
+                // Log card counts after WAR
+                console.log('After WAR:');
+                logCardCounts(newState);
                 return newState;
             });
         }, 2000);
@@ -896,4 +897,8 @@ export default function Demo() {
 }, [gameState]); // Only depend on gameState to prevent unnecessary re-renders
 
   return null;
+}
+
+function checkCardCount(newState: { playerDeck: Card[]; cpuDeck: Card[]; playerCard: Card | null; cpuCard: Card | null; warPile: Card[]; isWar: boolean; gameOver: boolean; message: string; playerHasNuke: boolean; cpuHasNuke: boolean; isNukeActive: boolean; readyForNextCard: boolean; gameStartTime?: number; }) {
+  throw new Error("Function not implemented.");
 }
