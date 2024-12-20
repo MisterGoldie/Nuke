@@ -649,7 +649,7 @@ export default function Demo() {
           </button>
 
           {/* Only show NUKE button if it's available */}
-          {gameData.playerHasNuke && !gameData.gameOver && (
+          {gameData.playerHasNuke && (
             <button
               onClick={handleNukeClick}
               className="text-lg py-2 px-4 rounded border-2 text-red-500 border-red-500 font-bold"
@@ -661,20 +661,20 @@ export default function Demo() {
               NUKE!
             </button>
           )}
-
-          {/* Nuke Used Status Message */}
-          {!gameData.playerHasNuke && (
-            <div 
-              className="text-lg text-green-500 flex flex-col items-center pointer-events-none"
-              style={{
-                textShadow: '0 0 10px #00ff00, 0 0 20px #00ff00, 0 0 30px #00ff00',
-              }}
-            >
-              <span>NUKE</span>
-              <span>USED</span>
-            </div>
-          )}
         </div>
+
+        {/* Nuke Used Status Message - Show when nuke is not available */}
+        {!gameData.playerHasNuke && (
+          <div 
+            className="absolute bottom-24 right-12 text-lg text-green-500 flex flex-col items-center pointer-events-none"
+            style={{
+              textShadow: '0 0 10px #00ff00, 0 0 20px #00ff00, 0 0 30px #00ff00',
+            }}
+          >
+            <span>NUKE</span>
+            <span>USED</span>
+          </div>
+        )}
       </div>
     );
   }
