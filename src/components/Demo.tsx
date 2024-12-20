@@ -42,6 +42,7 @@ export default function Demo() {
   const [nukeInitiator, setNukeInitiator] = useState<'player' | 'cpu'>('player');
   const [playNukeSound] = useSound('/sounds/nuke.mp3', { volume: 0.75 });
   const [playWarSound] = useSound('/sounds/war.mp3', { volume: 0.75 });
+  const [playGameplayMusic] = useSound('/sounds/gameplay.mp3', { volume: 0.3, loop: true });
   const [delayedMessage, setDelayedMessage] = useState<string>("Draw card to begin");
   const [isFirstCard, setIsFirstCard] = useState(true);
   const [username, setUsername] = useState<string>('Your');

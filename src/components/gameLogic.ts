@@ -95,6 +95,37 @@ export function drawCards(state: LocalState): LocalState {
         return nukeState;
     }
     
+    // Check if game has been running for more than 2 minutes
+    const gameRunningTime = Date.now() - (newState.gameStartTime || Date.now());
+    const isLongGame = gameRunningTime > 120000; // 2 minutes in milliseconds
+    
+    // If it's a long game, favor the player with more cards
+    if (isLongGame) {
+        const playerIsWinning = newState.playerDeck.length > newState.cpuDeck.length;
+        const leaderDeckSize = Math.max(newState.playerDeck.length, newState.cpuDeck.length);
+        const followerDeckSize = Math.min(newState.playerDeck.length, newState.cpuDeck.length);
+        
+        // Higher chance to favor leader as their advantage grows
+        const advantage = (leaderDeckSize - followerDeckSize) / 52; // normalized difference
+        const favorChance = Math.min(0.5, 0.3 + advantage); // 30-50% chance based on lead
+        
+        if (Math.random() < favorChance) {
+            // Draw cards first to see outcome
+            newState.playerCard = newState.playerDeck.shift()!;
+            newState.cpuCard = newState.cpuDeck.shift()!;
+            
+            // If result doesn't favor leader, swap cards
+            const playerWinsNaturally = newState.playerCard.rank > newState.cpuCard.rank;
+            if (playerIsWinning !== playerWinsNaturally) {
+                const temp = newState.playerCard;
+                newState.playerCard = newState.cpuCard;
+                newState.cpuCard = temp;
+            }
+            
+            return newState;
+        }
+    }
+    
     // Check if previous state was a war
     const wasWar = newState.isWar;
     
