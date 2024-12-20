@@ -51,18 +51,6 @@ export default function Demo() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState<number>(240); // 240 seconds = 4 minutes
 
-  const logCardCounts = (gameData: LocalState) => {
-    console.log('Card Counts:', {
-        playerDeckCount: gameData.playerDeck.length,
-        cpuDeckCount: gameData.cpuDeck.length,
-        playerCard: gameData.playerCard ? 1 : 0,
-        cpuCard: gameData.cpuCard ? 1 : 0,
-        warPileCount: gameData.warPile.length,
-        totalCards: gameData.playerDeck.length + gameData.cpuDeck.length + (gameData.playerCard ? 1 : 0) + (gameData.cpuCard ? 1 : 0) + gameData.warPile.length,
-        gameState: gameData.message // Add current game state for context
-    });
-  };
-
   const handleGameEnd = useCallback(async (outcome: 'win' | 'loss', isTimeUp: boolean = false) => {
     if (hasSubmittedResult) {
         console.log("Game result already submitted, skipping...");
@@ -530,6 +518,21 @@ export default function Demo() {
         }}>
           version 1.0
         </div>
+
+        <button 
+          className="absolute top-4 right-4 px-3 py-1 text-sm border border-gray-400 rounded-md text-gray-400 hover:bg-gray-800 transition-colors"
+          style={{
+            zIndex: 50,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)'
+          }}
+          onClick={() => {
+            const shareText = 'Have you played NUKE WAR CARDS? 🕹️';
+            const shareUrl = 'nuke-podplay.vercel.app';
+            sdk.actions.openUrl(`https://warpcast.com/~/compose?text=${encodeURIComponent(shareText)}&embeds[]=${encodeURIComponent(shareUrl)}`);
+          }}
+        >
+          Share Frame
+        </button>
       </div>
     );
   }
@@ -716,136 +719,94 @@ export default function Demo() {
     return <HowToPlay onBack={() => setGameState('menu')} />;
   }
 
-  // Add card count check to game over effect
+  // Single game over effect to replace all three game over effects
   useEffect(() => {
     if (gameData.gameOver && !hasSubmittedResult) {
-        // Log card counts before final state update
-        console.log('Before Game Over:');
-        logCardCounts(gameData);
-        
-        const newState = { ...gameData };
-        
-        // Move any remaining active cards to the appropriate deck
-        if (newState.playerCard) {
-            newState.playerDeck.push(newState.playerCard);
-            newState.playerCard = null;
+      // First, ensure all cards are properly allocated
+      const newState = { ...gameData };
+      
+      // Move any remaining active cards to the appropriate deck
+      if (newState.playerCard) {
+        newState.playerDeck.push(newState.playerCard);
+        newState.playerCard = null;
+      }
+      if (newState.cpuCard) {
+        newState.cpuDeck.push(newState.cpuCard);
+        newState.cpuCard = null;
+      }
+      
+      // Move any war pile cards to the winner's deck
+      if (newState.warPile.length > 0) {
+        if (newState.message.includes("You win")) {
+          newState.playerDeck.push(...newState.warPile);
+        } else {
+          newState.cpuDeck.push(...newState.warPile);
         }
-        if (newState.cpuCard) {
-            newState.cpuDeck.push(newState.cpuCard);
-            newState.cpuCard = null;
-        }
+        newState.warPile = [];
+      }
+
+      // Allow current animations to complete
+      setTimeout(() => {
+        setGameData(newState);
+        setShowWarAnimation(false);
+        setShowNukeAnimation(false);
+        setIsProcessing(false);
+
+        // Set final game over message
+        const gameOverMessage = gameData.message.includes("You win") || gameData.message.includes("NUKE") ?
+          `GAME OVER - ${username} WINS!` :
+          "GAME OVER - CPU WINS!";
         
-        // Move any war pile cards to the winner's deck
-        if (newState.warPile.length > 0) {
-            if (newState.message.includes("You win")) {
-                newState.playerDeck.push(...newState.warPile);
-            } else {
-                newState.cpuDeck.push(...newState.warPile);
-            }
-            newState.warPile = [];
-        }
+        setDelayedMessage(gameOverMessage);
+        
+        // Handle game end once
+        const outcome = gameData.message.includes("You win") || gameData.message.includes("NUKE") ? 
+          'win' : 'loss';
+        handleGameEnd(outcome);
+      }, 1000);
 
-        // Log card counts after final state update
-        console.log('After Game Over:');
-        logCardCounts(newState);
-
-        // Check card count before final state update
-        checkCardCount(newState);
-
-        // Allow current animations to complete
-        setTimeout(() => {
-            setGameData(newState);
-            setShowWarAnimation(false);
-            setShowNukeAnimation(false);
-            setIsProcessing(false);
-
-            // Check card count after state update
-            checkCardCount(newState);
-
-            // Set final game over message
-            const gameOverMessage = gameData.message.includes("You win") || gameData.message.includes("NUKE") ?
-                `GAME OVER - ${username} WINS!` :
-                "GAME OVER - CPU WINS!";
-            
-            setDelayedMessage(gameOverMessage);
-            
-            // Handle game end once
-            const outcome = gameData.message.includes("You win") || gameData.message.includes("NUKE") ? 
-                'win' : 'loss';
-            handleGameEnd(outcome);
-        }, 1000);
-
-        return () => {
-            setIsProcessing(false);
-        };
+      return () => {
+        setIsProcessing(false);
+      };
     }
-}, [gameData.gameOver, hasSubmittedResult]);
+  }, [gameData.gameOver, gameData.message, username, handleGameEnd, hasSubmittedResult]);
 
-  // Add card count check to NUKE effect
   useEffect(() => {
-    if (gameData.isNukeActive) {
-        setShowNukeAnimation(true);
-        setNukeInitiator(gameData.message.includes("CPU") ? 'cpu' : 'player');
-        playNukeSound();
-        
-        // Log card counts before NUKE
-        console.log('Before NUKE:');
-        logCardCounts(gameData);
-        
-        const timer = setTimeout(() => {
-            setShowNukeAnimation(false);
-            setGameData(prev => {
-                const newState = {
-                    ...prev,
-                    isNukeActive: false,
-                    playerCard: null,
-                    cpuCard: null,
-                    readyForNextCard: true,
-                    message: "Draw next card to continue"
-                };
-                // Log card counts after NUKE
-                console.log('After NUKE:');
-                logCardCounts(newState);
-                return newState;
-            });
-            setIsProcessing(false);
-        }, 2000);
-        
-        return () => {
-            clearTimeout(timer);
-            setIsProcessing(false);
-        };
+    // Check total cards in play
+    const totalCards = 
+      gameData.playerDeck.length + 
+      gameData.cpuDeck.length + 
+      (gameData.playerCard ? 1 : 0) + 
+      (gameData.cpuCard ? 1 : 0) + 
+      gameData.warPile.length;
+      
+    if (totalCards !== 52) {
+      console.error('Card count error:', {
+        playerDeck: gameData.playerDeck.length,
+        cpuDeck: gameData.cpuDeck.length,
+        playerCard: gameData.playerCard ? 1 : 0,
+        cpuCard: gameData.cpuCard ? 1 : 0,
+        warPile: gameData.warPile.length,
+        total: totalCards
+      });
     }
-}, [gameData.isNukeActive, gameData.message, playNukeSound]);
-
-  // Add card count check to WAR effect
-  useEffect(() => {
-    if (gameData.isWar && !gameData.gameOver) {
-        setShowWarAnimation(true);
-        playWarSound();
+    
+    // Force game over ONLY when one player has all 52 cards
+    if (gameData.playerDeck.length === 52 || gameData.cpuDeck.length === 52) {
+      if (!gameData.gameOver) {
+        setGameData(prev => ({
+          ...prev,
+          gameOver: true,
+          message: gameData.playerDeck.length === 52 ? 
+            "Game Over - You win!" : 
+            "Game Over - CPU wins!"
+        }));
         
-        // Log card counts before WAR
-        console.log('Before WAR:');
-        logCardCounts(gameData);
-        
-        const timer = setTimeout(() => {
-            setShowWarAnimation(false);
-            setGameData(prev => {
-                const newState = {
-                    ...prev,
-                    isWar: false,
-                    readyForNextCard: true
-                };
-                // Log card counts after WAR
-                console.log('After WAR:');
-                logCardCounts(newState);
-                return newState;
-            });
-        }, 2000);
-        
-        return () => clearTimeout(timer);
+        // Trigger game end handling
+        handleGameEnd(gameData.playerDeck.length === 52 ? 'win' : 'loss');
+      }
     }
-}, [gameData.isWar, gameData.gameOver, playWarSound]);
+  }, [gameData, handleGameEnd]);
 
   // Reset submission flag when starting a new game
   useEffect(() => {
@@ -897,8 +858,4 @@ export default function Demo() {
 }, [gameState]); // Only depend on gameState to prevent unnecessary re-renders
 
   return null;
-}
-
-function checkCardCount(newState: { playerDeck: Card[]; cpuDeck: Card[]; playerCard: Card | null; cpuCard: Card | null; warPile: Card[]; isWar: boolean; gameOver: boolean; message: string; playerHasNuke: boolean; cpuHasNuke: boolean; isNukeActive: boolean; readyForNextCard: boolean; gameStartTime?: number; }) {
-  throw new Error("Function not implemented.");
 }
