@@ -49,7 +49,7 @@ export default function Demo() {
   const [isFidLoaded, setIsFidLoaded] = useState(false);
   const [hasSubmittedResult, setHasSubmittedResult] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [timeRemaining, setTimeRemaining] = useState<number>(240);
+  const [timeRemaining, setTimeRemaining] = useState<number>(240); // 240 seconds = 4 minutes
 
   const handleGameEnd = useCallback(async (outcome: 'win' | 'loss', isTimeUp: boolean = false) => {
     if (hasSubmittedResult) {
@@ -707,47 +707,52 @@ export default function Demo() {
   // Single game over effect to replace all three game over effects
   useEffect(() => {
     if (gameData.gameOver && !hasSubmittedResult) {
-      // Immediately update the game state with proper card allocation
-      setGameData(prevState => {
-        const newState = { ...prevState };
-        
-        // Move any remaining active cards to the appropriate deck
-        if (newState.playerCard) {
-          newState.playerDeck.push(newState.playerCard);
-          newState.playerCard = null;
-        }
-        if (newState.cpuCard) {
-          newState.cpuDeck.push(newState.cpuCard);
-          newState.cpuCard = null;
-        }
-        
-        // Move any war pile cards to the winner's deck
-        if (newState.warPile.length > 0) {
-          if (newState.message.includes("You win")) {
-            newState.playerDeck.push(...newState.warPile);
-          } else {
-            newState.cpuDeck.push(...newState.warPile);
-          }
-          newState.warPile = [];
-        }
-
-        return newState;
-      });
-
-      // Handle animations and messages after state update
-      setShowWarAnimation(false);
-      setShowNukeAnimation(false);
-      setIsProcessing(false);
-
-      const gameOverMessage = gameData.message.includes("You win") || gameData.message.includes("NUKE") ?
-        `GAME OVER - ${username} WINS!` :
-        "GAME OVER - CPU WINS!";
+      // First, ensure all cards are properly allocated
+      const newState = { ...gameData };
       
-      setDelayedMessage(gameOverMessage);
+      // Move any remaining active cards to the appropriate deck
+      if (newState.playerCard) {
+        newState.playerDeck.push(newState.playerCard);
+        newState.playerCard = null;
+      }
+      if (newState.cpuCard) {
+        newState.cpuDeck.push(newState.cpuCard);
+        newState.cpuCard = null;
+      }
       
-      const outcome = gameData.message.includes("You win") || gameData.message.includes("NUKE") ? 
-        'win' : 'loss';
-      handleGameEnd(outcome);
+      // Move any war pile cards to the winner's deck
+      if (newState.warPile.length > 0) {
+        if (newState.message.includes("You win")) {
+          newState.playerDeck.push(...newState.warPile);
+        } else {
+          newState.cpuDeck.push(...newState.warPile);
+        }
+        newState.warPile = [];
+      }
+
+      // Allow current animations to complete
+      setTimeout(() => {
+        setGameData(newState);
+        setShowWarAnimation(false);
+        setShowNukeAnimation(false);
+        setIsProcessing(false);
+
+        // Set final game over message
+        const gameOverMessage = gameData.message.includes("You win") || gameData.message.includes("NUKE") ?
+          `GAME OVER - ${username} WINS!` :
+          "GAME OVER - CPU WINS!";
+        
+        setDelayedMessage(gameOverMessage);
+        
+        // Handle game end once
+        const outcome = gameData.message.includes("You win") || gameData.message.includes("NUKE") ? 
+          'win' : 'loss';
+        handleGameEnd(outcome);
+      }, 1000);
+
+      return () => {
+        setIsProcessing(false);
+      };
     }
   }, [gameData.gameOver, gameData.message, username, handleGameEnd, hasSubmittedResult]);
 
