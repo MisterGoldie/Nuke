@@ -644,35 +644,29 @@ export default function Demo() {
   // Single game over effect to replace all three game over effects
   useEffect(() => {
     if (gameData.gameOver && !hasSubmittedResult) {
-      // Clear all pending timeouts first
-      const highestId = window.setTimeout(() => {}, 0);
-      for (let i = 0; i < highestId; i++) {
-        window.clearTimeout(i);
-      }
+      // Allow current animations to complete
+      setTimeout(() => {
+        // Reset animation states after current animations finish
+        setShowWarAnimation(false);
+        setShowNukeAnimation(false);
+        setIsProcessing(false);
 
-      // Reset all animation states
-      setShowWarAnimation(false);
-      setShowNukeAnimation(false);
-      setIsProcessing(false);
-
-      // Set final game over message and ensure it persists
-      const gameOverMessage = gameData.message.includes("You win") || gameData.message.includes("NUKE") ?
-        `GAME OVER - ${username} WINS!` :
-        "GAME OVER - CPU WINS!";
-      
-      setDelayedMessage(gameOverMessage);
-      
-      // Remove any timeouts that might clear the message
-      const cleanup = () => {
+        // Set final game over message and ensure it persists
+        const gameOverMessage = gameData.message.includes("You win") || gameData.message.includes("NUKE") ?
+          `GAME OVER - ${username} WINS!` :
+          "GAME OVER - CPU WINS!";
+        
         setDelayedMessage(gameOverMessage);
-      };
-      
-      // Handle game end once
-      const outcome = gameData.message.includes("You win") || gameData.message.includes("NUKE") ? 
-        'win' : 'loss';
-      handleGameEnd(outcome);
+        
+        // Handle game end once
+        const outcome = gameData.message.includes("You win") || gameData.message.includes("NUKE") ? 
+          'win' : 'loss';
+        handleGameEnd(outcome);
+      }, 1000); // Wait for current animations to complete
 
-      return cleanup;
+      return () => {
+        setIsProcessing(false);
+      };
     }
   }, [gameData.gameOver, gameData.message, username, handleGameEnd, hasSubmittedResult]);
 
