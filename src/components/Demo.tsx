@@ -655,59 +655,61 @@ export default function Demo() {
       setShowNukeAnimation(false);
       setIsProcessing(false);
 
-      // Set final game over message
+      // Set final game over message and ensure it persists
       const gameOverMessage = gameData.message.includes("You win") || gameData.message.includes("NUKE") ?
-        `Game Over - ${username} wins!` :
-        "Game Over - CPU wins!";
+        `GAME OVER - ${username} WINS!` :
+        "GAME OVER - CPU WINS!";
+      
       setDelayedMessage(gameOverMessage);
-
+      
+      // Remove any timeouts that might clear the message
+      const cleanup = () => {
+        setDelayedMessage(gameOverMessage);
+      };
+      
       // Handle game end once
       const outcome = gameData.message.includes("You win") || gameData.message.includes("NUKE") ? 
         'win' : 'loss';
       handleGameEnd(outcome);
-    }
 
-    // Cleanup function
-    return () => {
-      const highestId = window.setTimeout(() => {}, 0);
-      for (let i = 0; i < highestId; i++) {
-        window.clearTimeout(i);
-      }
-    };
+      return cleanup;
+    }
   }, [gameData.gameOver, gameData.message, username, handleGameEnd, hasSubmittedResult]);
 
   useEffect(() => {
     // Check total cards in play
     const totalCards = 
-        gameData.playerDeck.length + 
-        gameData.cpuDeck.length + 
-        (gameData.playerCard ? 1 : 0) + 
-        (gameData.cpuCard ? 1 : 0) + 
-        gameData.warPile.length;
-        
+      gameData.playerDeck.length + 
+      gameData.cpuDeck.length + 
+      (gameData.playerCard ? 1 : 0) + 
+      (gameData.cpuCard ? 1 : 0) + 
+      gameData.warPile.length;
+      
     if (totalCards !== 52) {
-        console.error('Card count error:', {
-            playerDeck: gameData.playerDeck.length,
-            cpuDeck: gameData.cpuDeck.length,
-            playerCard: gameData.playerCard ? 1 : 0,
-            cpuCard: gameData.cpuCard ? 1 : 0,
-            warPile: gameData.warPile.length,
-            total: totalCards
-        });
+      console.error('Card count error:', {
+        playerDeck: gameData.playerDeck.length,
+        cpuDeck: gameData.cpuDeck.length,
+        playerCard: gameData.playerCard ? 1 : 0,
+        cpuCard: gameData.cpuCard ? 1 : 0,
+        warPile: gameData.warPile.length,
+        total: totalCards
+      });
     }
     
-    // Force game over if one player has all cards
+    // Force game over ONLY when one player has all 52 cards
     if (gameData.playerDeck.length === 52 || gameData.cpuDeck.length === 52) {
+      if (!gameData.gameOver) {
         setGameData(prev => ({
-            ...prev,
-            gameOver: true,
-            message: gameData.playerDeck.length === 52 ? 
-                "Game Over - You win!" : 
-                "Game Over - CPU wins!"
+          ...prev,
+          gameOver: true,
+          message: gameData.playerDeck.length === 52 ? 
+            "Game Over - You win!" : 
+            "Game Over - CPU wins!"
         }));
         
         // Trigger game end handling
         handleGameEnd(gameData.playerDeck.length === 52 ? 'win' : 'loss');
+      }
     }
   }, [gameData, handleGameEnd]);
 
