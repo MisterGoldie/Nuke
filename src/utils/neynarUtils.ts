@@ -45,7 +45,7 @@ async function getAirstackProfileImage(fid: string): Promise<string | null> {
 
 export async function fetchUserDataByFid(fid: string): Promise<UserData | null> {
   try {
-    // First get username from Neynar
+    console.log(`Fetching user data for FID: ${fid}`);
     const neynarResponse = await fetch(
       `https://api.neynar.com/v2/farcaster/user/bulk?fids=${fid}`,
       {
@@ -57,17 +57,22 @@ export async function fetchUserDataByFid(fid: string): Promise<UserData | null> 
     );
 
     const neynarData = await neynarResponse.json();
-    if (!neynarData.users?.[0]) return null;
+    console.log(`Neynar response for FID ${fid}:`, neynarData);
 
-    // Then get profile image from Airstack
+    if (!neynarData.users?.[0]) {
+      console.log(`No user data found for FID ${fid}`);
+      return null;
+    }
+
     const profileImage = await getAirstackProfileImage(fid);
+    console.log(`Profile image for FID ${fid}:`, profileImage);
 
     return {
       username: neynarData.users[0].username,
       pfp: profileImage || '/default-avatar.png',
     };
   } catch (error) {
-    console.error('Error fetching user data:', error);
+    console.error(`Error fetching user data for FID ${fid}:`, error);
     return null;
   }
 } 

@@ -50,38 +50,23 @@ export default function Demo() {
   const [hasSubmittedResult, setHasSubmittedResult] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState<number>(240); // 240 seconds = 4 minutes
+  const [isGameLocked, setIsGameLocked] = useState(false);
+  const [isTimerRunning, setIsTimerRunning] = useState(false);
 
   const handleGameEnd = useCallback(async (outcome: 'win' | 'loss', isTimeUp: boolean = false) => {
-    if (hasSubmittedResult) {
-        console.log("Game result already submitted, skipping...");
+    if (hasSubmittedResult || isGameLocked) {
+        console.log("Game already ended, skipping...");
         return;
     }
 
+    // Lock the game and stop timer immediately
+    setIsGameLocked(true);
+    setIsTimerRunning(false);  // Force timer to stop
+    
     if (!context?.user?.fid) {
         console.log("Waiting for FID to load...");
         return;
     }
-
-    // Calculate final scores
-    const playerTotal = gameData.playerDeck.length + (gameData.playerCard ? 1 : 0);
-    const cpuTotal = gameData.cpuDeck.length + (gameData.cpuCard ? 1 : 0);
-    
-    // Create appropriate message based on game end condition
-    let winnerMessage = isTimeUp
-        ? `Time's Up! ${playerTotal > cpuTotal 
-            ? `${username} wins with ${playerTotal} cards!` 
-            : `CPU wins with ${cpuTotal} cards!`}`
-        : `Game Over! ${playerTotal > cpuTotal 
-            ? `${username} wins with ${playerTotal} cards!` 
-            : `CPU wins with ${cpuTotal} cards!`}`;
-
-    // Update game state
-    setGameData(prev => ({
-        ...prev,
-        gameOver: true,
-        message: winnerMessage,
-        readyForNextCard: false
-    }));
 
     try {
         const gameResult = {
@@ -105,7 +90,7 @@ export default function Demo() {
     } catch (error) {
         console.error('Error in handleGameEnd:', error);
     }
-}, [context, hasSubmittedResult, gameData, username]);
+}, [context?.user?.fid, hasSubmittedResult, isGameLocked]);
 
   const handleDrawCard = useCallback(() => {
     if (showWarAnimation || showNukeAnimation || isProcessing) {
@@ -416,8 +401,9 @@ export default function Demo() {
   // Handle tutorial completion
   const handleTutorialComplete = () => {
     setGameState('game');
-    setTimeRemaining(240);  // Reset to 4 minutes
-    setIsFirstCard(true);   // Reset first card state
+    setTimeRemaining(240);
+    setIsFirstCard(true);
+    setIsTimerRunning(true);
   };
 
   const memoizedGameData = useMemo(() => ({
@@ -431,7 +417,7 @@ export default function Demo() {
 
   // Update timer effect
   useEffect(() => {
-    if (gameState === 'game') {
+    if (gameState === 'game' && isTimerRunning) {
         const timerInterval = setInterval(() => {
             setTimeRemaining(prevTime => {
                 if (prevTime <= 1) {
@@ -465,7 +451,7 @@ export default function Demo() {
         
         return () => clearInterval(timerInterval);
     }
-}, [gameState, gameData, username, handleGameEnd]);
+}, [gameState, gameData, username, handleGameEnd, isTimerRunning]);
 
   // Menu State
   if (gameState === 'menu') {
@@ -886,6 +872,22 @@ export default function Demo() {
       console.error('Failed to send notification:', error);
     }
   };
+
+  useEffect(() => {
+    if (!gameData.gameOver) {
+        setIsGameLocked(false);
+        setHasSubmittedResult(false);
+    }
+  }, [gameData.gameOver]);
+
+  // Add this effect to control the timer
+  useEffect(() => {
+    if (gameState === 'game' && !gameData.gameOver) {
+        setIsTimerRunning(true);
+    } else {
+        setIsTimerRunning(false);
+    }
+  }, [gameState, gameData.gameOver]);
 
   return null;
 }

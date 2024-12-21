@@ -3,6 +3,15 @@ import { fetchUserDataByFid } from '../../../utils/neynarUtils';
 import { checkFanTokenOwnership } from '../../../utils/tokenUtils';
 import { calculatePODScore } from '../../../utils/scoreUtils';
 
+interface LeaderboardEntry {
+  fid: string;
+  username: string;
+  wins: number;
+  losses: number;
+  lastPlayed: Date;
+  totalGames?: number;
+}
+
 export async function POST(request: Request) {
   try {
     const { fid, action, difficulty } = await request.json();
@@ -50,7 +59,7 @@ export async function GET(request: Request) {
     const userFid = searchParams.get('userFid');
     
     const db = admin.firestore();
-    const usersRef = db.collection('users');
+    const usersRef = db.collection('nuke_players');
     
     // Get leaderboard data
     const leaderboardSnapshot = await usersRef

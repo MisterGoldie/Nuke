@@ -62,12 +62,13 @@ export async function getPlayerStats(playerFid: string): Promise<PlayerStats | n
 // Get leaderboard
 export async function getLeaderboard(limit: number = 10) {
   try {
-    const snapshot = await db.collection('nuke_players')
+    const usersRef = db.collection('nuke_players');
+    const leaderboardSnapshot = await usersRef
       .orderBy('wins', 'desc')
       .limit(limit)
       .get();
       
-    return snapshot.docs.map(doc => ({
+    return leaderboardSnapshot.docs.map(doc => ({
       fid: doc.id,
       ...doc.data()
     }));
