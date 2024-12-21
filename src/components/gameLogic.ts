@@ -263,42 +263,46 @@ export function handleNuke(state: LocalState, initiator: 'player' | 'cpu'): Loca
     }
 
     if (initiator === 'cpu' && newState.cpuHasNuke) {
-        // Check if player has enough cards
+        // Verify card count before NUKE
+        const totalBefore = newState.playerDeck.length + newState.cpuDeck.length;
+        
+        // If player has less than 10 cards, they lose immediately
         if (newState.playerDeck.length < 10) {
             newState.gameOver = true;
             newState.message = "Game Over - CPU wins with a NUKE!";
-            verifyCardCount(newState);
             return newState;
         }
-
+        
         // Otherwise, steal exactly 10 cards
         const stolenCards = newState.playerDeck.splice(-10, 10);
-        newState.cpuDeck.push(...stolenCards);
+        if (stolenCards.length === 10) {
+            newState.cpuDeck.push(...stolenCards);
+        }
+        
+        // Verify card count after NUKE
+        const totalAfter = newState.playerDeck.length + newState.cpuDeck.length;
+        if (totalBefore !== totalAfter) {
+            console.error('Card count mismatch:', { totalBefore, totalAfter });
+        }
+        
         newState.cpuHasNuke = false;
         newState.isNukeActive = true;
-        newState.message = "CPU LAUNCHED A NUKE! They stole 10 cards!";
-        verifyCardCount(newState);
+        newState.message = "CPU LAUNCHED A NUKE! You lost 10 cards";
     } else if (initiator === 'player' && newState.playerHasNuke) {
-        // Check if CPU has enough cards
+        // If CPU has less than 10 cards, they lose immediately
         if (newState.cpuDeck.length < 10) {
             newState.gameOver = true;
             newState.message = "Game Over - You win with a NUKE!";
-            verifyCardCount(newState);
             return newState;
         }
-
+        
         // Otherwise, steal 10 cards
         const stolenCards = newState.cpuDeck.splice(-10, 10);
         newState.playerDeck.push(...stolenCards);
         newState.playerHasNuke = false;
         newState.isNukeActive = true;
         newState.message = "NUKE LAUNCHED! You stole 10 cards!";
-        verifyCardCount(newState);
     }
     
     return newState;
 } 
-
-function verifyCardCount(newState: { playerDeck: Card[]; cpuDeck: Card[]; warPile: Card[]; playerCard: Card | null; cpuCard: Card | null; isWar: boolean; gameOver: boolean; message: string; playerHasNuke: boolean; cpuHasNuke: boolean; isNukeActive: boolean; readyForNextCard: boolean; gameStartTime?: number; }) {
-    throw new Error("Function not implemented.");
-}
