@@ -275,9 +275,7 @@ export function handleNuke(state: LocalState, initiator: 'player' | 'cpu'): Loca
         
         // Otherwise, steal exactly 10 cards
         const stolenCards = newState.playerDeck.splice(-10, 10);
-        if (stolenCards.length === 10) {
-            newState.cpuDeck.push(...stolenCards);
-        }
+        newState.cpuDeck.push(...stolenCards);
         
         // Verify card count after NUKE
         const totalAfter = newState.playerDeck.length + newState.cpuDeck.length;

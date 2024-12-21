@@ -42,7 +42,7 @@ export default function Demo() {
   const [nukeInitiator, setNukeInitiator] = useState<'player' | 'cpu'>('player');
   const [playNukeSound] = useSound('/sounds/nuke.mp3', { volume: 0.75 });
   const [playWarSound] = useSound('/sounds/war.mp3', { volume: 0.75 });
-  const [playGameplayMusic] = useSound('/sounds/gameplay.mp3', { volume: 0.3, loop: true });
+  const [playGameplayMusic] = useSound('/sounds/gameplay.mp3', { volume: 0.2, loop: true });
   const [delayedMessage, setDelayedMessage] = useState<string>("Draw card to begin");
   const [isFirstCard, setIsFirstCard] = useState(true);
   const [username, setUsername] = useState<string>('Your');
@@ -339,7 +339,7 @@ export default function Demo() {
       }
       
       // Start gameplay music
-      gameplayMusic.volume = 0.5;
+      gameplayMusic.volume = 0.2;
       gameplayMusic.loop = true;
       
       if (gameplayMusic.paused) {
