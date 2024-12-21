@@ -176,42 +176,35 @@ export function drawCards(state: LocalState): LocalState {
     if (playerRank > cpuRank) {
         if (newState.warPile.length > 0) {
             newState.message = `You wins WAR with ${newState.playerCard.display}${newState.playerCard.suit}! (${newState.warPile.length + 2} cards won)`;
-            newState.playerDeck.push(...newState.warPile, newState.playerCard, newState.cpuCard);
+            newState.playerDeck.push(...newState.warPile);
             newState.warPile = [];
         } else {
             newState.message = `You wins with ${newState.playerCard.display}${newState.playerCard.suit}`;
-            newState.playerDeck.push(newState.playerCard, newState.cpuCard);
         }
-        newState.playerCard = null;
-        newState.cpuCard = null;
+        newState.playerDeck.push(newState.playerCard, newState.cpuCard);
         newState.readyForNextCard = true;
     } else if (cpuRank > playerRank) {
         if (newState.warPile.length > 0) {
             newState.message = `CPU wins WAR with ${newState.cpuCard.display}${newState.cpuCard.suit}! (${newState.warPile.length + 2} cards won)`;
-            newState.cpuDeck.push(...newState.warPile, newState.playerCard, newState.cpuCard);
+            newState.cpuDeck.push(...newState.warPile);
             newState.warPile = [];
         } else {
             newState.message = `CPU wins with ${newState.cpuCard.display}${newState.cpuCard.suit}`;
-            newState.cpuDeck.push(newState.playerCard, newState.cpuCard);
         }
-        newState.playerCard = null;
-        newState.cpuCard = null;
+        newState.cpuDeck.push(newState.playerCard, newState.cpuCard);
         newState.readyForNextCard = true;
     } else {
         newState.message = "WAR!";
         newState.isWar = true;
         
-        // Add current cards to war pile first
-        newState.warPile.push(newState.playerCard, newState.cpuCard);
-        newState.playerCard = null;
-        newState.cpuCard = null;
-        
         if (newState.playerDeck.length >= 3 && newState.cpuDeck.length >= 3) {
-            // Add face-down cards to war pile
-            for (let i = 0; i < 3; i++) {  // Changed from 2 to 3
-                const playerCard = newState.playerDeck.shift()!;
-                const cpuCard = newState.cpuDeck.shift()!;
-                newState.warPile.push(playerCard, cpuCard);
+            newState.warPile.push(newState.playerCard, newState.cpuCard);
+            newState.playerCard = null;
+            newState.cpuCard = null;
+            
+            for (let i = 0; i < 2; i++) {
+                newState.warPile.push(newState.playerDeck.shift()!);
+                newState.warPile.push(newState.cpuDeck.shift()!);
             }
         } else {
             newState.gameOver = true;
@@ -274,6 +267,7 @@ export function handleNuke(state: LocalState, initiator: 'player' | 'cpu'): Loca
         if (newState.playerDeck.length < 10) {
             newState.gameOver = true;
             newState.message = "Game Over - CPU wins with a NUKE!";
+            verifyCardCount(newState);
             return newState;
         }
 
@@ -283,11 +277,13 @@ export function handleNuke(state: LocalState, initiator: 'player' | 'cpu'): Loca
         newState.cpuHasNuke = false;
         newState.isNukeActive = true;
         newState.message = "CPU LAUNCHED A NUKE! They stole 10 cards!";
+        verifyCardCount(newState);
     } else if (initiator === 'player' && newState.playerHasNuke) {
         // Check if CPU has enough cards
         if (newState.cpuDeck.length < 10) {
             newState.gameOver = true;
             newState.message = "Game Over - You win with a NUKE!";
+            verifyCardCount(newState);
             return newState;
         }
 
@@ -297,7 +293,12 @@ export function handleNuke(state: LocalState, initiator: 'player' | 'cpu'): Loca
         newState.playerHasNuke = false;
         newState.isNukeActive = true;
         newState.message = "NUKE LAUNCHED! You stole 10 cards!";
+        verifyCardCount(newState);
     }
     
     return newState;
 } 
+
+function verifyCardCount(newState: { playerDeck: Card[]; cpuDeck: Card[]; warPile: Card[]; playerCard: Card | null; cpuCard: Card | null; isWar: boolean; gameOver: boolean; message: string; playerHasNuke: boolean; cpuHasNuke: boolean; isNukeActive: boolean; readyForNextCard: boolean; gameStartTime?: number; }) {
+    throw new Error("Function not implemented.");
+}
