@@ -102,35 +102,25 @@ export default function Leaderboard({ currentUserFid, onBack }: { currentUserFid
         )}
       </div>
 
-      <button
-        onClick={() => {
-          const shareText = 'Play "Nuke" by @goldie and /thepod team 🃏';
-          const shareUrl = 'nuke-podplay.vercel.app';
-          sdk.actions.openUrl(`https://warpcast.com/~/compose?text=${encodeURIComponent(shareText)}&embeds[]=${encodeURIComponent(shareUrl)}`);
-        }}
-        className="arcade-button text-xl py-3 px-8 mb-4"
-        style={{
-          textShadow: '0 0 10px #a855f7, 0 0 20px #a855f7, 0 0 30px #a855f7',
-          boxShadow: '0 0 10px rgba(168, 85, 247, 0.3), inset 0 0 10px rgba(168, 85, 247, 0.2)',
-          color: '#a855f7',
-          borderColor: '#a855f7'
-        }}
-      >
-        SHARE GAME
-      </button>
-
-      <button
-        onClick={onBack}
-        className="arcade-button text-xl py-3 px-8"
-        style={{
-          textShadow: '0 0 10px #ffd700, 0 0 20px #ffd700, 0 0 30px #ffd700',
-          boxShadow: '0 0 10px rgba(255, 215, 0, 0.3), inset 0 0 10px rgba(255, 215, 0, 0.2)',
-          color: '#ffd700',
-          borderColor: '#ffd700'
-        }}
-      >
-        BACK TO MENU
-      </button>
+      <div className="flex flex-col items-center gap-3 w-[260px]">
+        <button
+          onClick={() => {
+            const shareText = 'Play "Nuke" by @goldie and /thepod team 🃏';
+            const shareUrl = 'nuke-podplay.vercel.app';
+            sdk.actions.openUrl(`https://warpcast.com/~/compose?text=${encodeURIComponent(shareText)}&embeds[]=${encodeURIComponent(shareUrl)}`);
+          }}
+          className="arcade-button glow-purple text-2xl py-3"
+        >
+          SHARE GAME
+        </button>
+        
+        <button
+          onClick={onBack}
+          className="arcade-button glow-yellow text-2xl py-3"
+        >
+          BACK TO MENU
+        </button>
+      </div>
     </div>
   );
 }
