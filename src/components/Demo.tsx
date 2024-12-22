@@ -3,7 +3,6 @@
 import { useEffect, useCallback, useState, useContext, useMemo } from "react";
 import sdk, { FrameContext } from "@farcaster/frame-sdk";
 import { Button } from "~/components/ui/Button";
-import useSound from 'use-sound';
 import Leaderboard from './Leaderboard';
 import Image from 'next/image';
 import { LocalState, Card, initializeGame, drawCards, handleNuke } from './gameLogic';
@@ -33,6 +32,11 @@ const NukeAnimation = dynamic(() => import('./NukeAnimation'), {
 });
 
 export default function Demo() {
+  // State declarations first
+  const [isMuted, setIsMuted] = useState(() => {
+    const savedMute = localStorage.getItem('isMuted');
+    return savedMute === 'true';
+  });
   const [gameState, setGameState] = useState<GameState>('menu');
   const [gameData, setGameData] = useState<LocalState>(initializeGame());
   const [isSDKLoaded, setIsSDKLoaded] = useState(false);
@@ -41,13 +45,6 @@ export default function Demo() {
   const [showWarAnimation, setShowWarAnimation] = useState(false);
   const [showNukeAnimation, setShowNukeAnimation] = useState(false);
   const [nukeInitiator, setNukeInitiator] = useState<'player' | 'cpu'>('player');
-  const [isMuted, setIsMuted] = useState(() => {
-    // Check if there's a saved mute preference
-    const savedMute = localStorage.getItem('isMuted');
-    return savedMute === 'true';
-  });
-  const [playNukeSound] = useSound('/sounds/nuke.mp3', { volume: 0.75, mute: isMuted });
-  const [playWarSound] = useSound('/sounds/war.mp3', { volume: 0.75, mute: isMuted });
   const [delayedMessage, setDelayedMessage] = useState<string>("Draw card to begin");
   const [isFirstCard, setIsFirstCard] = useState(true);
   const [username, setUsername] = useState<string>('Your');
@@ -56,6 +53,45 @@ export default function Demo() {
   const [timeRemaining, setTimeRemaining] = useState<number>(240); // 240 seconds = 4 minutes
   const [isGameLocked, setIsGameLocked] = useState(false);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
+
+  // Add effect to handle muting across all states
+  useEffect(() => {
+    // Save mute state to localStorage
+    localStorage.setItem('isMuted', isMuted.toString());
+    
+    // Get all audio elements from the cache
+    const audioElements = Array.from(soundCache.values());
+    
+    // Update mute state for all audio elements
+    audioElements.forEach(audio => {
+      if (audio) {
+        audio.muted = isMuted;
+        if (isMuted) {
+          audio.pause();
+          audio.currentTime = 0;
+        }
+      }
+    });
+  }, [isMuted, gameState]); // Add gameState as dependency to ensure it runs on state changes
+
+  // Sound function declarations (move these to the top)
+  const playWarSound = useCallback(() => {
+    const warSound = soundCache.get('/sounds/war.mp3');
+    if (warSound && !isMuted) {
+      warSound.currentTime = 0;
+      warSound.volume = 0.75;
+      warSound.play();
+    }
+  }, [isMuted]);
+
+  const playNukeSound = useCallback(() => {
+    const nukeSound = soundCache.get('/sounds/nuke.mp3');
+    if (nukeSound && !isMuted) {
+      nukeSound.currentTime = 0;
+      nukeSound.volume = 0.75;
+      nukeSound.play();
+    }
+  }, [isMuted]);
 
   const handleGameEnd = useCallback(async (outcome: 'win' | 'loss' | 'tie', isTimeUp: boolean = false) => {
     if (hasSubmittedResult || isGameLocked) {
@@ -906,24 +942,10 @@ export default function Demo() {
     }
   }, [gameState, gameData.gameOver]);
 
+  // Add cleanup when component unmounts
   useEffect(() => {
-    // Get all audio elements from the cache
-    const audioElements = Array.from(soundCache.values());
-    
-    // Update mute state for all audio elements
-    audioElements.forEach(audio => {
-      if (audio) {
-        audio.muted = isMuted;
-        // If muted, also pause and reset
-        if (isMuted) {
-          audio.pause();
-          audio.currentTime = 0;
-        }
-      }
-    });
-
-    // Clean up function
     return () => {
+      const audioElements = Array.from(soundCache.values());
       audioElements.forEach(audio => {
         if (audio) {
           audio.pause();
@@ -931,7 +953,34 @@ export default function Demo() {
         }
       });
     };
-  }, [isMuted, gameState]); // Add gameState as dependency to ensure it runs on state changes
+  }, []);
+
+  // Update the timer effect to handle ties
+  useEffect(() => {
+    if (timeRemaining === 0 && !gameData.gameOver) {
+      const playerCards = gameData.playerDeck.length + (gameData.playerCard ? 1 : 0);
+      const cpuCards = gameData.cpuDeck.length + (gameData.cpuCard ? 1 : 0);
+      
+      if (playerCards === cpuCards) {
+        setGameData(prev => ({
+          ...prev,
+          gameOver: true,
+          message: "Game Over - It's a tie!"
+        }));
+        handleGameEnd('tie', true);
+      } else {
+        const winner = playerCards > cpuCards ? 'win' : 'loss';
+        setGameData(prev => ({
+          ...prev,
+          gameOver: true,
+          message: winner === 'win' ? 
+            "Game Over - You win on points!" : 
+            "Game Over - CPU wins on points!"
+        }));
+        handleGameEnd(winner, true);
+      }
+    }
+  }, [timeRemaining, gameData, handleGameEnd]);
 
   return null;
 }
