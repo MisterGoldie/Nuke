@@ -527,7 +527,7 @@ export default function Demo() {
             sdk.actions.openUrl(`https://warpcast.com/~/compose?text=${encodeURIComponent(shareText)}&embeds[]=${encodeURIComponent(shareUrl)}`);
           }}
         >
-          Share Frame
+          Share Game
         </button>
       </div>
     );

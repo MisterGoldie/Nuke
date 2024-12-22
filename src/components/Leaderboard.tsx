@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import sdk from '@farcaster/frame-sdk';
 
 interface LeaderboardEntry {
   fid: string;
@@ -19,9 +20,7 @@ export default function Leaderboard({ currentUserFid, onBack }: { currentUserFid
         const data = await response.json();
         
         if (data.leaderboard) {
-          // Fetch usernames for all FIDs
           const entries = await Promise.all(data.leaderboard.map(async (entry: any) => {
-            // Use the same Airstack query as in Demo.tsx
             const query = `
               query ($fid: String!) {
                 Socials(input: {filter: {dappName: {_eq: farcaster}, userId: {_eq: $fid}}, blockchain: ethereum}) {
@@ -80,11 +79,11 @@ export default function Leaderboard({ currentUserFid, onBack }: { currentUserFid
     <div className="arcade-container flex flex-col items-center p-8">
       <h1 className="arcade-text text-4xl mb-6 title-glow">LEADERBOARD</h1>
 
-      {isLoading ? (
-        <div className="arcade-text text-xl animate-pulse">Loading...</div>
-      ) : (
-        <div className="w-full max-w-md space-y-4 mb-8">
-          {leaderboardData.map((entry, index) => (
+      <div className="w-full max-w-md space-y-4 mb-8 max-h-[400px] overflow-y-auto">
+        {isLoading ? (
+          <div className="arcade-text text-xl animate-pulse">Loading...</div>
+        ) : (
+          leaderboardData.map((entry, index) => (
             <div 
               key={entry.fid} 
               className={`flex items-center justify-between p-4 border-2 border-green-500 rounded-lg ${
@@ -99,9 +98,26 @@ export default function Leaderboard({ currentUserFid, onBack }: { currentUserFid
                 {entry.wins} wins
               </div>
             </div>
-          ))}
-        </div>
-      )}
+          ))
+        )}
+      </div>
+
+      <button
+        onClick={() => {
+          const shareText = 'Play "Nuke" by @goldie and /thepod team 🃏';
+          const shareUrl = 'nuke-podplay.vercel.app';
+          sdk.actions.openUrl(`https://warpcast.com/~/compose?text=${encodeURIComponent(shareText)}&embeds[]=${encodeURIComponent(shareUrl)}`);
+        }}
+        className="arcade-button text-xl py-3 px-8 mb-4"
+        style={{
+          textShadow: '0 0 10px #a855f7, 0 0 20px #a855f7, 0 0 30px #a855f7',
+          boxShadow: '0 0 10px rgba(168, 85, 247, 0.3), inset 0 0 10px rgba(168, 85, 247, 0.2)',
+          color: '#a855f7',
+          borderColor: '#a855f7'
+        }}
+      >
+        SHARE GAME
+      </button>
 
       <button
         onClick={onBack}
@@ -117,5 +133,4 @@ export default function Leaderboard({ currentUserFid, onBack }: { currentUserFid
       </button>
     </div>
   );
-} 
-////
+}
