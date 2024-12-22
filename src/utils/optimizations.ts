@@ -21,7 +21,7 @@ export const assetManifest = {
   ]
 };
 
-export const preloadAssets = async () => {
+export const preloadAssets = async (isMuted = false) => {
   const imagePromises = assetManifest.images.map(src => {
     return new Promise((resolve, reject) => {
       const img = new Image();
@@ -35,6 +35,8 @@ export const preloadAssets = async () => {
     return new Promise((resolve, reject) => {
       const audio = new Audio();
       audio.oncanplaythrough = () => {
+        audio.muted = isMuted;
+        audio.volume = src.includes('gameplay.mp3') ? 0.2 : 0.75;
         soundCache.set(src, audio);
         resolve(audio);
       };
@@ -52,12 +54,15 @@ export const preloadAssets = async () => {
   }
 };
 
-export const playSound = (soundUrl: string) => {
+export const playSound = (soundUrl: string, isMuted: boolean) => {
   if (soundCache.has(soundUrl)) {
     const audio = soundCache.get(soundUrl);
     if (audio) {
+      audio.muted = isMuted;
       audio.currentTime = 0;
-      audio.play();
+      if (!isMuted) {
+        audio.play();
+      }
     }
   }
 };

@@ -12,6 +12,7 @@ import dynamic from 'next/dynamic';
 import { soundCache, preloadAssets } from '~/utils/optimizations';
 import HowToPlay from './HowToPlay';
 import { fetchUserDataByFid } from '../utils/neynarUtils';
+import SoundToggle from './SoundToggle';
 
 type GameState = 'menu' | 'game' | 'leaderboard' | 'tutorial';
 
@@ -40,28 +41,30 @@ export default function Demo() {
   const [showWarAnimation, setShowWarAnimation] = useState(false);
   const [showNukeAnimation, setShowNukeAnimation] = useState(false);
   const [nukeInitiator, setNukeInitiator] = useState<'player' | 'cpu'>('player');
-  const [playNukeSound] = useSound('/sounds/nuke.mp3', { volume: 0.75 });
-  const [playWarSound] = useSound('/sounds/war.mp3', { volume: 0.75 });
-  const [playGameplayMusic] = useSound('/sounds/gameplay.mp3', { volume: 0.2, loop: true });
+  const [isMuted, setIsMuted] = useState(() => {
+    // Check if there's a saved mute preference
+    const savedMute = localStorage.getItem('isMuted');
+    return savedMute === 'true';
+  });
+  const [playNukeSound] = useSound('/sounds/nuke.mp3', { volume: 0.75, mute: isMuted });
+  const [playWarSound] = useSound('/sounds/war.mp3', { volume: 0.75, mute: isMuted });
   const [delayedMessage, setDelayedMessage] = useState<string>("Draw card to begin");
   const [isFirstCard, setIsFirstCard] = useState(true);
   const [username, setUsername] = useState<string>('Your');
-  const [isFidLoaded, setIsFidLoaded] = useState(false);
   const [hasSubmittedResult, setHasSubmittedResult] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState<number>(240); // 240 seconds = 4 minutes
   const [isGameLocked, setIsGameLocked] = useState(false);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
 
-  const handleGameEnd = useCallback(async (outcome: 'win' | 'loss', isTimeUp: boolean = false) => {
+  const handleGameEnd = useCallback(async (outcome: 'win' | 'loss' | 'tie', isTimeUp: boolean = false) => {
     if (hasSubmittedResult || isGameLocked) {
         console.log("Game already ended, skipping...");
         return;
     }
 
-    // Lock the game and stop timer immediately
     setIsGameLocked(true);
-    setIsTimerRunning(false);  // Force timer to stop
+    setIsTimerRunning(false);
     
     if (!context?.user?.fid) {
         console.log("Waiting for FID to load...");
@@ -93,9 +96,9 @@ export default function Demo() {
 }, [context?.user?.fid, hasSubmittedResult, isGameLocked]);
 
   const handleDrawCard = useCallback(() => {
-    // Block all actions during animations
-    if (showWarAnimation || showNukeAnimation || isProcessing) {
-        return;
+    // Add timer check to block actions
+    if (timeRemaining === 0 || showWarAnimation || showNukeAnimation || isProcessing) {
+      return;
     }
 
     // Only allow new draw when no cards are in play OR rotation complete
@@ -120,11 +123,14 @@ export default function Demo() {
             }
         }, 500); // Match card rotation duration
     }
-  }, [gameData, showWarAnimation, showNukeAnimation, isProcessing, handleGameEnd]);
+  }, [timeRemaining, gameData, showWarAnimation, showNukeAnimation, isProcessing, handleGameEnd]);
 
   const handleNukeClick = useCallback(() => {
-    if (showNukeAnimation || isProcessing) return;
-    
+    // Add timer check to block actions
+    if (timeRemaining === 0 || showNukeAnimation || isProcessing) {
+      return;
+    }
+
     setIsProcessing(true);
     setGameData((prevState) => {
         const newState = handleNuke(prevState, 'player');
@@ -144,7 +150,7 @@ export default function Demo() {
         
         return newState;
     });
-}, [showNukeAnimation, isProcessing, playNukeSound, handleGameEnd]);
+}, [timeRemaining, showNukeAnimation, isProcessing, playNukeSound, handleGameEnd]);
 
   useEffect(() => {
     const load = async () => {
@@ -157,7 +163,6 @@ export default function Demo() {
         // Get FID from context
         const fid = ctx?.user?.fid;
         if (fid) {
-          setIsFidLoaded(true);  // Mark FID as loaded
           // Use the same query method from the Frog app
           const query = `
             query ($fid: String!) {
@@ -362,8 +367,8 @@ export default function Demo() {
 
   // Make sure preloadAssets is called when component mounts
   useEffect(() => {
-    preloadAssets();
-  }, []);
+    preloadAssets(isMuted);
+  }, [isMuted]);
 
   // Handle the initial card flip messages
   useEffect(() => {
@@ -432,27 +437,27 @@ export default function Demo() {
             setTimeRemaining(prevTime => {
                 if (prevTime <= 1) {
                     clearInterval(timerInterval);
+                    setIsGameLocked(true);
+                    setIsTimerRunning(false);
+                    
                     const playerTotal = gameData.playerDeck.length + (gameData.playerCard ? 1 : 0);
                     const cpuTotal = gameData.cpuDeck.length + (gameData.cpuCard ? 1 : 0);
                     
-                    // Update game state and message
                     setGameData(prev => ({
                         ...prev,
                         gameOver: true,
                         readyForNextCard: false,
                         message: playerTotal > cpuTotal ? 
                             `GAME OVER - Time's Up! ${username} wins with ${playerTotal} cards!` : 
+                            playerTotal === cpuTotal ?
+                            `GAME OVER - Time's Up! It's a tie with ${playerTotal} cards each!` :
                             `GAME OVER - Time's Up! CPU wins with ${cpuTotal} cards!`
                     }));
                     
-                    // Set the delayed message for display
-                    setDelayedMessage(playerTotal > cpuTotal ? 
-                        `GAME OVER - Time's Up! ${username} wins with ${playerTotal} cards!` : 
-                        `GAME OVER - Time's Up! CPU wins with ${cpuTotal} cards!`
-                    );
-                    
-                    // Handle game end with isTimeUp flag
-                    handleGameEnd(playerTotal > cpuTotal ? 'win' : 'loss', true);
+                    // Handle game end with proper outcome
+                    const outcome = playerTotal > cpuTotal ? 'win' : 
+                                  playerTotal === cpuTotal ? 'tie' : 'loss';
+                    handleGameEnd(outcome, true);
                     return 0;
                 }
                 return prevTime - 1;
@@ -461,7 +466,7 @@ export default function Demo() {
         
         return () => clearInterval(timerInterval);
     }
-}, [gameState, gameData, username, handleGameEnd, isTimerRunning]);
+}, [gameState, isTimerRunning, gameData, username, handleGameEnd]);
 
   // Menu State
   if (gameState === 'menu') {
@@ -512,7 +517,7 @@ export default function Demo() {
           textShadow: '0 0 5px #00ff00, 0 0 10px #00ff00',
           opacity: 0.8 
         }}>
-          version 1.0
+          version 1.1
         </div>
 
         <button 
@@ -529,6 +534,8 @@ export default function Demo() {
         >
           Share Game
         </button>
+
+        <SoundToggle isMuted={isMuted} onToggle={() => setIsMuted(prev => !prev)} />
       </div>
     );
   }
@@ -898,6 +905,33 @@ export default function Demo() {
         setIsTimerRunning(false);
     }
   }, [gameState, gameData.gameOver]);
+
+  useEffect(() => {
+    // Get all audio elements from the cache
+    const audioElements = Array.from(soundCache.values());
+    
+    // Update mute state for all audio elements
+    audioElements.forEach(audio => {
+      if (audio) {
+        audio.muted = isMuted;
+        // If muted, also pause and reset
+        if (isMuted) {
+          audio.pause();
+          audio.currentTime = 0;
+        }
+      }
+    });
+
+    // Clean up function
+    return () => {
+      audioElements.forEach(audio => {
+        if (audio) {
+          audio.pause();
+          audio.currentTime = 0;
+        }
+      });
+    };
+  }, [isMuted, gameState]); // Add gameState as dependency to ensure it runs on state changes
 
   return null;
 }

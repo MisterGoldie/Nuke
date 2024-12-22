@@ -3,7 +3,7 @@ import { FieldValue } from 'firebase-admin/firestore';
 
 interface GameResult {
   playerFid: string;
-  outcome: 'win' | 'loss';
+  outcome: 'win' | 'loss' | 'tie';
   timestamp?: FieldValue;
 }
 
@@ -11,6 +11,7 @@ interface PlayerStats {
   totalGames: number;
   wins: number;
   losses: number;
+  ties: number;
   lastPlayed: FieldValue;
 }
 
