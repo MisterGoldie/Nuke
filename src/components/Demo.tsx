@@ -93,22 +93,32 @@ export default function Demo() {
 }, [context?.user?.fid, hasSubmittedResult, isGameLocked]);
 
   const handleDrawCard = useCallback(() => {
+    // Block all actions during animations
     if (showWarAnimation || showNukeAnimation || isProcessing) {
         return;
     }
 
+    // Only allow new draw when no cards are in play OR rotation complete
     if (!gameData.playerCard && !gameData.cpuCard) {
-        if (isFirstCard) {
-            setIsFirstCard(false);
-        }
+        setIsProcessing(true); // Block new actions
         
         const newState = drawCards(gameData);
+        
+        // First set the cards to trigger rotation
         setGameData(newState);
         
-        if (newState.gameOver) {
-            const outcome = newState.message.includes("You win") ? "win" : "loss";
-            handleGameEnd(outcome);
-        }
+        // Wait for rotation to complete before allowing next action
+        setTimeout(() => {
+            setIsProcessing(false);
+            
+            // Now check for WAR or game over
+            if (newState.isWar) {
+                setShowWarAnimation(true);
+            } else if (newState.gameOver) {
+                const outcome = newState.message.includes("You win") ? "win" : "loss";
+                handleGameEnd(outcome);
+            }
+        }, 500); // Match card rotation duration
     }
   }, [gameData, showWarAnimation, showNukeAnimation, isProcessing, handleGameEnd]);
 
