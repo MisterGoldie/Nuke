@@ -235,6 +235,14 @@ export function drawCards(state: LocalState): LocalState {
 }
   
 export function handleNuke(state: LocalState, initiator: 'player' | 'cpu'): LocalState {
+    // First verify total cards before NUKE
+    const totalBefore = 
+        state.playerDeck.length + 
+        state.cpuDeck.length + 
+        (state.playerCard ? 1 : 0) + 
+        (state.cpuCard ? 1 : 0) + 
+        state.warPile.length;
+
     const newState = {
         ...state,
         playerDeck: [...state.playerDeck],
@@ -242,7 +250,7 @@ export function handleNuke(state: LocalState, initiator: 'player' | 'cpu'): Loca
         warPile: [...state.warPile]
     };
 
-    // First, return any active cards to their respective decks
+    // IMPORTANT: Return active cards to decks BEFORE nuke
     if (newState.playerCard) {
         newState.playerDeck.push(newState.playerCard);
         newState.playerCard = null;
@@ -252,7 +260,7 @@ export function handleNuke(state: LocalState, initiator: 'player' | 'cpu'): Loca
         newState.cpuCard = null;
     }
 
-    // Return any war pile cards
+    // Return war pile cards BEFORE nuke
     if (newState.warPile.length > 0) {
         if (initiator === 'cpu') {
             newState.cpuDeck.push(...newState.warPile);
@@ -263,9 +271,6 @@ export function handleNuke(state: LocalState, initiator: 'player' | 'cpu'): Loca
     }
 
     if (initiator === 'cpu' && newState.cpuHasNuke) {
-        // Verify card count before NUKE
-        const totalBefore = newState.playerDeck.length + newState.cpuDeck.length;
-        
         // If player has less than 10 cards, they lose immediately
         if (newState.playerDeck.length < 10) {
             newState.gameOver = true;
@@ -273,19 +278,13 @@ export function handleNuke(state: LocalState, initiator: 'player' | 'cpu'): Loca
             return newState;
         }
         
-        // Otherwise, steal exactly 10 cards
+        // Take exactly 10 cards
         const stolenCards = newState.playerDeck.splice(-10, 10);
         newState.cpuDeck.push(...stolenCards);
-        
-        // Verify card count after NUKE
-        const totalAfter = newState.playerDeck.length + newState.cpuDeck.length;
-        if (totalBefore !== totalAfter) {
-            console.error('Card count mismatch:', { totalBefore, totalAfter });
-        }
-        
         newState.cpuHasNuke = false;
         newState.isNukeActive = true;
         newState.message = "CPU LAUNCHED A NUKE! You lost 10 cards";
+        
     } else if (initiator === 'player' && newState.playerHasNuke) {
         // If CPU has less than 10 cards, they lose immediately
         if (newState.cpuDeck.length < 10) {
@@ -294,13 +293,40 @@ export function handleNuke(state: LocalState, initiator: 'player' | 'cpu'): Loca
             return newState;
         }
         
-        // Otherwise, steal 10 cards
+        // Take exactly 10 cards
         const stolenCards = newState.cpuDeck.splice(-10, 10);
         newState.playerDeck.push(...stolenCards);
         newState.playerHasNuke = false;
         newState.isNukeActive = true;
         newState.message = "NUKE LAUNCHED! You stole 10 cards!";
     }
-    
+
+    // Verify total cards after NUKE
+    const totalAfter = 
+        newState.playerDeck.length + 
+        newState.cpuDeck.length + 
+        (newState.playerCard ? 1 : 0) + 
+        (newState.cpuCard ? 1 : 0) + 
+        newState.warPile.length;
+
+    if (totalAfter !== 52 || totalBefore !== 52) {
+        console.error('NUKE caused card count mismatch:', {
+            before: totalBefore,
+            after: totalAfter,
+            playerDeck: newState.playerDeck.length,
+            cpuDeck: newState.cpuDeck.length,
+            warPile: newState.warPile.length
+        });
+        // Emergency fix if cards were duplicated
+        if (totalAfter > 52) {
+            const excess = totalAfter - 52;
+            if (initiator === 'cpu') {
+                newState.cpuDeck.splice(-excess);
+            } else {
+                newState.playerDeck.splice(-excess);
+            }
+        }
+    }
+
     return newState;
 } 
