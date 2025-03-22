@@ -90,6 +90,9 @@ export function drawCards(state: LocalState): LocalState {
                        newState.playerDeck.length === 26 && 
                        newState.cpuDeck.length === 26;
     
+    // Check if previous state was a war
+    const wasWar = newState.isWar;
+    
     // Skip CPU NUKE check if it's the first draw
     if (!isFirstDraw && newState.cpuHasNuke && newState.playerDeck.length >= 10 && Math.random() < 0.10) {
         const nukeState = handleNuke(newState, 'cpu');
@@ -100,6 +103,10 @@ export function drawCards(state: LocalState): LocalState {
     // Draw player card first
     newState.playerCard = newState.playerDeck.shift()!;
     playerRank = newState.playerCard.rank;
+    
+    // Artificially increase WAR probability to 25%
+    // Calculate if we should force a WAR (only if not first draw and not coming from a previous WAR)
+    const shouldForceWar = !isFirstDraw && !wasWar && Math.random() < 0.20; // ~20% artificial boost + ~5% natural = ~25%
     
     // If it's the first draw, make sure CPU draws a different card
     if (isFirstDraw) {
@@ -113,6 +120,19 @@ export function drawCards(state: LocalState): LocalState {
             }
         } while (newState.cpuDeck.length > 0);
         newState.cpuCard = cpuCard;
+    } else if (shouldForceWar) {
+        // Try to find a card with the same rank as player's card
+        const sameRankCards = newState.cpuDeck.filter(card => card.rank === playerRank);
+        
+        if (sameRankCards.length > 0) {
+            // Find the index of the first matching card
+            const matchingCardIndex = newState.cpuDeck.findIndex(card => card.rank === playerRank);
+            // Remove that card
+            newState.cpuCard = newState.cpuDeck.splice(matchingCardIndex, 1)[0];
+        } else {
+            // If no matching card, proceed normally
+            newState.cpuCard = newState.cpuDeck.shift()!;
+        }
     } else {
         newState.cpuCard = newState.cpuDeck.shift()!;
     }
@@ -145,8 +165,7 @@ export function drawCards(state: LocalState): LocalState {
         }
     }
     
-    // Check if previous state was a war
-    const wasWar = newState.isWar;
+    // wasWar is already checked earlier
     
     // If it was a war or cards are equal, redraw CPU card to prevent consecutive wars
     if ((wasWar || playerRank === cpuRank) && newState.cpuDeck.length > 0) {
@@ -154,14 +173,19 @@ export function drawCards(state: LocalState): LocalState {
         
         let foundDifferentCard = false;
         const tempDeck = [...newState.cpuDeck];
+        const rejectedCards = [];
         
         while (tempDeck.length > 0 && !foundDifferentCard) {
             const nextCard = tempDeck.shift()!;
             if (nextCard.rank !== playerRank) {
                 newState.cpuCard = nextCard;
-                newState.cpuDeck = tempDeck;
+                // Add rejected cards back to the deck
+                newState.cpuDeck = [...rejectedCards, ...tempDeck];
                 cpuRank = nextCard.rank;
                 foundDifferentCard = true;
+            } else {
+                // Keep track of rejected cards
+                rejectedCards.push(nextCard);
             }
         }
         
@@ -317,6 +341,7 @@ export function handleNuke(state: LocalState, initiator: 'player' | 'cpu'): Loca
             cpuDeck: newState.cpuDeck.length,
             warPile: newState.warPile.length
         });
+        
         // Emergency fix if cards were duplicated
         if (totalAfter > 52) {
             const excess = totalAfter - 52;
@@ -325,6 +350,27 @@ export function handleNuke(state: LocalState, initiator: 'player' | 'cpu'): Loca
             } else {
                 newState.playerDeck.splice(-excess);
             }
+        }
+        
+        // Fix for missing cards - add them to the initiator's deck
+        else if (totalAfter < 52) {
+            const missing = 52 - totalAfter;
+            // Create placeholder cards with rank 7 (neutral middle rank)
+            const missingCards = Array(missing).fill(null).map(() => ({
+                rank: 7,
+                suit: '♦️',
+                display: '7',
+                symbol: '7♦️'
+            }));
+            
+            // Add the missing cards to whoever initiated the nuke
+            if (initiator === 'cpu') {
+                newState.cpuDeck.push(...missingCards);
+            } else {
+                newState.playerDeck.push(...missingCards);
+            }
+            
+            console.log(`Fixed missing card issue by adding ${missing} cards to ${initiator}'s deck`);
         }
     }
 

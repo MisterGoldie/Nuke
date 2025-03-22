@@ -18,7 +18,7 @@ type GameState = 'menu' | 'game' | 'leaderboard' | 'tutorial';
 
 // Add interface for your context type
 interface ExtendedFrameContext extends FrameContext {
-  fid?: string;  // Add fid as optional property
+  fid?: string;  // Add fid as optional Property
 }
 
 // Add dynamic imports for animations
