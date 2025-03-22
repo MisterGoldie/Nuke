@@ -23,6 +23,11 @@ export function useGameManager({
   playNukeSound
 }: GameManagerProps) {
   const handleDrawCard = useCallback(() => {
+    // Prevent any actions if the game is over
+    if (gameData.gameOver) {
+      return;
+    }
+    
     if (!gameData.playerCard && !gameData.cpuCard) {
       setIsProcessing(true);
       const newState = drawCards(gameData);
@@ -41,6 +46,11 @@ export function useGameManager({
   }, [gameData, setIsProcessing, setGameData, setShowWarAnimation, handleGameEnd]);
 
   const handleNukeClick = useCallback(() => {
+    // Prevent any actions if the game is over
+    if (gameData.gameOver) {
+      return;
+    }
+    
     setIsProcessing(true);
     setGameData((prevState: LocalState) => {
       const newState = handleNuke(prevState, 'player');
@@ -57,7 +67,7 @@ export function useGameManager({
       }, 2000);
       return newState;
     });
-  }, [setIsProcessing, setGameData, setShowNukeAnimation, setNukeInitiator, playNukeSound, handleGameEnd]);
+  }, [gameData, setIsProcessing, setGameData, setShowNukeAnimation, setNukeInitiator, playNukeSound, handleGameEnd]);
 
   return { handleDrawCard, handleNukeClick };
 }

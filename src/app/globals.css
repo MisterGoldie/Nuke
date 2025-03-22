@@ -100,12 +100,7 @@ body {
 
 .arcade-container {
   background: #000000;
-  border: 6px solid #00ff00 !important;
   padding: 12px !important;
-  box-shadow: 
-    0 0 20px rgba(0, 255, 0, 0.7),
-    0 0 40px rgba(0, 255, 0, 0.4),
-    inset 0 0 20px rgba(0, 255, 0, 0.4);
   position: relative !important;
   display: flex !important;
   flex-direction: column !important;

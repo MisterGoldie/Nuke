@@ -436,15 +436,24 @@ export default function Demo() {
                     const playerTotal = gameData.playerDeck.length + (gameData.playerCard ? 1 : 0);
                     const cpuTotal = gameData.cpuDeck.length + (gameData.cpuCard ? 1 : 0);
                     
+                    // Play a sound to indicate game over
+                    const warSound = soundCache.get('/sounds/war.mp3');
+                    if (warSound && !isMuted) {
+                        warSound.currentTime = 0;
+                        warSound.volume = 0.75;
+                        warSound.play();
+                    }
+                    
+                    // Set game over state with clear message
                     setGameData(prev => ({
                         ...prev,
                         gameOver: true,
                         readyForNextCard: false,
                         message: playerTotal > cpuTotal ? 
-                            `GAME OVER - Time's Up! ${username} wins with ${playerTotal} cards!` : 
+                            `GAME OVER - TIME'S UP! ${username} WINS with ${playerTotal} cards!` : 
                             playerTotal === cpuTotal ?
-                            `GAME OVER - Time's Up! It's a tie with ${playerTotal} cards each!` :
-                            `GAME OVER - Time's Up! CPU wins with ${cpuTotal} cards!`
+                            `GAME OVER - TIME'S UP! IT'S A TIE with ${playerTotal} cards each!` :
+                            `GAME OVER - TIME'S UP! CPU WINS with ${cpuTotal} cards!`
                     }));
                     
                     // Handle game end with proper outcome
@@ -727,9 +736,10 @@ export default function Demo() {
             isNukeActive={showNukeAnimation}
           />
           <motion.p 
-            className="arcade-text text-lg mt-4"
+            className="arcade-text text-lg mt-4 max-w-[60%] mx-auto truncate"
             animate={{ opacity: [0.8, 1, 0.8] }}
             transition={{ duration: 2, repeat: Infinity, repeatType: "reverse" }}
+            title={username === 'Your' ? 'Your card' : `${username}'s card`}
           >
             {username === 'Your' ? 'Your card' : `${username}'s card`}
           </motion.p>
