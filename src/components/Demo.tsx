@@ -478,16 +478,16 @@ export default function Demo() {
         <div className="h-full w-full flex flex-col items-center justify-between pt-10 pb-8">
           <div />
           
-          <div className="flex flex-col items-center gap-16">
-            <div className="text-center mb-16">
-              <h1 className="arcade-text text-6xl mb-2 title-glow">NUKE</h1>
-              <p className="arcade-text text-2xl">WAR STYLE CARD GAME</p>
+          <div className="flex flex-col items-center gap-10 mt-4">
+            <div className="text-center mb-8 transform scale-110">
+              <h1 className="arcade-text text-7xl mb-3 title-glow tracking-wider">NUKE</h1>
+              <p className="arcade-text text-2xl tracking-wide">WAR STYLE CARD GAME</p>
             </div>
 
-            <div className="flex flex-col items-center gap-3 w-[260px]">
+            <div className="flex flex-col items-center gap-4 w-[280px]">
               <Button 
                 data-action="start-game"
-                className="arcade-button glow-blue text-2xl py-3"
+                className="arcade-button glow-blue text-2xl py-3 w-full transform hover:scale-105 transition-transform"
                 onClick={handleStartGame}
               >
                 START GAME
@@ -495,12 +495,12 @@ export default function Demo() {
               
               <Button 
                 data-action="leaderboard"
-                className="arcade-button glow-yellow text-2xl py-3"
+                className="arcade-button glow-yellow text-2xl py-3 w-full transform hover:scale-105 transition-transform"
                 onClick={() => setGameState('leaderboard')}
               >
                 LEADERBOARD
               </Button>
-              <p className="arcade-text text-sm mt-2 text-center w-full">Powered by The POD</p>
+              <p className="arcade-text text-sm mt-3 text-center w-full">Powered by The POD</p>
             </div>
           </div>
 
@@ -508,7 +508,7 @@ export default function Demo() {
         </div>
 
         {/* Version number in its own div at the bottom */}
-        <div className="absolute bottom-4 arcade-text text-xs" style={{ 
+        <div className="absolute bottom-16 left-0 right-0 text-center arcade-text text-xs" style={{ 
           textShadow: '0 0 5px #00ff00, 0 0 10px #00ff00',
           opacity: 0.8 
         }}>
