@@ -468,17 +468,9 @@ export default function Demo() {
           <div />
           
           <div className="flex flex-col items-center gap-16">
-            <div className="text-center">
+            <div className="text-center mb-16">
               <h1 className="arcade-text text-6xl mb-2 title-glow">NUKE</h1>
               <p className="arcade-text text-2xl">WAR STYLE CARD GAME</p>
-            </div>
-
-            {/* Nuclear Hazard Symbol (Trefoil) */}
-            <div className="trefoil">
-              <div className="circle"></div>
-              <div className="blade"></div>
-              <div className="blade"></div>
-              <div className="blade"></div>
             </div>
 
             <div className="flex flex-col items-center gap-3 w-[260px]">
