@@ -13,6 +13,7 @@ import HowToPlay from './HowToPlay';
 import { fetchUserDataByFid } from '../utils/neynarUtils';
 import SoundToggle from './SoundToggle';
 import { useGameManager } from './GameManager';
+import { motion, AnimatePresence } from 'framer-motion';
 
 type GameState = 'menu' | 'game' | 'leaderboard' | 'tutorial';
 
@@ -580,7 +581,12 @@ export default function Demo() {
   // Game State
   if (gameState === 'game') {
     return (
-      <div className={`arcade-container w-[420px] h-[685px] bg-black relative overflow-hidden flex flex-col items-center justify-between p-6 ${showNukeAnimation ? 'nuke-border-flash' : ''}`}>
+      <motion.div 
+        className={`arcade-container w-[420px] h-[685px] bg-black relative overflow-hidden flex flex-col items-center justify-between p-6 ${showNukeAnimation ? 'nuke-border-flash' : ''}`}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+      >
         {/* Nuke Animation */}
         <NukeAnimation 
           isVisible={showNukeAnimation} 
@@ -588,31 +594,87 @@ export default function Demo() {
         />
 
         {/* Card Count Display */}
-        <div className="absolute top-4 left-4 right-4 flex justify-between">
-          <span className="arcade-text text-lg">CPU Cards: {gameData.cpuDeck.length}</span>
-          <span className="text-yellow-500 text-lg" style={{ textShadow: 'none' }}>
+        <motion.div 
+          className="absolute top-4 left-4 right-4 flex justify-between"
+          initial={{ y: -20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
+          <motion.span 
+            className="arcade-text text-lg"
+            animate={{ scale: gameData.cpuDeck.length < 10 ? [1, 1.1, 1] : 1 }}
+            transition={{ duration: 0.5, repeat: gameData.cpuDeck.length < 10 ? Infinity : 0, repeatDelay: 1.5 }}
+          >
+            CPU Cards: {gameData.cpuDeck.length}
+          </motion.span>
+          <motion.span 
+            className="text-yellow-500 text-lg" 
+            style={{ textShadow: 'none' }}
+            animate={{ opacity: [1, 0.7, 1] }}
+            transition={{ duration: 1.5, repeat: Infinity }}
+          >
             {Math.floor(timeRemaining / 60)}:{(timeRemaining % 60).toString().padStart(2, '0')}
-          </span>
-          <span className="arcade-text text-lg">Your Cards: {gameData.playerDeck.length}</span>
-        </div>
+          </motion.span>
+          <motion.span 
+            className="arcade-text text-lg"
+            animate={{ scale: gameData.playerDeck.length < 10 ? [1, 1.1, 1] : 1 }}
+            transition={{ duration: 0.5, repeat: gameData.playerDeck.length < 10 ? Infinity : 0, repeatDelay: 1.5 }}
+          >
+            Your Cards: {gameData.playerDeck.length}
+          </motion.span>
+        </motion.div>
 
         {/* CPU Card Area */}
-        <div className="text-center w-full mt-8 flex flex-col items-center relative">
-          <p className="arcade-text text-lg mb-4">CPU's card</p>
+        <motion.div 
+          className="text-center w-full mt-8 flex flex-col items-center relative"
+          initial={{ y: -10, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.4, delay: 0.3 }}
+        >
+          <motion.p 
+            className="arcade-text text-lg mb-4"
+            animate={{ opacity: [0.8, 1, 0.8] }}
+            transition={{ duration: 2, repeat: Infinity, repeatType: "reverse" }}
+          >
+            CPU's card
+          </motion.p>
           
           {/* CPU Nuke Used Status Message */}
-          {!gameData.cpuHasNuke && (
-            <div 
-              className="absolute bottom-16 left-12 text-lg text-red-500 flex flex-col items-center pointer-events-none"
-              style={{
-                textShadow: '0 0 10px #ff0000',
-                zIndex: 10
-              }}
-            >
-              <span>NUKE</span>
-              <span>USED</span>
-            </div>
-          )}
+          <AnimatePresence>
+            {!gameData.cpuHasNuke && (
+              <motion.div 
+                className="absolute bottom-16 left-12 text-lg text-red-500 flex flex-col items-center pointer-events-none"
+                style={{
+                  textShadow: '0 0 10px #ff0000',
+                  zIndex: 10
+                }}
+                initial={{ opacity: 0, scale: 0.5 }}
+                animate={{ 
+                  opacity: 1, 
+                  scale: 1,
+                  textShadow: ['0 0 10px #ff0000', '0 0 15px #ff0000', '0 0 10px #ff0000']
+                }}
+                exit={{ opacity: 0, scale: 0.5 }}
+                transition={{ 
+                  duration: 0.4,
+                  textShadow: { duration: 1.5, repeat: Infinity }
+                }}
+              >
+                <motion.span
+                  animate={{ y: [0, -2, 0] }}
+                  transition={{ duration: 1.5, repeat: Infinity }}
+                >
+                  NUKE
+                </motion.span>
+                <motion.span
+                  animate={{ y: [0, 2, 0] }}
+                  transition={{ duration: 1.5, repeat: Infinity }}
+                >
+                  USED
+                </motion.span>
+              </motion.div>
+            )}
+          </AnimatePresence>
           
           <CardComponent
             suit={gameData.cpuCard?.suit || ''}
@@ -620,17 +682,37 @@ export default function Demo() {
             isFlipped={gameData.cpuCard !== null}
             isPlayerCard={false}
           />
-        </div>
+        </motion.div>
 
         {/* Game Status */}
-        <div className="text-center text-xl my-4 relative">
-          <div className="text-[#00ff00]" style={{ textShadow: 'none', position: 'relative', zIndex: 1 }}>
-            {isFirstCard ? "Draw card to begin" : delayedMessage}
-          </div>
-        </div>
+        <motion.div 
+          className="text-center text-xl my-4 relative"
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.4 }}
+        >
+          <AnimatePresence mode="wait">
+            <motion.div 
+              key={delayedMessage} 
+              className="text-[#00ff00]" 
+              style={{ textShadow: 'none', position: 'relative', zIndex: 1 }}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.3 }}
+            >
+              {isFirstCard ? "Draw card to begin" : delayedMessage}
+            </motion.div>
+          </AnimatePresence>
+        </motion.div>
 
         {/* Player Card Area */}
-        <div className="text-center w-full flex flex-col items-center">
+        <motion.div 
+          className="text-center w-full flex flex-col items-center"
+          initial={{ y: 10, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.4, delay: 0.4 }}
+        >
           <CardComponent
             suit={gameData.playerCard?.suit || ''}
             rank={gameData.playerCard?.display || ''}
@@ -639,52 +721,104 @@ export default function Demo() {
             onClick={handleDrawCard}
             isNukeActive={showNukeAnimation}
           />
-          <p className="arcade-text text-lg mt-4">
+          <motion.p 
+            className="arcade-text text-lg mt-4"
+            animate={{ opacity: [0.8, 1, 0.8] }}
+            transition={{ duration: 2, repeat: Infinity, repeatType: "reverse" }}
+          >
             {username === 'Your' ? 'Your card' : `${username}'s card`}
-          </p>
-        </div>
+          </motion.p>
+        </motion.div>
 
         {/* Bottom Action Buttons */}
-        <div className="absolute bottom-24 left-4 right-4 flex justify-between items-center">
-          <button
+        <motion.div 
+          className="absolute bottom-24 left-4 right-4 flex justify-between items-center"
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.5 }}
+        >
+          <motion.button
             onClick={() => setGameState('menu')}
             className="text-lg py-2 px-4 text-yellow-400 font-bold border-2 border-yellow-400 rounded"
             style={{
               textShadow: '0 0 10px #ffd700, 0 0 20px #ffd700, 0 0 30px #ffd700',
               boxShadow: '0 0 10px rgba(255, 215, 0, 0.3), inset 0 0 10px rgba(255, 215, 0, 0.2)'
             }}
+            whileHover={{ scale: 1.05, boxShadow: '0 0 15px rgba(255, 215, 0, 0.5), inset 0 0 15px rgba(255, 215, 0, 0.3)' }}
+            whileTap={{ scale: 0.95 }}
+            transition={{ type: "spring", stiffness: 400, damping: 17 }}
           >
             BACK
-          </button>
+          </motion.button>
 
           {/* Only show NUKE button if it's available */}
-          {gameData.playerHasNuke && (
-            <button
-              onClick={handleNukeClick}
-              className="text-lg py-2 px-4 rounded border-2 text-red-500 border-red-500 font-bold"
-              style={{
-                textShadow: '0 0 10px #ff0000, 0 0 20px #ff0000, 0 0 30px #ff0000',
-                boxShadow: '0 0 10px rgba(255, 0, 0, 0.3), inset 0 0 10px rgba(255, 0, 0, 0.2)'
-              }}
-            >
-              NUKE!
-            </button>
-          )}
-        </div>
+          <AnimatePresence>
+            {gameData.playerHasNuke && (
+              <motion.button
+                onClick={handleNukeClick}
+                className="text-lg py-2 px-4 rounded border-2 text-red-500 border-red-500 font-bold"
+                style={{
+                  textShadow: '0 0 10px #ff0000, 0 0 20px #ff0000, 0 0 30px #ff0000',
+                  boxShadow: '0 0 10px rgba(255, 0, 0, 0.3), inset 0 0 10px rgba(255, 0, 0, 0.2)'
+                }}
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ 
+                  scale: 1, 
+                  opacity: 1,
+                  boxShadow: ['0 0 10px rgba(255, 0, 0, 0.3), inset 0 0 10px rgba(255, 0, 0, 0.2)', '0 0 20px rgba(255, 0, 0, 0.5), inset 0 0 20px rgba(255, 0, 0, 0.3)', '0 0 10px rgba(255, 0, 0, 0.3), inset 0 0 10px rgba(255, 0, 0, 0.2)']
+                }}
+                exit={{ scale: 0, opacity: 0 }}
+                whileHover={{ scale: 1.1, boxShadow: '0 0 20px rgba(255, 0, 0, 0.6), inset 0 0 20px rgba(255, 0, 0, 0.4)' }}
+                whileTap={{ scale: 0.9 }}
+                transition={{ 
+                  type: "spring", 
+                  stiffness: 400, 
+                  damping: 17,
+                  boxShadow: { duration: 2, repeat: Infinity }
+                }}
+              >
+                NUKE!
+              </motion.button>
+            )}
+          </AnimatePresence>
+        </motion.div>
 
         {/* Nuke Used Status Message - Show when nuke is not available */}
-        {!gameData.playerHasNuke && (
-          <div 
-            className="absolute bottom-24 right-12 text-lg text-green-500 flex flex-col items-center pointer-events-none"
-            style={{
-              textShadow: '0 0 10px #00ff00, 0 0 20px #00ff00, 0 0 30px #00ff00',
-            }}
-          >
-            <span>NUKE</span>
-            <span>USED</span>
-          </div>
-        )}
-      </div>
+        <AnimatePresence>
+          {!gameData.playerHasNuke && (
+            <motion.div 
+              className="absolute bottom-24 right-12 text-lg text-purple-500 flex flex-col items-center pointer-events-none"
+              style={{
+                textShadow: '0 0 10px #9c27b0, 0 0 20px #9c27b0, 0 0 30px #9c27b0',
+              }}
+              initial={{ opacity: 0, scale: 0.5 }}
+              animate={{ 
+                opacity: 1, 
+                scale: 1,
+                textShadow: ['0 0 10px #9c27b0, 0 0 20px #9c27b0', '0 0 15px #9c27b0, 0 0 30px #9c27b0', '0 0 10px #9c27b0, 0 0 20px #9c27b0']
+              }}
+              exit={{ opacity: 0, scale: 0.5 }}
+              transition={{ 
+                duration: 0.4,
+                textShadow: { duration: 1.5, repeat: Infinity }
+              }}
+            >
+              <motion.span
+                animate={{ y: [0, -2, 0] }}
+                transition={{ duration: 1.5, repeat: Infinity }}
+              >
+                NUKE
+              </motion.span>
+              <motion.span
+                animate={{ y: [0, 2, 0] }}
+                transition={{ duration: 1.5, repeat: Infinity }}
+              >
+                USED
+              </motion.span>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
     );
   }
 
