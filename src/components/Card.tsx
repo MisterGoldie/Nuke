@@ -27,10 +27,10 @@ export default function Card({ suit, rank, isFlipped, isPlayerCard, onClick, isN
       `}
     >
       {/* Stack effect - bottom card */}
-      <div className={`absolute top-2 left-1 w-full h-full bg-[#3f51b5] rounded-xl ${borderClass} opacity-40`} />
+      <div className={`absolute top-2 left-1 w-full h-full bg-[#7b1fa2] rounded-xl ${borderClass} opacity-40`} />
       
       {/* Stack effect - middle card */}
-      <div className={`absolute top-1 left-0.5 w-full h-full bg-[#3f51b5] rounded-xl ${borderClass} opacity-60`} />
+      <div className={`absolute top-1 left-0.5 w-full h-full bg-[#7b1fa2] rounded-xl ${borderClass} opacity-60`} />
 
       <div
         className={`
