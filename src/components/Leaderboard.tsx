@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import sdk from '@farcaster/frame-sdk';
 import { useLeaderboardManager } from './LeaderboardManager';
-import { LeaderboardEntry } from '/Users/goldie/Documents/Nuke/src/utils/leaderboardUtils';
+import { LeaderboardEntry } from '../utils/leaderboardUtils';
 
 export default function Leaderboard({ currentUserFid, onBack }: { currentUserFid?: string, onBack: () => void }) {
   const { leaderboardData, isLoading, error } = useLeaderboardManager();

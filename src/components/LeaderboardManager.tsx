@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { fetchLeaderboardData, LeaderboardEntry } from '/Users/goldie/Documents/Nuke/src/utils/leaderboardUtils';
+import { fetchLeaderboardData, LeaderboardEntry } from '../utils/leaderboardUtils';
 
 export function useLeaderboardManager() {
   const [leaderboardData, setLeaderboardData] = useState<LeaderboardEntry[]>([]);
