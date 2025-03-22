@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { motion } from 'framer-motion';
 
 interface CardProps {
   suit: string;
@@ -15,36 +15,49 @@ export default function Card({ suit, rank, isFlipped, isPlayerCard, onClick, isN
     : 'border-2 border-green-500';
 
   return (
-    <div
+    <motion.div
       onClick={isPlayerCard ? onClick : undefined}
       className={`
         relative w-[120px] h-[168px] 
-        transform transition-transform duration-300 ease-in-out
-        ${isPlayerCard ? 'hover:scale-105 cursor-pointer' : ''}
         perspective-1000
         mx-auto
         card ${isFlipped ? 'flipped' : ''}
       `}
+      initial={{ scale: 0.95, opacity: 0.8 }}
+      animate={{ scale: 1, opacity: 1 }}
+      transition={{ duration: 0.3 }}
+      whileHover={isPlayerCard ? { scale: 1.05, y: -5 } : undefined}
+      whileTap={isPlayerCard ? { scale: 0.98 } : undefined}
     >
       {/* Stack effect - bottom card */}
-      <div className={`absolute top-2 left-1 w-full h-full bg-[#7b1fa2] rounded-xl ${borderClass} opacity-40`} />
+      <motion.div 
+        className={`absolute top-2 left-1 w-full h-full bg-[#7b1fa2] rounded-xl ${borderClass} opacity-40`}
+        initial={{ scale: 0.98 }}
+        animate={{ scale: 1 }}
+        transition={{ duration: 0.5, delay: 0.1 }}
+      />
       
       {/* Stack effect - middle card */}
-      <div className={`absolute top-1 left-0.5 w-full h-full bg-[#7b1fa2] rounded-xl ${borderClass} opacity-60`} />
+      <motion.div 
+        className={`absolute top-1 left-0.5 w-full h-full bg-[#7b1fa2] rounded-xl ${borderClass} opacity-60`}
+        initial={{ scale: 0.99 }}
+        animate={{ scale: 1 }}
+        transition={{ duration: 0.5 }}
+      />
 
-      <div
-        className={`
-          relative w-full h-full
-          transition-transform duration-500 ease-in-out
-          transform-style-preserve-3d
-          ${isFlipped ? `rotate-y-180 ${isPlayerCard ? '' : 'delay-300'}` : 'rotate-y-0'}
-        `}
-        style={{
-          transitionDelay: isPlayerCard ? '0ms' : '300ms'
+      <motion.div
+        className="relative w-full h-full transform-style-preserve-3d"
+        animate={{ rotateY: isFlipped ? 180 : 0 }}
+        transition={{ 
+          duration: 0.6, 
+          type: "spring", 
+          stiffness: 260, 
+          damping: 20,
+          delay: isPlayerCard ? 0 : 0.3
         }}
       >
         {/* Front of card (back design) */}
-        <div
+        <motion.div
           className={`
             absolute w-full h-full
             bg-gradient-to-br from-[#4a148c] via-[#7b1fa2] to-[#9c27b0] rounded-xl
@@ -54,6 +67,9 @@ export default function Card({ suit, rank, isFlipped, isPlayerCard, onClick, isN
             overflow-hidden
             shadow-lg
           `}
+          initial={{ boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)" }}
+          animate={{ boxShadow: "0 8px 15px rgba(0, 0, 0, 0.2)" }}
+          transition={{ duration: 0.5 }}
         >
           <div className="relative w-full h-full flex justify-center items-center">
             {/* Decorative background pattern */}
@@ -106,10 +122,10 @@ export default function Card({ suit, rank, isFlipped, isPlayerCard, onClick, isN
             <div className="absolute bottom-1/4 left-1/4 text-xs text-purple-300/50">•</div>
             <div className="absolute bottom-1/4 right-1/4 text-xs text-purple-300/50">•</div>
           </div>
-        </div>
+        </motion.div>
 
         {/* Back of card (card face) */}
-        <div
+        <motion.div
           className={`
             absolute w-full h-full
             bg-white rounded-xl shadow-xl
@@ -118,12 +134,15 @@ export default function Card({ suit, rank, isFlipped, isPlayerCard, onClick, isN
             backface-hidden rotate-y-180
             ${suit.includes('♥️') || suit.includes('♦️') ? 'text-red-600' : 'text-black'}
           `}
+          initial={{ boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)" }}
+          animate={{ boxShadow: "0 8px 15px rgba(0, 0, 0, 0.2)" }}
+          transition={{ duration: 0.5 }}
         >
           <div className="self-start text-xl">{rank}{suit}</div>
           <div className="text-4xl self-center">{suit}</div>
           <div className="self-end text-xl rotate-180">{rank}{suit}</div>
-        </div>
-      </div>
-    </div>
+        </motion.div>
+      </motion.div>
+    </motion.div>
   );
 } 
