@@ -576,10 +576,11 @@ export default function Demo() {
   if (gameState === 'game') {
     return (
       <motion.div 
-        className={`arcade-container relative overflow-hidden flex flex-col items-center justify-center p-4 ${showNukeAnimation ? 'nuke-border-flash' : ''}`}
+        className={`arcade-container relative overflow-hidden p-4 ${showNukeAnimation ? 'nuke-border-flash' : ''}`}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
+        style={{ height: '695px' }}
       >
         {/* Nuke Animation */}
         <NukeAnimation 
@@ -630,7 +631,7 @@ export default function Demo() {
 
         {/* CPU Card Area */}
         <motion.div 
-          className="text-center w-full mt-8 flex flex-col items-center relative"
+          className="text-center w-full flex flex-col items-center absolute top-[100px] left-0 right-0"
           initial={{ y: -10, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.4, delay: 0.3 }}
@@ -690,7 +691,7 @@ export default function Demo() {
 
         {/* Game Status */}
         <motion.div 
-          className="text-center text-xl my-4 relative"
+          className="text-center text-xl absolute top-[360px] left-0 right-0"
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.4 }}
@@ -712,7 +713,7 @@ export default function Demo() {
 
         {/* Player Card Area */}
         <motion.div 
-          className="text-center w-full -mt-4 flex flex-col items-center"
+          className="text-center w-full flex flex-col items-center absolute top-[440px] left-0 right-0"
           initial={{ y: 10, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.4, delay: 0.4 }}
@@ -736,7 +737,7 @@ export default function Demo() {
 
         {/* Bottom Action Buttons */}
         <motion.div 
-          className="absolute bottom-24 left-4 right-4 flex justify-between items-center"
+          className="absolute bottom-4 left-4 right-4 flex justify-between items-center"
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.5 }}
