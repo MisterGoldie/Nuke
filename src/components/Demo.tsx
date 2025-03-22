@@ -14,6 +14,7 @@ import { fetchUserDataByFid } from '../utils/neynarUtils';
 import SoundToggle from './SoundToggle';
 import { useGameManager } from './GameManager';
 import { motion, AnimatePresence } from 'framer-motion';
+import ExplosionBackground from './ExplosionBackground';
 
 type GameState = 'menu' | 'game' | 'leaderboard' | 'tutorial';
 
@@ -463,8 +464,9 @@ export default function Demo() {
   // Menu State
   if (gameState === 'menu') {
     return (
-      <div className="arcade-container flex flex-col items-center">
-        <div className="h-full flex flex-col items-center justify-between pt-20 pb-12">
+      <div className="arcade-container flex flex-col items-center overflow-hidden">
+        <ExplosionBackground />
+        <div className="h-full w-full flex flex-col items-center justify-between pt-10 pb-8">
           <div />
           
           <div className="flex flex-col items-center gap-16">
@@ -527,7 +529,7 @@ export default function Demo() {
   // Tutorial State
   if (gameState === 'tutorial') {
     return (
-      <div className="arcade-container flex flex-col items-center p-8">
+      <div className="arcade-container flex flex-col items-center overflow-hidden p-6">
         <h1 className="arcade-text text-4xl mb-6 title-glow">HOW TO PLAY</h1>
         
         <div className="space-y-6 max-w-[350px]">
@@ -574,7 +576,7 @@ export default function Demo() {
   if (gameState === 'game') {
     return (
       <motion.div 
-        className={`arcade-container w-[420px] h-[685px] bg-black relative overflow-hidden flex flex-col items-center justify-between p-6 ${showNukeAnimation ? 'nuke-border-flash' : ''}`}
+        className={`arcade-container relative overflow-hidden flex flex-col items-center justify-center p-4 ${showNukeAnimation ? 'nuke-border-flash' : ''}`}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
@@ -600,10 +602,20 @@ export default function Demo() {
             CPU Cards: {gameData.cpuDeck.length}
           </motion.span>
           <motion.span 
-            className="text-yellow-500 text-lg" 
-            style={{ textShadow: 'none' }}
-            animate={{ opacity: [1, 0.7, 1] }}
-            transition={{ duration: 1.5, repeat: Infinity }}
+            className={`text-lg ${timeRemaining <= 30 ? 'text-red-500' : 'text-yellow-500'}`} 
+            style={{ 
+              textShadow: timeRemaining <= 30 ? '0 0 5px rgba(255, 0, 0, 0.7)' : 'none',
+              fontWeight: timeRemaining <= 30 ? 'bold' : 'normal'
+            }}
+            animate={{ 
+              opacity: [1, 0.7, 1],
+              scale: timeRemaining <= 30 ? [1, 1.1, 1] : 1
+            }}
+            transition={{ 
+              duration: timeRemaining <= 30 ? 0.8 : 1.5, 
+              repeat: Infinity,
+              repeatDelay: timeRemaining <= 30 ? 0.2 : 0.5
+            }}
           >
             {Math.floor(timeRemaining / 60)}:{(timeRemaining % 60).toString().padStart(2, '0')}
           </motion.span>
@@ -700,7 +712,7 @@ export default function Demo() {
 
         {/* Player Card Area */}
         <motion.div 
-          className="text-center w-full flex flex-col items-center"
+          className="text-center w-full -mt-4 flex flex-col items-center"
           initial={{ y: 10, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.4, delay: 0.4 }}
@@ -826,7 +838,7 @@ export default function Demo() {
   // Add condition to check for frame loaded state
   if (!isFrameLoaded) {
     return (
-      <div className="arcade-container w-[424px] h-[685px] bg-black relative overflow-hidden flex flex-col justify-center">
+      <div className="arcade-container relative overflow-hidden flex flex-col justify-center">
         <div className="text-center">
           <h1 className="arcade-text text-4xl animate-pulse">Loading...</h1>
         </div>

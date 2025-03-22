@@ -109,6 +109,12 @@ body {
   position: relative !important;
   display: flex !important;
   flex-direction: column !important;
+  /* Farcaster v2 frame dimensions */
+  max-width: 424px;
+  max-height: 695px;
+  height: 100vh;
+  width: 100%;
+  margin: 0 auto;
   align-items: center !important;
   justify-content: space-between !important;
   width: 100% !important; /* Full width on mobile */
@@ -551,6 +557,58 @@ body {
     background: #ff6600;
     filter: drop-shadow(0 0 15px #ff6600);
   }
+}
+
+/* Explosion Background Styles */
+.explosion-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  z-index: -1; /* Move behind all content */
+  pointer-events: none;
+  background: radial-gradient(circle at center, rgba(20, 20, 20, 0.8) 0%, rgba(0, 0, 0, 1) 100%);
+}
+
+.explosion-particle {
+  will-change: transform, opacity;
+  mix-blend-mode: screen;
+}
+
+.shockwave {
+  will-change: transform, opacity;
+  mix-blend-mode: screen;
+  box-shadow: 0 0 80px 20px rgba(255, 165, 0, 0.6);
+}
+
+/* Add a subtle smoke effect */
+.explosion-background::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIj48ZmlsdGVyIGlkPSJhIiB4PSIwIiB5PSIwIj48ZmVUdXJidWxlbmNlIHR5cGU9ImZyYWN0YWxOb2lzZSIgYmFzZUZyZXF1ZW5jeT0iLjc1IiBzdGl0Y2hUaWxlcz0ic3RpdGNoIi8+PGZlQ29sb3JNYXRyaXggdHlwZT0ic2F0dXJhdGUiIHZhbHVlcz0iMCIvPjwvZmlsdGVyPjxwYXRoIGZpbHRlcj0idXJsKCNhKSIgb3BhY2l0eT0iLjA1IiBkPSJNMCAwaDMwMHYzMDBIMHoiLz48L3N2Zz4=');
+  opacity: 0.15;
+  animation: smoke 20s linear infinite alternate;
+}
+
+@keyframes smoke {
+  0% {
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    transform: translateY(-10%) scale(1.1);
+  }
+}
+
+/* Ensure content stays above the explosion background */
+.arcade-container {
+  position: relative;
+  z-index: 1;
 }
 
 @keyframes spin {
