@@ -1,6 +1,7 @@
 export interface LeaderboardEntry {
   fid: string;
   username: string;
+  profileImage?: string;
   wins: number;
   losses: number;
   lastPlayed: Date;
@@ -17,11 +18,21 @@ export async function fetchLeaderboardData(): Promise<LeaderboardEntry[]> {
     
     if (data.leaderboard) {
       return Promise.all(data.leaderboard.map(async (entry: any) => {
+        // Improved query that uses multiple ways to fetch Farcaster usernames
         const query = `
           query ($fid: String!) {
             Socials(input: {filter: {dappName: {_eq: farcaster}, userId: {_eq: $fid}}, blockchain: ethereum}) {
               Social {
                 profileName
+                profileDisplayName
+                profileTokenId
+                profileImage
+                profileImageContentValue {
+                  image {
+                    extraSmall
+                  }
+                }
+                userAssociatedAddresses
               }
             }
           }
@@ -41,11 +52,24 @@ export async function fetchLeaderboardData(): Promise<LeaderboardEntry[]> {
           });
 
           const data = await response.json();
-          const username = data?.data?.Socials?.Social?.[0]?.profileName;
+          console.log(`Airstack response for FID ${entry.fid}:`, JSON.stringify(data));
+          
+          // Try multiple fields to get the username and profile image
+          const socialData = data?.data?.Socials?.Social?.[0];
+          const username = socialData?.profileName || socialData?.profileDisplayName;
+          
+          // Get profile image from different possible sources
+          let profileImage = socialData?.profileImage;
+          
+          // Try to get from profileImageContentValue if available
+          if (!profileImage && socialData?.profileImageContentValue?.image?.extraSmall) {
+            profileImage = socialData.profileImageContentValue.image.extraSmall;
+          }
 
           return {
             fid: entry.fid,
             username: username || `fid:${entry.fid}`,
+            profileImage,
             wins: entry.wins || 0,
             losses: entry.losses || 0,
             lastPlayed: entry.lastPlayed ? new Date(entry.lastPlayed) : new Date()
@@ -55,6 +79,7 @@ export async function fetchLeaderboardData(): Promise<LeaderboardEntry[]> {
           return {
             fid: entry.fid,
             username: `fid:${entry.fid}`,
+            profileImage: undefined,
             wins: entry.wins || 0,
             losses: entry.losses || 0,
             lastPlayed: entry.lastPlayed ? new Date(entry.lastPlayed) : new Date()

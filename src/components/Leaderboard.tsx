@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import sdk from '@farcaster/frame-sdk';
 import { useLeaderboardManager } from './LeaderboardManager';
-import { LeaderboardEntry } from '../utils/leaderboardUtils';
+import { LeaderboardEntry } from '~/utils/leaderboardUtils';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Leaderboard({ currentUserFid, onBack }: { currentUserFid?: string, onBack: () => void }) {
@@ -149,6 +149,36 @@ export default function Leaderboard({ currentUserFid, onBack }: { currentUserFid
               >
                 #{index + 1}
               </motion.span>
+              
+              {/* Profile Image */}
+              <motion.div 
+                className="relative w-8 h-8 rounded-full overflow-hidden border-2 flex-shrink-0"
+                style={{ 
+                  borderColor: index < 3 ? '#FFD700' : '#9c27b0',
+                  boxShadow: `0 0 8px ${index < 3 ? 'rgba(255, 215, 0, 0.6)' : 'rgba(156, 39, 176, 0.6)'}` 
+                }}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.1 * index + 0.2 }}
+              >
+                {entry.profileImage ? (
+                  <img 
+                    src={entry.profileImage} 
+                    alt={`${entry.username}'s profile`}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      // Fallback to default image on error
+                      (e.target as HTMLImageElement).src = 'https://i.imgur.com/HeIi0wU.png';
+                    }}
+                  />
+                ) : (
+                  // Default profile image
+                  <div className="w-full h-full bg-purple-900 flex items-center justify-center text-xs text-white">
+                    {entry.username.substring(0, 2).toUpperCase()}
+                  </div>
+                )}
+              </motion.div>
+              
               <span className="arcade-text text-xl">{entry.username}</span>
             </div>
             <div className={`arcade-text text-xl ${index < 3 ? 'text-yellow-400' : 'text-purple-400'}`}>
