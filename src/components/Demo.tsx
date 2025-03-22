@@ -744,7 +744,7 @@ export default function Demo() {
         >
           <motion.button
             onClick={() => setGameState('menu')}
-            className="text-lg py-2 px-4 text-yellow-400 font-bold border-2 border-yellow-400 rounded"
+            className="text-sm py-1.5 px-3 text-yellow-400 font-bold border-2 border-yellow-400 rounded"
             style={{
               textShadow: '0 0 10px #ffd700, 0 0 20px #ffd700, 0 0 30px #ffd700',
               boxShadow: '0 0 10px rgba(255, 215, 0, 0.3), inset 0 0 10px rgba(255, 215, 0, 0.2)'
@@ -756,12 +756,13 @@ export default function Demo() {
             BACK
           </motion.button>
 
-          {/* Only show NUKE button if it's available */}
-          <AnimatePresence>
-            {gameData.playerHasNuke && (
+          {/* NUKE button or NUKE USED status in the same position */}
+          <AnimatePresence mode="wait">
+            {gameData.playerHasNuke ? (
               <motion.button
+                key="nuke-button"
                 onClick={handleNukeClick}
-                className="text-lg py-2 px-4 rounded border-2 text-red-500 border-red-500 font-bold"
+                className="text-sm py-1.5 px-3 rounded border-2 text-red-500 border-red-500 font-bold"
                 style={{
                   textShadow: '0 0 10px #ff0000, 0 0 20px #ff0000, 0 0 30px #ff0000',
                   boxShadow: '0 0 10px rgba(255, 0, 0, 0.3), inset 0 0 10px rgba(255, 0, 0, 0.2)'
@@ -784,45 +785,36 @@ export default function Demo() {
               >
                 NUKE!
               </motion.button>
+            ) : (
+              <motion.div
+                key="nuke-used"
+                className="text-xs py-1.5 px-3 rounded border-2 text-purple-500 border-purple-500 font-bold flex flex-col items-center justify-center"
+                style={{
+                  textShadow: '0 0 10px #9c27b0, 0 0 20px #9c27b0, 0 0 30px #9c27b0',
+                  boxShadow: '0 0 10px rgba(156, 39, 176, 0.3), inset 0 0 10px rgba(156, 39, 176, 0.2)'
+                }}
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ 
+                  scale: 1, 
+                  opacity: 1,
+                  boxShadow: ['0 0 10px rgba(156, 39, 176, 0.3), inset 0 0 10px rgba(156, 39, 176, 0.2)', '0 0 20px rgba(156, 39, 176, 0.5), inset 0 0 20px rgba(156, 39, 176, 0.3)', '0 0 10px rgba(156, 39, 176, 0.3), inset 0 0 10px rgba(156, 39, 176, 0.2)']
+                }}
+                exit={{ scale: 0, opacity: 0 }}
+                transition={{ 
+                  type: "spring", 
+                  stiffness: 400, 
+                  damping: 17,
+                  boxShadow: { duration: 2, repeat: Infinity }
+                }}
+              >
+                <motion.span animate={{ y: [0, -2, 0] }} transition={{ duration: 1.5, repeat: Infinity }}>NUKE</motion.span>
+                <motion.span animate={{ y: [0, 2, 0] }} transition={{ duration: 1.5, repeat: Infinity }}>USED</motion.span>
+              </motion.div>
             )}
           </AnimatePresence>
         </motion.div>
 
-        {/* Nuke Used Status Message - Show when nuke is not available */}
-        <AnimatePresence>
-          {!gameData.playerHasNuke && (
-            <motion.div 
-              className="absolute bottom-24 right-12 text-lg text-purple-500 flex flex-col items-center pointer-events-none"
-              style={{
-                textShadow: '0 0 10px #9c27b0, 0 0 20px #9c27b0, 0 0 30px #9c27b0',
-              }}
-              initial={{ opacity: 0, scale: 0.5 }}
-              animate={{ 
-                opacity: 1, 
-                scale: 1,
-                textShadow: ['0 0 10px #9c27b0, 0 0 20px #9c27b0', '0 0 15px #9c27b0, 0 0 30px #9c27b0', '0 0 10px #9c27b0, 0 0 20px #9c27b0']
-              }}
-              exit={{ opacity: 0, scale: 0.5 }}
-              transition={{ 
-                duration: 0.4,
-                textShadow: { duration: 1.5, repeat: Infinity }
-              }}
-            >
-              <motion.span
-                animate={{ y: [0, -2, 0] }}
-                transition={{ duration: 1.5, repeat: Infinity }}
-              >
-                NUKE
-              </motion.span>
-              <motion.span
-                animate={{ y: [0, 2, 0] }}
-                transition={{ duration: 1.5, repeat: Infinity }}
-              >
-                USED
-              </motion.span>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {/* Removed separate Nuke Used Status Message - now integrated with the button */}
       </motion.div>
     );
   }
