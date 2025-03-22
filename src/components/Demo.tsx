@@ -12,6 +12,7 @@ import { soundCache, preloadAssets } from '~/utils/optimizations';
 import HowToPlay from './HowToPlay';
 import { fetchUserDataByFid } from '../utils/neynarUtils';
 import SoundToggle from './SoundToggle';
+import { useGameManager } from './GameManager';
 
 type GameState = 'menu' | 'game' | 'leaderboard' | 'tutorial';
 
@@ -131,62 +132,16 @@ export default function Demo() {
     }
 }, [context?.user?.fid, hasSubmittedResult, isGameLocked]);
 
-  const handleDrawCard = useCallback(() => {
-    // Add timer check to block actions
-    if (timeRemaining === 0 || showWarAnimation || showNukeAnimation || isProcessing) {
-      return;
-    }
-
-    // Only allow new draw when no cards are in play OR rotation complete
-    if (!gameData.playerCard && !gameData.cpuCard) {
-        setIsProcessing(true); // Block new actions
-        
-        const newState = drawCards(gameData);
-        
-        // First set the cards to trigger rotation
-        setGameData(newState);
-        
-        // Wait for rotation to complete before allowing next action
-        setTimeout(() => {
-            setIsProcessing(false);
-            
-            // Now check for WAR or game over
-            if (newState.isWar) {
-                setShowWarAnimation(true);
-            } else if (newState.gameOver) {
-                const outcome = newState.message.includes("You win") ? "win" : "loss";
-                handleGameEnd(outcome);
-            }
-        }, 500); // Match card rotation duration
-    }
-  }, [timeRemaining, gameData, showWarAnimation, showNukeAnimation, isProcessing, handleGameEnd]);
-
-  const handleNukeClick = useCallback(() => {
-    // Add timer check to block actions
-    if (timeRemaining === 0 || showNukeAnimation || isProcessing) {
-      return;
-    }
-
-    setIsProcessing(true);
-    setGameData((prevState) => {
-        const newState = handleNuke(prevState, 'player');
-        setShowNukeAnimation(true);
-        setNukeInitiator('player');
-        playNukeSound();
-        
-        // Clear animation after delay
-        setTimeout(() => {
-            setShowNukeAnimation(false);
-            setIsProcessing(false);
-            
-            if (newState.gameOver) {
-                handleGameEnd('win');
-            }
-        }, 2000);
-        
-        return newState;
-    });
-}, [timeRemaining, showNukeAnimation, isProcessing, playNukeSound, handleGameEnd]);
+  const { handleDrawCard, handleNukeClick } = useGameManager({
+    gameData,
+    setGameData,
+    setShowWarAnimation,
+    setShowNukeAnimation,
+    setNukeInitiator,
+    setIsProcessing,
+    handleGameEnd,
+    playNukeSound
+  });
 
   useEffect(() => {
     const load = async () => {
@@ -553,7 +508,7 @@ export default function Demo() {
           textShadow: '0 0 5px #00ff00, 0 0 10px #00ff00',
           opacity: 0.8 
         }}>
-          version 1.1
+          version 1.2
         </div>
 
         <button 
