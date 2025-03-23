@@ -81,11 +81,11 @@ export default function WarAnimation({
           </motion.div>
           
           {/* Cards being drawn animation */}
-          <div className="flex justify-between w-full px-20 mt-4">
+          <div className="flex justify-between w-full px-4 sm:px-10 md:px-20 mt-4">
             {/* Player cards */}
             <div className="flex flex-col items-center">
               <div className="text-xl text-white mb-2">YOUR CARDS</div>
-              <div className="relative h-[200px] w-[120px]">
+              <div className="relative h-[200px] w-[90px] sm:w-[120px]">
                 {warCards.player.map((card, index) => (
                   <motion.div 
                     key={`player-${index}`}
@@ -93,7 +93,7 @@ export default function WarAnimation({
                     initial={{ x: -100, y: -50, opacity: 0, rotateY: 180 }}
                     animate={{ 
                       x: 0, 
-                      y: index * 20, 
+                      y: index * 15, 
                       opacity: 1,
                       rotateY: 0
                     }}
@@ -102,7 +102,7 @@ export default function WarAnimation({
                       delay: 0.2 + (index * 0.2)
                     }}
                   >
-                    <div className="w-[120px] h-[168px] bg-purple-700 rounded-xl border-2 border-white flex items-center justify-center text-white">
+                    <div className="w-[90px] h-[126px] sm:w-[120px] sm:h-[168px] bg-purple-700 rounded-xl border-2 border-white flex items-center justify-center text-white">
                       <span className="text-3xl">?</span>
                     </div>
                   </motion.div>
@@ -113,7 +113,7 @@ export default function WarAnimation({
             {/* CPU cards */}
             <div className="flex flex-col items-center">
               <div className="text-xl text-white mb-2">CPU CARDS</div>
-              <div className="relative h-[200px] w-[120px]">
+              <div className="relative h-[200px] w-[90px] sm:w-[120px]">
                 {warCards.cpu.map((card, index) => (
                   <motion.div 
                     key={`cpu-${index}`}
@@ -121,7 +121,7 @@ export default function WarAnimation({
                     initial={{ x: 100, y: -50, opacity: 0, rotateY: 180 }}
                     animate={{ 
                       x: 0, 
-                      y: index * 20, 
+                      y: index * 15, 
                       opacity: 1,
                       rotateY: 0 
                     }}
@@ -130,7 +130,7 @@ export default function WarAnimation({
                       delay: 0.2 + (index * 0.2)
                     }}
                   >
-                    <div className="w-[120px] h-[168px] bg-purple-700 rounded-xl border-2 border-white flex items-center justify-center text-white">
+                    <div className="w-[90px] h-[126px] sm:w-[120px] sm:h-[168px] bg-purple-700 rounded-xl border-2 border-white flex items-center justify-center text-white">
                       <span className="text-3xl">?</span>
                     </div>
                   </motion.div>
@@ -187,26 +187,28 @@ export default function WarAnimation({
           {/* Winning card animation */}
           <motion.div
             initial={{ scale: 0, rotateY: 180, opacity: 0 }}
-            animate={{ scale: 1.8, rotateY: 0, opacity: 1 }}
+            animate={{ scale: 1.2, rotateY: 0, opacity: 1 }}
             transition={{ 
               duration: 0.8, 
               delay: 0.3,
               type: 'spring',
               stiffness: 200
             }}
-            className="mb-12 relative"
+            className="mb-8 relative max-w-[90%] transform-gpu"
           >
             {/* Card glow effect */}
             <div 
               className={`absolute inset-0 rounded-xl blur-md -z-10 ${warWinner === 'player' ? 'bg-green-500' : 'bg-red-500'}`} 
               style={{ transform: 'scale(1.15)' }}
             />
-            <CardComponent
-              suit={warWinningCard.suit === 'hearts' ? '♥️' : warWinningCard.suit === 'diamonds' ? '♦️' : warWinningCard.suit === 'clubs' ? '♣️' : '♠️'}
-              rank={warWinningCard.display}
-              isFlipped={true}
-              isPlayerCard={warWinner === 'player'}
-            />
+            <div className="transform-gpu">
+              <CardComponent
+                suit={warWinningCard.suit === 'hearts' ? '♥️' : warWinningCard.suit === 'diamonds' ? '♦️' : warWinningCard.suit === 'clubs' ? '♣️' : '♠️'}
+                rank={warWinningCard.display}
+                isFlipped={true}
+                isPlayerCard={warWinner === 'player'}
+              />
+            </div>
           </motion.div>
           
           {/* Celebration particles */}
