@@ -49,11 +49,11 @@ export default function Card({ suit, rank, isFlipped, isPlayerCard, onClick, isN
         className="relative w-full h-full transform-style-preserve-3d"
         animate={{ rotateY: isFlipped ? 180 : 0 }}
         transition={{ 
-          duration: 0.6, 
+          duration: 0.5, 
           type: "spring", 
-          stiffness: 260, 
-          damping: 20,
-          delay: isPlayerCard ? 0 : 0.3
+          stiffness: 300, 
+          damping: 25,
+          delay: isPlayerCard ? 0 : 0.2
         }}
       >
         {/* Front of card (back design) */}

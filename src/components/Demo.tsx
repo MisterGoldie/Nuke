@@ -611,11 +611,18 @@ export default function Demo() {
               initial={{ y: 0, opacity: 0, scale: 0.5 }}
               animate={{ y: -30, opacity: 1, scale: 1.2 }}
               exit={{ y: -60, opacity: 0 }}
-              transition={{ duration: 0.8 }}
+              transition={{ 
+                duration: 0.5, 
+                delay: 0.3, // Delay to start after cards flip
+                ease: "easeOut"
+              }}
               onAnimationComplete={() => setCpuCardChange(null)}
             >
               <span className={`text-2xl font-bold ${cpuCardChange > 0 ? 'text-green-500' : 'text-red-500'}`}
-                style={{ textShadow: '0 0 8px rgba(0, 0, 0, 0.8)' }}
+                style={{ 
+                  textShadow: '0 0 8px rgba(0, 0, 0, 0.8)',
+                  filter: 'drop-shadow(0 0 2px rgba(0, 0, 0, 0.5))' 
+                }}
               >
                 {cpuCardChange > 0 ? '+' : ''}{cpuCardChange}
               </span>
@@ -630,11 +637,18 @@ export default function Demo() {
               initial={{ y: 0, opacity: 0, scale: 0.5 }}
               animate={{ y: -30, opacity: 1, scale: 1.2 }}
               exit={{ y: -60, opacity: 0 }}
-              transition={{ duration: 0.8 }}
+              transition={{ 
+                duration: 0.5, 
+                delay: 0.3, // Delay to start after cards flip
+                ease: "easeOut"
+              }}
               onAnimationComplete={() => setPlayerCardChange(null)}
             >
               <span className={`text-2xl font-bold ${playerCardChange > 0 ? 'text-green-500' : 'text-red-500'}`}
-                style={{ textShadow: '0 0 8px rgba(0, 0, 0, 0.8)' }}
+                style={{ 
+                  textShadow: '0 0 8px rgba(0, 0, 0, 0.8)',
+                  filter: 'drop-shadow(0 0 2px rgba(0, 0, 0, 0.5))' 
+                }}
               >
                 {playerCardChange > 0 ? '+' : ''}{playerCardChange}
               </span>

@@ -40,18 +40,22 @@ export function useGameManager({
       const newState = drawCards(gameData);
       setGameData(newState);
 
-      // Calculate card changes for animation
-      const playerDeckChange = newState.playerDeck.length - prevPlayerDeckLength;
-      const cpuDeckChange = newState.cpuDeck.length - prevCpuDeckLength;
-      
-      // Only show animations if there was an actual change
-      if (playerDeckChange !== 0 && setPlayerCardChange) {
-        setPlayerCardChange(playerDeckChange);
-      }
-      
-      if (cpuDeckChange !== 0 && setCpuCardChange) {
-        setCpuCardChange(cpuDeckChange);
-      }
+      // Set a slight delay before showing the card change animations
+      // This allows the card flip animations to complete first
+      setTimeout(() => {
+        // Calculate card changes for animation
+        const playerDeckChange = newState.playerDeck.length - prevPlayerDeckLength;
+        const cpuDeckChange = newState.cpuDeck.length - prevCpuDeckLength;
+        
+        // Only show animations if there was an actual change
+        if (playerDeckChange !== 0 && setPlayerCardChange) {
+          setPlayerCardChange(playerDeckChange);
+        }
+        
+        if (cpuDeckChange !== 0 && setCpuCardChange) {
+          setCpuCardChange(cpuDeckChange);
+        }
+      }, 300); // Delay the +1/-1 animations to start after cards have flipped
 
       setTimeout(() => {
         setIsProcessing(false);
@@ -61,7 +65,7 @@ export function useGameManager({
           const outcome = newState.message.includes('You win') ? 'win' : 'loss';
           handleGameEnd(outcome);
         }
-      }, 500);
+      }, 800); // Extended to allow animations to complete
     }
   }, [gameData, setIsProcessing, setGameData, setShowWarAnimation, handleGameEnd]);
 
@@ -81,18 +85,21 @@ export function useGameManager({
       setNukeInitiator('player');
       playNukeSound();
       
-      // Calculate card changes for animation
-      const playerDeckChange = newState.playerDeck.length - prevPlayerDeckLength;
-      const cpuDeckChange = newState.cpuDeck.length - prevCpuDeckLength;
-      
-      // Only show animations if there was an actual change
-      if (playerDeckChange !== 0 && setPlayerCardChange) {
-        setPlayerCardChange(playerDeckChange);
-      }
-      
-      if (cpuDeckChange !== 0 && setCpuCardChange) {
-        setCpuCardChange(cpuDeckChange);
-      }
+      // Delay the card change animations to start after the nuke animation begins
+      setTimeout(() => {
+        // Calculate card changes for animation
+        const playerDeckChange = newState.playerDeck.length - prevPlayerDeckLength;
+        const cpuDeckChange = newState.cpuDeck.length - prevCpuDeckLength;
+        
+        // Only show animations if there was an actual change
+        if (playerDeckChange !== 0 && setPlayerCardChange) {
+          setPlayerCardChange(playerDeckChange);
+        }
+        
+        if (cpuDeckChange !== 0 && setCpuCardChange) {
+          setCpuCardChange(cpuDeckChange);
+        }
+      }, 1000); // Show +1/-1 animations midway through the nuke animation
 
       setTimeout(() => {
         setShowNukeAnimation(false);
