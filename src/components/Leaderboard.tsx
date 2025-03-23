@@ -94,7 +94,7 @@ export default function Leaderboard({ currentUserFid, onBack }: { currentUserFid
 
   return (
     <motion.div 
-      className="arcade-container flex flex-col items-center p-8 pt-16 h-[685px] w-[420px] bg-black relative overflow-hidden"
+      className="arcade-container flex flex-col items-center p-8 pt-96 pb-4 h-[685px] w-[420px] bg-black relative overflow-hidden"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
@@ -107,7 +107,7 @@ export default function Leaderboard({ currentUserFid, onBack }: { currentUserFid
       />
       
       <motion.h1 
-        className="arcade-text text-4xl mb-4 relative z-10"
+        className="arcade-text text-4xl mb-20 relative z-10"
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         style={{
@@ -119,7 +119,7 @@ export default function Leaderboard({ currentUserFid, onBack }: { currentUserFid
       </motion.h1>
 
       <motion.div 
-        className="w-full max-w-md space-y-3 mb-4 max-h-[380px] overflow-y-auto custom-scrollbar relative z-10 px-2"
+        className="w-full max-w-md space-y-3 max-h-[320px] overflow-y-auto custom-scrollbar relative z-10 px-2 mt-10"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2, duration: 0.5 }}
@@ -188,8 +188,9 @@ export default function Leaderboard({ currentUserFid, onBack }: { currentUserFid
         ))}
       </motion.div>
 
+      <div className="flex-grow"></div>
       <motion.div 
-        className="flex flex-col items-center gap-3 w-[260px] relative z-10 mt-2"
+        className="flex flex-col items-center gap-3 w-[260px] relative z-10 mb-12"
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.4, duration: 0.5 }}
