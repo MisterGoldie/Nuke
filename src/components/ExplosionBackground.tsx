@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, useRef } from 'react';
-import { motion, useAnimation } from 'framer-motion';
+import { motion, useAnimation, AnimatePresence } from 'framer-motion';
 
 interface ExplosionParticle {
   id: number;
@@ -18,21 +18,26 @@ interface ExplosionParticle {
 
 interface ShockwaveProps {
   delay: number;
+  isActive: boolean;
 }
 
-const Shockwave: React.FC<ShockwaveProps> = ({ delay }) => {
-  // Using a simple declarative animation approach instead of animation controls
+interface ExplosionBackgroundProps {
+  isActive?: boolean;
+}
+
+const Shockwave: React.FC<ShockwaveProps> = ({ delay, isActive }) => {
+  // Only animate when active
   return (
     <motion.div
       className="shockwave"
       initial={{ scale: 0, opacity: 0.5 }}
-      animate={{ scale: 10, opacity: 0 }}
+      animate={isActive ? { scale: 10, opacity: 0 } : { scale: 0, opacity: 0 }}
       transition={{
         duration: 3,
         ease: "easeOut",
         delay: delay / 1000, // Convert from ms to seconds
         repeatDelay: Math.random() * 8 + 3, // Random delay between repetitions
-        repeat: Infinity
+        repeat: isActive ? Infinity : 0
       }}
       style={{
         position: 'absolute',
@@ -49,7 +54,7 @@ const Shockwave: React.FC<ShockwaveProps> = ({ delay }) => {
   );
 };
 
-const ExplosionBackground: React.FC = () => {
+const ExplosionBackground: React.FC<ExplosionBackgroundProps> = ({ isActive = true }) => {
   // Generate a fixed set of particles and shockwaves
   // This avoids complex state management and timing issues
   const generateStaticParticles = () => {
@@ -85,53 +90,64 @@ const ExplosionBackground: React.FC = () => {
   const particles = generateStaticParticles();
   const shockwaveDelays = [0, 10000, 20000];
   
-  // No complex state management or animation controls needed
+  // If not active, don't render the animations
+  if (!isActive) {
+    return <div className="explosion-background" style={{ opacity: 0 }}></div>;
+  }
   
   return (
-    <div className="explosion-background">
-      {/* Particles */}
-      {particles.map((particle) => (
-        <motion.div
-          key={particle.id}
-          className="explosion-particle"
-          initial={{
-            opacity: 0,
-            scale: 0,
-            x: `50%`,
-            y: `50%`,
-            rotate: 0,
-            backgroundColor: particle.color
-          }}
-          animate={{
-            opacity: [0, 0.9, 0],
-            scale: [0, 1, 0.5],
-            x: `${particle.x}%`,
-            y: `${particle.y}%`,
-            rotate: [0, particle.rotation],
-            backgroundColor: particle.color
-          }}
-          transition={{
-            duration: particle.duration,
-            delay: particle.delay,
-            repeat: Infinity,
-            repeatDelay: Math.random() * 8 + 2
-          }}
-          style={{
-            position: 'absolute',
-            width: particle.size,
-            height: particle.size,
-            filter: `blur(${particle.blurAmount}px)`,
-            zIndex: 0,
-            borderRadius: '50%' // All particles are circles
-          }}
-        />
-      ))}
-      
-      {/* Shockwaves */}
-      {shockwaveDelays.map((delay: number, index: number) => (
-        <Shockwave key={index} delay={delay} />
-      ))}
-    </div>
+    <AnimatePresence>
+      {isActive && (
+        <motion.div 
+          className="explosion-background"
+          initial={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+        >
+          {/* Particles */}
+          {particles.map((particle) => (
+            <motion.div
+              key={particle.id}
+              className="explosion-particle"
+              initial={{
+                opacity: 0,
+                scale: 0,
+                x: `50%`,
+                y: `50%`,
+                rotate: 0,
+                backgroundColor: particle.color
+              }}
+              animate={{
+                opacity: [0, 0.9, 0],
+                scale: [0, 1, 0.5],
+                x: `${particle.x}%`,
+                y: `${particle.y}%`,
+                rotate: [0, particle.rotation],
+                backgroundColor: particle.color
+              }}
+              transition={{
+                duration: particle.duration,
+                delay: particle.delay,
+                repeat: Infinity,
+                repeatDelay: Math.random() * 8 + 2
+              }}
+              style={{
+                position: 'absolute',
+                width: particle.size,
+                height: particle.size,
+                filter: `blur(${particle.blurAmount}px)`,
+                zIndex: 0,
+                borderRadius: '50%' // All particles are circles
+              }}
+            />
+          ))}
+          
+          {/* Shockwaves */}
+          {shockwaveDelays.map((delay: number, index: number) => (
+            <Shockwave key={index} delay={delay} isActive={isActive} />
+          ))}
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 };
 

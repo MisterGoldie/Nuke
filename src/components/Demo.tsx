@@ -20,7 +20,7 @@ type GameState = 'menu' | 'game' | 'leaderboard' | 'tutorial';
 
 // Add interface for your context type
 interface ExtendedFrameContext extends FrameContext {
-  fid?: string;  // Add fid as optional Property
+  fid?: string;  // Add fid as optional 
 }
 
 // Add dynamic imports for animations
@@ -714,7 +714,7 @@ export default function Demo() {
   if (gameState === 'menu') {
     return (
       <div className="arcade-container flex flex-col items-center overflow-hidden">
-        <ExplosionBackground />
+        <ExplosionBackground isActive={true} />
         <div className="h-full w-full flex flex-col items-center justify-between pt-10 pb-8">
           <div />
           
@@ -833,6 +833,7 @@ export default function Demo() {
         transition={{ duration: 0.5 }}
         style={{ height: '695px' }}
       >
+
         {/* Nuke Animation */}
         <NukeAnimation 
           isVisible={showNukeAnimation} 
@@ -912,10 +913,10 @@ export default function Demo() {
         >
           <motion.span 
             className="arcade-text text-lg"
-            animate={{ scale: gameData.cpuDeck.length < 10 ? [1, 1.1, 1] : 1 }}
-            transition={{ duration: 0.5, repeat: gameData.cpuDeck.length < 10 ? Infinity : 0, repeatDelay: 1.5 }}
+            animate={{ scale: gameData.playerDeck.length < 10 ? [1, 1.1, 1] : 1 }}
+            transition={{ duration: 0.5, repeat: gameData.playerDeck.length < 10 ? Infinity : 0, repeatDelay: 1.5 }}
           >
-            CPU Cards: {gameData.cpuDeck.length}
+            Your Cards: {gameData.playerDeck.length}
           </motion.span>
           <motion.span 
             className={`text-lg ${timeRemaining <= 30 ? 'text-red-500' : 'text-yellow-500'}`} 
@@ -937,10 +938,10 @@ export default function Demo() {
           </motion.span>
           <motion.span 
             className="arcade-text text-lg"
-            animate={{ scale: gameData.playerDeck.length < 10 ? [1, 1.1, 1] : 1 }}
-            transition={{ duration: 0.5, repeat: gameData.playerDeck.length < 10 ? Infinity : 0, repeatDelay: 1.5 }}
+            animate={{ scale: gameData.cpuDeck.length < 10 ? [1, 1.1, 1] : 1 }}
+            transition={{ duration: 0.5, repeat: gameData.cpuDeck.length < 10 ? Infinity : 0, repeatDelay: 1.5 }}
           >
-            Your Cards: {gameData.playerDeck.length}
+            CPU Cards: {gameData.cpuDeck.length}
           </motion.span>
         </motion.div>
 
