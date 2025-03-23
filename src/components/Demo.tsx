@@ -669,7 +669,7 @@ export default function Demo() {
               >
                 LEADERBOARD
               </Button>
-              <p className="arcade-text text-sm mt-3 text-center w-full">Powered by The POD</p>
+              <p className="arcade-text text-sm mt-3 text-center w-full">Powered by /thepod</p>
             </div>
           </div>
 
