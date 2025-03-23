@@ -6,7 +6,7 @@ interface WarAnimationProps {
   playerCard?: any;
   cpuCard?: any;
   warCards?: {player: any[], cpu: any[]};
-  warStage: 'initial' | 'showing-cards' | 'drawing-cards' | 'complete';
+  warStage: 'initial' | 'showing-cards' | 'drawing-cards' | 'revealing-winner' | 'complete';
   warWinner?: 'player' | 'cpu';
   warWinningCard?: any;
 }
@@ -80,13 +80,14 @@ export default function WarAnimation({
             WAR!
           </motion.div>
           
-          {/* Cards being drawn animation */}
+          {/* Cards being drawn animation - showing 3 cards on each side */}
           <div className="flex justify-between w-full px-4 sm:px-10 md:px-20 mt-4">
             {/* Player cards */}
             <div className="flex flex-col items-center">
               <div className="text-xl text-white mb-2">YOUR CARDS</div>
               <div className="relative h-[200px] w-[90px] sm:w-[120px]">
-                {warCards.player.map((card, index) => (
+                {/* Show exactly 3 cards */}
+                {[0, 1, 2].map((index) => (
                   <motion.div 
                     key={`player-${index}`}
                     className="absolute"
@@ -114,7 +115,8 @@ export default function WarAnimation({
             <div className="flex flex-col items-center">
               <div className="text-xl text-white mb-2">CPU CARDS</div>
               <div className="relative h-[200px] w-[90px] sm:w-[120px]">
-                {warCards.cpu.map((card, index) => (
+                {/* Show exactly 3 cards */}
+                {[0, 1, 2].map((index) => (
                   <motion.div 
                     key={`cpu-${index}`}
                     className="absolute"
@@ -167,6 +169,110 @@ export default function WarAnimation({
         </div>
       )}
       
+      {/* Revealing the 4th card that will determine the winner */}
+      {warStage === 'revealing-winner' && warWinner && warWinningCard && (
+        <div className="relative flex flex-col items-center justify-center w-full h-full">
+          <div className="text-2xl text-white mb-8">FINAL CARD REVEALS THE WINNER!</div>
+          <div className="flex justify-between w-full px-4 sm:px-10 md:px-20">
+            {/* Player's 4 cards */}
+            <div className="flex flex-col items-center">
+              <div className="text-xl text-white mb-2">YOUR CARDS</div>
+              <div className="relative h-[200px] w-[90px] sm:w-[120px]">
+                {/* First 3 face-down cards */}
+                {[0, 1, 2].map((index) => (
+                  <motion.div 
+                    key={`player-stack-${index}`}
+                    className="absolute"
+                    initial={{ y: index * 15 }}
+                    animate={{ y: index * 15 }}
+                  >
+                    <div className="w-[90px] h-[126px] sm:w-[120px] sm:h-[168px] bg-purple-700 rounded-xl border-2 border-white flex items-center justify-center text-white">
+                      <span className="text-3xl">?</span>
+                    </div>
+                  </motion.div>
+                ))}
+                {/* 5th card - shown and flipped for both players */}
+                <motion.div 
+                  className="absolute"
+                  initial={{ y: 4 * 15, rotateY: 180 }}
+                  animate={{ 
+                    y: warWinner === 'player' ? -5 : 4 * 15, 
+                    rotateY: 0,
+                    scale: warWinner === 'player' ? 1.2 : 1,
+                    zIndex: warWinner === 'player' ? 10 : 0
+                  }}
+                  transition={{ duration: 0.8, type: 'spring' }}
+                >
+                  <div className="transform-gpu">
+                    <div className="relative">
+                      {/* Always show player's card, with glow effect if winner */}
+                      {warWinner === 'player' && (
+                        <div className="absolute inset-0 rounded-xl blur-md -z-10 bg-green-500" style={{ transform: 'scale(1.15)' }} />
+                      )}
+                      <CardComponent
+                        suit={warWinningCard.playerSuit === 'hearts' ? '♥️' : warWinningCard.playerSuit === 'diamonds' ? '♦️' : warWinningCard.playerSuit === 'clubs' ? '♣️' : '♠️'}
+                        rank={warWinningCard.playerRank}
+                        isFlipped={true}
+                        isPlayerCard={true}
+                        singleCard={true}
+                      />
+                    </div>
+                  </div>
+                </motion.div>
+              </div>
+            </div>
+            
+            {/* CPU's 4 cards */}
+            <div className="flex flex-col items-center">
+              <div className="text-xl text-white mb-2">CPU CARDS</div>
+              <div className="relative h-[200px] w-[90px] sm:w-[120px]">
+                {/* First 3 face-down cards */}
+                {[0, 1, 2].map((index) => (
+                  <motion.div 
+                    key={`cpu-stack-${index}`}
+                    className="absolute"
+                    initial={{ y: index * 15 }}
+                    animate={{ y: index * 15 }}
+                  >
+                    <div className="w-[90px] h-[126px] sm:w-[120px] sm:h-[168px] bg-purple-700 rounded-xl border-2 border-white flex items-center justify-center text-white">
+                      <span className="text-3xl">?</span>
+                    </div>
+                  </motion.div>
+                ))}
+                {/* 5th card - shown and flipped for both players */}
+                <motion.div 
+                  className="absolute"
+                  initial={{ y: 4 * 15, rotateY: 180 }}
+                  animate={{ 
+                    y: warWinner === 'cpu' ? -5 : 4 * 15, 
+                    rotateY: 0,
+                    scale: warWinner === 'cpu' ? 1.2 : 1,
+                    zIndex: warWinner === 'cpu' ? 10 : 0
+                  }}
+                  transition={{ duration: 0.8, type: 'spring' }}
+                >
+                  <div className="transform-gpu">
+                    <div className="relative">
+                      {/* Always show CPU's card, with glow effect if winner */}
+                      {warWinner === 'cpu' && (
+                        <div className="absolute inset-0 rounded-xl blur-md -z-10 bg-red-500" style={{ transform: 'scale(1.15)' }} />
+                      )}
+                      <CardComponent
+                        suit={warWinningCard.cpuSuit === 'hearts' ? '♥️' : warWinningCard.cpuSuit === 'diamonds' ? '♦️' : warWinningCard.cpuSuit === 'clubs' ? '♣️' : '♠️'}
+                        rank={warWinningCard.cpuRank}
+                        isFlipped={true}
+                        isPlayerCard={false}
+                        singleCard={true}
+                      />
+                    </div>
+                  </div>
+                </motion.div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      
       {/* War winner animation */}
       {warStage === 'complete' && warWinner && warWinningCard && (
         <div className="relative flex flex-col items-center justify-center w-full h-full">
@@ -203,8 +309,10 @@ export default function WarAnimation({
             />
             <div className="transform-gpu">
               <CardComponent
-                suit={warWinningCard.suit === 'hearts' ? '♥️' : warWinningCard.suit === 'diamonds' ? '♦️' : warWinningCard.suit === 'clubs' ? '♣️' : '♠️'}
-                rank={warWinningCard.display}
+                suit={warWinner === 'player' ? 
+                  (warWinningCard.playerSuit === 'hearts' ? '♥️' : warWinningCard.playerSuit === 'diamonds' ? '♦️' : warWinningCard.playerSuit === 'clubs' ? '♣️' : '♠️') :
+                  (warWinningCard.cpuSuit === 'hearts' ? '♥️' : warWinningCard.cpuSuit === 'diamonds' ? '♦️' : warWinningCard.cpuSuit === 'clubs' ? '♣️' : '♠️')}
+                rank={warWinner === 'player' ? warWinningCard.playerRank : warWinningCard.cpuRank}
                 isFlipped={true}
                 isPlayerCard={warWinner === 'player'}
                 singleCard={true} /* Force single card display */

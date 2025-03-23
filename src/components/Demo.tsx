@@ -210,7 +210,7 @@ export default function Demo() {
   }, [isSDKLoaded, gameState, fetchUserDataByFid]);
 
   // State for war animation sequence
-  const [warStage, setWarStage] = useState<'initial' | 'showing-cards' | 'drawing-cards' | 'complete'>('initial');
+  const [warStage, setWarStage] = useState<'initial' | 'showing-cards' | 'drawing-cards' | 'revealing-winner' | 'complete'>('initial');
   const [warCards, setWarCards] = useState<{player: any[], cpu: any[]}>({player: [], cpu: []});
   const [warWinner, setWarWinner] = useState<'player' | 'cpu' | undefined>(undefined);
   const [warWinningCard, setWarWinningCard] = useState<any>(undefined);
@@ -246,30 +246,51 @@ export default function Demo() {
         const cpuVisualCards = gameData.cpuDeck.slice(0, Math.min(3, gameData.cpuDeck.length));
         setWarCards({player: playerVisualCards, cpu: cpuVisualCards});
         
-        // After 3 more seconds, show the war winner and then continue the game
+        // After 3 more seconds, first show the revealing-winner stage with the 4th card
         const completeTimer = setTimeout(() => {
           if (!gameData.gameOver) {  // Additional check before updating state
             // Determine war winner randomly (50/50 chance)
             const winner = Math.random() < 0.5 ? 'player' : 'cpu';
             setWarWinner(winner);
             
-            // Create a winning card with random suit and high value
+            // Create different cards for each player
             const suits = ['hearts', 'diamonds', 'clubs', 'spades'];
-            const randomSuit = suits[Math.floor(Math.random() * suits.length)];
-            const highRank = ['J', 'Q', 'K', 'A'][Math.floor(Math.random() * 4)];
+            
+            // Use different suits for player and CPU
+            const playerSuit = suits[Math.floor(Math.random() * suits.length)];
+            let cpuSuit;
+            do {
+              cpuSuit = suits[Math.floor(Math.random() * suits.length)];
+            } while (cpuSuit === playerSuit); // Make sure suits are different
+            
+            // Higher rank (A, K, Q) for winner, lower rank (J, 10, 9) for loser
+            const highRanks = ['Q', 'K', 'A'];
+            const lowRanks = ['9', '10', 'J'];
+            
+            const winnerRank = highRanks[Math.floor(Math.random() * highRanks.length)];
+            const loserRank = lowRanks[Math.floor(Math.random() * lowRanks.length)];
+            
+            // Create the card object with appropriate properties
             const winningCard = {
-              suit: randomSuit,
-              display: highRank,
-              value: highRank === 'A' ? 14 : (highRank === 'K' ? 13 : (highRank === 'Q' ? 12 : 11))
+              playerSuit,
+              cpuSuit,
+              playerRank: winner === 'player' ? winnerRank : loserRank,
+              cpuRank: winner === 'cpu' ? winnerRank : loserRank,
+              display: winner === 'player' ? winnerRank : loserRank, // For backward compatibility
+              suit: winner === 'player' ? playerSuit : cpuSuit // For backward compatibility
             };
             setWarWinningCard(winningCard);
             
-            // Show the complete war animation with winner
-            setWarStage('complete');
+            // First show the revealing-winner stage with the 4th deciding card
+            setWarStage('revealing-winner');
             
-            // After 3 more seconds, hide the animation and continue the game
-            const finalTimer = setTimeout(() => {
-              setShowWarAnimation(false);
+            // After 2 seconds, show the complete war animation with winner
+            setTimeout(() => {
+              setWarStage('complete');
+            
+              // After 3 more seconds, hide the animation and continue the game
+              const finalTimer = setTimeout(() => {
+                setShowWarAnimation(false);
               
               // Create a new game state instead of modifying the existing one
               // This ensures we're not carrying over any war-related state
@@ -386,9 +407,10 @@ export default function Demo() {
               setWarWinningCard(undefined);
             }, 3000);
             
-            return () => clearTimeout(finalTimer);
+              return () => clearTimeout(finalTimer);
+            }, 3000);
           }
-        }, 3000);
+        }, 2000);
         
         return () => clearTimeout(completeTimer);
       }, 1500);
