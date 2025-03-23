@@ -7,6 +7,8 @@ interface WarAnimationProps {
   cpuCard?: any;
   warCards?: {player: any[], cpu: any[]};
   warStage: 'initial' | 'showing-cards' | 'drawing-cards' | 'complete';
+  warWinner?: 'player' | 'cpu';
+  warWinningCard?: any;
 }
 
 export default function WarAnimation({ 
@@ -14,7 +16,9 @@ export default function WarAnimation({
   playerCard, 
   cpuCard, 
   warCards = {player: [], cpu: []},
-  warStage 
+  warStage,
+  warWinner,
+  warWinningCard
 }: WarAnimationProps) {
   if (!isVisible) return null;
 
@@ -160,6 +164,86 @@ export default function WarAnimation({
               />
             ))}
           </div>
+        </div>
+      )}
+      
+      {/* War winner animation */}
+      {warStage === 'complete' && warWinner && warWinningCard && (
+        <div className="relative flex flex-col items-center justify-center w-full h-full">
+          {/* Winner announcement */}
+          <motion.div 
+            className={`text-[80px] font-bold mb-12 text-center ${warWinner === 'player' ? 'text-green-500' : 'text-red-500'}`}
+            initial={{ scale: 0.5, opacity: 0, y: -50 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, type: 'spring' }}
+            style={{ 
+              textShadow: `0 0 10px ${warWinner === 'player' ? '#00ff00' : '#ff0000'}`,
+              WebkitTextStroke: `2px ${warWinner === 'player' ? '#006400' : '#800000'}`
+            }}
+          >
+            {warWinner === 'player' ? 'YOU WIN!' : 'CPU WINS!'}
+          </motion.div>
+          
+          {/* Winning card animation */}
+          <motion.div
+            initial={{ scale: 0, rotateY: 180, opacity: 0 }}
+            animate={{ scale: 1.8, rotateY: 0, opacity: 1 }}
+            transition={{ 
+              duration: 0.8, 
+              delay: 0.3,
+              type: 'spring',
+              stiffness: 200
+            }}
+            className="mb-12 relative"
+          >
+            {/* Card glow effect */}
+            <div 
+              className={`absolute inset-0 rounded-xl blur-md -z-10 ${warWinner === 'player' ? 'bg-green-500' : 'bg-red-500'}`} 
+              style={{ transform: 'scale(1.15)' }}
+            />
+            <CardComponent
+              suit={warWinningCard.suit === 'hearts' ? '♥️' : warWinningCard.suit === 'diamonds' ? '♦️' : warWinningCard.suit === 'clubs' ? '♣️' : '♠️'}
+              rank={warWinningCard.display}
+              isFlipped={true}
+              isPlayerCard={warWinner === 'player'}
+            />
+          </motion.div>
+          
+          {/* Celebration particles */}
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            {[...Array(20)].map((_, i) => (
+              <motion.div
+                key={i}
+                className={`absolute w-4 h-4 rounded-full ${warWinner === 'player' ? 'bg-green-500' : 'bg-red-500'}`}
+                initial={{ 
+                  x: 0, 
+                  y: 0, 
+                  opacity: 0 
+                }}
+                animate={{ 
+                  x: Math.cos(i * 18 * Math.PI / 180) * 300, 
+                  y: Math.sin(i * 18 * Math.PI / 180) * 300,
+                  opacity: [0, 1, 0]
+                }}
+                transition={{ 
+                  duration: 2, 
+                  delay: i * 0.05,
+                  repeat: 2,
+                  repeatType: 'reverse'
+                }}
+              />
+            ))}
+          </div>
+          
+          {/* Cards won text */}
+          <motion.div 
+            className="text-3xl text-white mt-8 text-center font-bold"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 1 }}
+          >
+            {warWinner === 'player' ? 'You won' : 'CPU won'} the war and collected cards!
+          </motion.div>
         </div>
       )}
     </div>

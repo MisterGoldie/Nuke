@@ -212,6 +212,8 @@ export default function Demo() {
   // State for war animation sequence
   const [warStage, setWarStage] = useState<'initial' | 'showing-cards' | 'drawing-cards' | 'complete'>('initial');
   const [warCards, setWarCards] = useState<{player: any[], cpu: any[]}>({player: [], cpu: []});
+  const [warWinner, setWarWinner] = useState<'player' | 'cpu' | undefined>(undefined);
+  const [warWinningCard, setWarWinningCard] = useState<any>(undefined);
   
   // Effect for War animation
   useEffect(() => {
@@ -236,22 +238,74 @@ export default function Demo() {
         const cpuCards = gameData.cpuDeck.slice(0, 3);
         setWarCards({player: playerCards, cpu: cpuCards});
         
-        // After 3 more seconds, complete the war and continue the game
+        // After 3 more seconds, show the war winner and then continue the game
         const completeTimer = setTimeout(() => {
           if (!gameData.gameOver) {  // Additional check before updating state
-            setShowWarAnimation(false);
+            // Determine war winner randomly (50/50 chance)
+            const winner = Math.random() < 0.5 ? 'player' : 'cpu';
+            setWarWinner(winner);
+            
+            // Create a winning card with random suit and high value
+            const suits = ['hearts', 'diamonds', 'clubs', 'spades'];
+            const randomSuit = suits[Math.floor(Math.random() * suits.length)];
+            const highRank = ['J', 'Q', 'K', 'A'][Math.floor(Math.random() * 4)];
+            const winningCard = {
+              suit: randomSuit,
+              display: highRank,
+              value: highRank === 'A' ? 14 : (highRank === 'K' ? 13 : (highRank === 'Q' ? 12 : 11))
+            };
+            setWarWinningCard(winningCard);
+            
+            // Show the complete war animation with winner
             setWarStage('complete');
             
-            // Continue the game after war animation
-            // Draw new cards to resolve the war
-            const updatedState = drawCards({
-              ...gameData,
-              isWar: false,
-              readyForNextCard: true
-            });
+            // After 3 more seconds, hide the animation and continue the game
+            const finalTimer = setTimeout(() => {
+              setShowWarAnimation(false);
+              
+              // Continue the game after war animation
+              // Draw new cards to resolve the war
+              const updatedState = drawCards({
+                ...gameData,
+                isWar: false,
+                readyForNextCard: true
+              });
+              
+              // Update the game state based on the winner
+              if (winner === 'player') {
+                updatedState.playerDeck = [...updatedState.playerDeck, ...warCards.player, ...warCards.cpu];
+              } else {
+                updatedState.cpuDeck = [...updatedState.cpuDeck, ...warCards.player, ...warCards.cpu];
+              }
+              
+              // Ensure we don't have back-to-back wars by forcing different cards
+              updatedState.isWar = false;
+              
+              // Make sure the next draw won't immediately trigger another war
+              if (updatedState.playerDeck.length > 0 && updatedState.cpuDeck.length > 0) {
+                // If the top cards would cause another war, move one of them down in the deck
+                if (updatedState.playerDeck[0]?.rank === updatedState.cpuDeck[0]?.rank) {
+                  // Move the player's top card to a random position in their deck
+                  const topCard = updatedState.playerDeck.shift();
+                  if (topCard && updatedState.playerDeck.length > 0) {
+                    const randomPosition = Math.floor(Math.random() * updatedState.playerDeck.length);
+                    updatedState.playerDeck.splice(randomPosition, 0, topCard);
+                  } else {
+                    // If there was only one card, put it back
+                    if (topCard) updatedState.playerDeck.push(topCard);
+                  }
+                }
+              }
+              
+              setGameData(updatedState);
+              setIsProcessing(false);
+              
+              // Reset war animation states
+              setWarWinner(undefined);
+              setWarWinningCard(undefined);
+            }, 3000);
             
-            setGameData(updatedState);
-            setIsProcessing(false);
+            return () => clearTimeout(finalTimer);
           }
         }, 3000);
         
@@ -646,6 +700,8 @@ export default function Demo() {
           cpuCard={gameData.cpuCard}
           warCards={warCards}
           warStage={warStage}
+          warWinner={warWinner}
+          warWinningCard={warWinningCard}
         />
 
         {/* Card Change Animation Component */}
