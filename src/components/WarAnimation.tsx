@@ -184,7 +184,7 @@ export default function WarAnimation({
             {warWinner === 'player' ? 'YOU WIN!' : 'CPU WINS!'}
           </motion.div>
           
-          {/* Winning card animation */}
+          {/* Winning card animation - single card display */}
           <motion.div
             initial={{ scale: 0, rotateY: 180, opacity: 0 }}
             animate={{ scale: 1.2, rotateY: 0, opacity: 1 }}
@@ -207,6 +207,7 @@ export default function WarAnimation({
                 rank={warWinningCard.display}
                 isFlipped={true}
                 isPlayerCard={warWinner === 'player'}
+                singleCard={true} /* Force single card display */
               />
             </div>
           </motion.div>

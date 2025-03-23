@@ -7,9 +7,10 @@ interface CardProps {
   isPlayerCard: boolean;
   onClick?: () => void;
   isNukeActive?: boolean;
+  singleCard?: boolean; // Add option to display as a single card without stack effect
 }
 
-export default function Card({ suit, rank, isFlipped, isPlayerCard, onClick, isNukeActive }: CardProps) {
+export default function Card({ suit, rank, isFlipped, isPlayerCard, onClick, isNukeActive, singleCard = false }: CardProps) {
   const borderClass = isNukeActive 
     ? 'border-2 border-red-500 animate-nuke-border' 
     : 'border-2 border-green-500';
@@ -29,21 +30,26 @@ export default function Card({ suit, rank, isFlipped, isPlayerCard, onClick, isN
       whileHover={isPlayerCard ? { scale: 1.05, y: -5 } : undefined}
       whileTap={isPlayerCard ? { scale: 0.98 } : undefined}
     >
-      {/* Stack effect - bottom card */}
-      <motion.div 
-        className={`absolute top-2 left-1 w-full h-full bg-[#7b1fa2] rounded-xl ${borderClass} opacity-40`}
-        initial={{ scale: 0.98 }}
-        animate={{ scale: 1 }}
-        transition={{ duration: 0.5, delay: 0.1 }}
-      />
-      
-      {/* Stack effect - middle card */}
-      <motion.div 
-        className={`absolute top-1 left-0.5 w-full h-full bg-[#7b1fa2] rounded-xl ${borderClass} opacity-60`}
-        initial={{ scale: 0.99 }}
-        animate={{ scale: 1 }}
-        transition={{ duration: 0.5 }}
-      />
+      {/* Stack effect - only shown when singleCard is false */}
+      {!singleCard && (
+        <>
+          {/* Stack effect - bottom card */}
+          <motion.div 
+            className={`absolute top-2 left-1 w-full h-full bg-[#7b1fa2] rounded-xl ${borderClass} opacity-40`}
+            initial={{ scale: 0.98 }}
+            animate={{ scale: 1 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+          />
+          
+          {/* Stack effect - middle card */}
+          <motion.div 
+            className={`absolute top-1 left-0.5 w-full h-full bg-[#7b1fa2] rounded-xl ${borderClass} opacity-60`}
+            initial={{ scale: 0.99 }}
+            animate={{ scale: 1 }}
+            transition={{ duration: 0.5 }}
+          />
+        </>
+      )}
 
       <motion.div
         className="relative w-full h-full transform-style-preserve-3d"
