@@ -196,9 +196,9 @@ export default function WarAnimation({
                   className="absolute"
                   initial={{ y: 4 * 15, rotateY: 180 }}
                   animate={{ 
-                    y: warWinner === 'player' ? -5 : 4 * 15, 
+                    y: warWinner === 'player' ? 0 : 4 * 15, 
                     rotateY: 0,
-                    scale: warWinner === 'player' ? 1.2 : 1,
+                    scale: warWinner === 'player' ? 1.05 : 1,
                     zIndex: warWinner === 'player' ? 10 : 0
                   }}
                   transition={{ duration: 0.8, type: 'spring' }}
@@ -244,9 +244,9 @@ export default function WarAnimation({
                   className="absolute"
                   initial={{ y: 4 * 15, rotateY: 180 }}
                   animate={{ 
-                    y: warWinner === 'cpu' ? -5 : 4 * 15, 
+                    y: warWinner === 'cpu' ? 0 : 4 * 15, 
                     rotateY: 0,
-                    scale: warWinner === 'cpu' ? 1.2 : 1,
+                    scale: warWinner === 'cpu' ? 1.05 : 1,
                     zIndex: warWinner === 'cpu' ? 10 : 0
                   }}
                   transition={{ duration: 0.8, type: 'spring' }}
