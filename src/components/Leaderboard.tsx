@@ -234,32 +234,48 @@ export default function Leaderboard({ currentUserFid, onBack }: { currentUserFid
 
       {/* Decorative elements */}
       <motion.div 
-        className="absolute top-20 left-4 text-4xl opacity-20 z-0"
+        className="absolute top-20 left-4 text-4xl opacity-30 z-0"
         animate={{ rotate: 360 }}
         transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
       >
         ♠
       </motion.div>
       <motion.div 
-        className="absolute bottom-20 right-4 text-4xl opacity-20 z-0"
+        className="absolute bottom-20 right-4 text-4xl opacity-30 z-0"
         animate={{ rotate: -360 }}
         transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
       >
         ♦
       </motion.div>
       <motion.div 
-        className="absolute top-1/2 left-6 text-4xl opacity-20 z-0"
+        className="absolute top-1/2 left-6 text-4xl opacity-30 z-0"
         animate={{ rotate: 180, scale: [1, 1.2, 1] }}
         transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
       >
         ♣
       </motion.div>
       <motion.div 
-        className="absolute top-1/3 right-6 text-4xl opacity-20 z-0"
+        className="absolute top-1/3 right-6 text-4xl opacity-30 z-0"
         animate={{ rotate: -180, scale: [1, 1.2, 1] }}
         transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
       >
         ♥
+      </motion.div>
+      
+      {/* Additional card suits */}
+      <motion.div 
+        className="absolute top-80 left-10 text-5xl opacity-20 z-0 text-red-500"
+        animate={{ rotate: 180, scale: [1, 1.1, 1] }}
+        transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+      >
+        ♥
+      </motion.div>
+      <motion.div 
+        className="absolute bottom-60 right-10 text-5xl opacity-20 z-0"
+        animate={{ rotate: -90, scale: [1, 1.1, 1] }}
+        transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+      >
+        ♠
       </motion.div>
     </motion.div>
   );
