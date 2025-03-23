@@ -353,7 +353,7 @@ export default function WarAnimation({
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 1 }}
           >
-            {warWinner === 'player' ? 'You won' : 'CPU won'} the war and collected cards!
+            {warWinner === 'player' ? 'You won' : 'CPU won'} the war and collected 8 cards!
           </motion.div>
         </div>
       )}

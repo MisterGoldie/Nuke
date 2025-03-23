@@ -630,11 +630,11 @@ export default function Demo() {
                     // Set game over state with clear message
                     let winnerMessage = '';
                     if (playerTotal > cpuTotal) {
-                        winnerMessage = `GAME OVER - TIME'S UP! ${username} WINS with ${playerTotal} cards!`;
+                        winnerMessage = `GAME OVER - ${username} WINS!`;
                     } else if (playerTotal === cpuTotal) {
-                        winnerMessage = `GAME OVER - TIME'S UP! IT'S A TIE with ${playerTotal} cards each!`;
+                        winnerMessage = `GAME OVER - IT'S A TIE!`;
                     } else {
-                        winnerMessage = `GAME OVER - TIME'S UP! CPU WINS with ${cpuTotal} cards!`;
+                        winnerMessage = `GAME OVER - CPU WINS!`;
                     }
                     
                     setGameData(prev => ({
