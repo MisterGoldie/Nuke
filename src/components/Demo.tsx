@@ -607,7 +607,7 @@ export default function Demo() {
         <AnimatePresence>
           {cpuCardChange && (
             <motion.div 
-              className="absolute top-[150px] right-[80px] z-50"
+              className="absolute top-[220px] right-[80px] z-50"
               initial={{ y: 0, opacity: 0, scale: 0.5 }}
               animate={{ y: -30, opacity: 1, scale: 1.2 }}
               exit={{ y: -60, opacity: 0 }}
