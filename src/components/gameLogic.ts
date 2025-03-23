@@ -19,6 +19,7 @@ export interface LocalState {
     isNukeActive: boolean;
     readyForNextCard: boolean;
     gameStartTime?: number;
+    isWarBeingHandled?: boolean;
 }
   
 export function createDeck(): Card[] {

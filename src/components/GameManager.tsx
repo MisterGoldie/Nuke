@@ -59,7 +59,14 @@ export function useGameManager({
 
       setTimeout(() => {
         setIsProcessing(false);
-        if (newState.isWar) {
+        // Only trigger war animation if it's not already being handled in the Demo component
+        // This prevents the war from being processed twice
+        if (newState.isWar && !newState.isWarBeingHandled) {
+          // Mark that we're handling the war to prevent duplicate processing
+          setGameData(prevState => ({
+            ...prevState,
+            isWarBeingHandled: true
+          }));
           setShowWarAnimation(true);
         } else if (newState.gameOver) {
           const outcome = newState.message.includes('You win') ? 'win' : 'loss';

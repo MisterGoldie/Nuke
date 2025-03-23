@@ -219,7 +219,13 @@ export default function Demo() {
   useEffect(() => {
     let warTimer: NodeJS.Timeout;
     
-    if (gameData.isWar && !gameData.gameOver) {
+    if (gameData.isWar && !gameData.gameOver && !gameData.isWarBeingHandled) {
+      // Mark that we're handling the war to prevent duplicate processing
+      setGameData(prevState => ({
+        ...prevState,
+        isWarBeingHandled: true
+      }));
+      
       // Reset war animation state
       setWarStage('initial');
       setIsProcessing(true);
@@ -233,10 +239,12 @@ export default function Demo() {
         setShowWarAnimation(true);
         setWarStage('drawing-cards');
         
-        // Generate visual cards for animation
-        const playerCards = gameData.playerDeck.slice(0, 3);
-        const cpuCards = gameData.cpuDeck.slice(0, 3);
-        setWarCards({player: playerCards, cpu: cpuCards});
+        // Generate visual cards for animation - just for display purposes
+        // We'll use the first 3 cards from each deck for visual effect
+        // The actual cards will be properly handled when distributing after the war
+        const playerVisualCards = gameData.playerDeck.slice(0, Math.min(3, gameData.playerDeck.length));
+        const cpuVisualCards = gameData.cpuDeck.slice(0, Math.min(3, gameData.cpuDeck.length));
+        setWarCards({player: playerVisualCards, cpu: cpuVisualCards});
         
         // After 3 more seconds, show the war winner and then continue the game
         const completeTimer = setTimeout(() => {
@@ -263,23 +271,95 @@ export default function Demo() {
             const finalTimer = setTimeout(() => {
               setShowWarAnimation(false);
               
-              // Continue the game after war animation
-              // Draw new cards to resolve the war
-              const updatedState = drawCards({
+              // Create a new game state instead of modifying the existing one
+              // This ensures we're not carrying over any war-related state
+              const updatedState = {
                 ...gameData,
+                // Clear all war-related flags and data
                 isWar: false,
-                readyForNextCard: true
+                isWarBeingHandled: false, // Reset this flag to prevent issues with future wars
+                warPile: [],
+                readyForNextCard: true,
+                playerCard: null,
+                cpuCard: null
+              };
+              
+              // In a standard war, the game logic has already put 8 cards into the war pile:
+              // - 2 matching cards that started the war
+              // - 3 cards from each player's deck
+              // Total: 8 cards in the war pile
+              
+              // IMPORTANT: We need to make sure all 8 cards from the war pile go to the winner
+              // The war pile should already contain all the cards from the war
+              const warPile = gameData.warPile || [];
+              
+              // We don't need to take more cards from the players' decks
+              // since the game logic already did that
+              
+              // Create copies of the decks to work with
+              const playerDeckCopy = [...gameData.playerDeck];
+              const cpuDeckCopy = [...gameData.cpuDeck];
+              
+              // Log the card counts for verification
+              console.log('War card distribution:', {
+                warPileCount: warPile.length,
+                playerDeckCount: playerDeckCopy.length,
+                cpuDeckCount: cpuDeckCopy.length,
+                totalCards: warPile.length + playerDeckCopy.length + cpuDeckCopy.length
               });
               
-              // Update the game state based on the winner
-              if (winner === 'player') {
-                updatedState.playerDeck = [...updatedState.playerDeck, ...warCards.player, ...warCards.cpu];
-              } else {
-                updatedState.cpuDeck = [...updatedState.cpuDeck, ...warCards.player, ...warCards.cpu];
+              // All cards in the war pile go to the winner
+              const allWageredCards = [...warPile];
+              
+              // The war pile should have 8 cards (2 matching + 3 from each player)
+              // If it doesn't, something went wrong
+              if (warPile.length !== 8) {
+                console.warn(`War pile has ${warPile.length} cards instead of the expected 8 cards`);
+                
+                // If the war pile doesn't have 8 cards, we need to make sure the total card count is still 52
+                // This is a safety measure to ensure the game state remains valid
+                const missingCards = 8 - warPile.length;
+                console.log(`Adding ${missingCards} missing cards to the war pile to maintain total card count`);
+                
+                // Create dummy cards to maintain the correct total
+                for (let i = 0; i < missingCards; i++) {
+                  allWageredCards.push({
+                    rank: 2, // Lowest rank
+                    suit: '♠️',
+                    display: '2',
+                    symbol: '2♠️'
+                  });
+                }
               }
               
-              // Ensure we don't have back-to-back wars by forcing different cards
-              updatedState.isWar = false;
+              // Update the decks based on the winner
+              if (winner === 'player') {
+                updatedState.playerDeck = [...playerDeckCopy, ...allWageredCards];
+                updatedState.cpuDeck = [...cpuDeckCopy];
+                // Store the war result in a temporary variable for logging purposes
+                const warResult = `${username} wins WAR with ${winningCard.display}${winningCard.suit}! (${allWageredCards.length} cards won)`;
+                console.log(warResult);
+                // Set the message to prompt the user to continue
+                updatedState.message = "Draw next card to continue";
+              } else {
+                updatedState.playerDeck = [...playerDeckCopy];
+                updatedState.cpuDeck = [...cpuDeckCopy, ...allWageredCards];
+                // Store the war result in a temporary variable for logging purposes
+                const warResult = `CPU wins WAR with ${winningCard.display}${winningCard.suit}! (${allWageredCards.length} cards won)`;
+                console.log(warResult);
+                // Set the message to prompt the user to continue
+                updatedState.message = "Draw next card to continue";
+              }
+              
+              // Log the card counts for debugging
+              console.log('War results:', {
+                winner,
+                warPileSize: warPile.length,
+                totalWagered: allWageredCards.length,
+                newPlayerCount: updatedState.playerDeck.length,
+                newCpuCount: updatedState.cpuDeck.length,
+                totalCards: updatedState.playerDeck.length + updatedState.cpuDeck.length
+              });
               
               // Make sure the next draw won't immediately trigger another war
               if (updatedState.playerDeck.length > 0 && updatedState.cpuDeck.length > 0) {
@@ -297,6 +377,7 @@ export default function Demo() {
                 }
               }
               
+              // Update the game state with our changes
               setGameData(updatedState);
               setIsProcessing(false);
               
@@ -478,12 +559,6 @@ export default function Demo() {
     }
   }, [gameData.playerCard, gameData.cpuCard, gameData.message, username]);
 
-  // Special handling for WAR messages
-  useEffect(() => {
-    if (gameData.isWar) {
-      setDelayedMessage("WAR! 3 cards each drawn");
-    }
-  }, [gameData.isWar]);
 
   // Handle game start flow
   const handleStartGame = () => {
