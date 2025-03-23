@@ -209,26 +209,49 @@ export default function Demo() {
     }
   }, [isSDKLoaded, gameState, fetchUserDataByFid]);
 
+  // State for war animation sequence
+  const [warStage, setWarStage] = useState<'initial' | 'showing-cards' | 'drawing-cards' | 'complete'>('initial');
+  const [warCards, setWarCards] = useState<{player: any[], cpu: any[]}>({player: [], cpu: []});
+  
   // Effect for War animation
   useEffect(() => {
     let warTimer: NodeJS.Timeout;
     
     if (gameData.isWar && !gameData.gameOver) {
+      // Reset war animation state
+      setWarStage('initial');
       setIsProcessing(true);
-      setShowWarAnimation(true);
+      
+      // First show the matching cards
+      setWarStage('showing-cards');
       playWarSound();
       
+      // After 1.5 seconds, show the war animation
       warTimer = setTimeout(() => {
-        if (!gameData.gameOver) {  // Additional check before updating state
-          setShowWarAnimation(false);
-          setGameData(prev => ({
-            ...prev,
-            isWar: false,
-            readyForNextCard: true
-          }));
-          setIsProcessing(false);
-        }
-      }, 3000);
+        setShowWarAnimation(true);
+        setWarStage('drawing-cards');
+        
+        // Generate visual cards for animation
+        const playerCards = gameData.playerDeck.slice(0, 3);
+        const cpuCards = gameData.cpuDeck.slice(0, 3);
+        setWarCards({player: playerCards, cpu: cpuCards});
+        
+        // After 3 more seconds, complete the war
+        const completeTimer = setTimeout(() => {
+          if (!gameData.gameOver) {  // Additional check before updating state
+            setShowWarAnimation(false);
+            setWarStage('complete');
+            setGameData(prev => ({
+              ...prev,
+              isWar: false,
+              readyForNextCard: true
+            }));
+            setIsProcessing(false);
+          }
+        }, 3000);
+        
+        return () => clearTimeout(completeTimer);
+      }, 1500);
     }
     
     return () => {
@@ -237,7 +260,7 @@ export default function Demo() {
       }
       setIsProcessing(false);
     };
-  }, [gameData.isWar, gameData.gameOver, playWarSound]);
+  }, [gameData.isWar, gameData.gameOver, gameData.playerDeck, gameData.cpuDeck, playWarSound]);
 
   useEffect(() => {
     if (gameData.isNukeActive) {
@@ -609,6 +632,15 @@ export default function Demo() {
         <NukeAnimation 
           isVisible={showNukeAnimation} 
           initiator={nukeInitiator}
+        />
+        
+        {/* War Animation */}
+        <WarAnimation 
+          isVisible={showWarAnimation}
+          playerCard={gameData.playerCard}
+          cpuCard={gameData.cpuCard}
+          warCards={warCards}
+          warStage={warStage}
         />
 
         {/* Card Change Animation Component */}

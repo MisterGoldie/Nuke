@@ -167,8 +167,8 @@ export function drawCards(state: LocalState): LocalState {
     
     // wasWar is already checked earlier
     
-    // If it was a war or cards are equal, redraw CPU card to prevent consecutive wars
-    if ((wasWar || playerRank === cpuRank) && newState.cpuDeck.length > 0) {
+    // Only prevent consecutive wars, but allow normal wars to happen
+    if (wasWar && playerRank === cpuRank && newState.cpuDeck.length > 0) {
         newState.cpuDeck.unshift(newState.cpuCard);
         
         let foundDifferentCard = false;
@@ -218,15 +218,18 @@ export function drawCards(state: LocalState): LocalState {
         newState.cpuDeck.push(newState.playerCard, newState.cpuCard);
         newState.readyForNextCard = true;
     } else {
-        newState.message = "WAR!";
+        // War scenario - same rank cards
+        newState.message = `WAR! ${newState.playerCard.display}${newState.playerCard.suit} vs ${newState.cpuCard.display}${newState.cpuCard.suit}`;
         newState.isWar = true;
         
         if (newState.playerDeck.length >= 3 && newState.cpuDeck.length >= 3) {
+            // Add current cards to war pile
             newState.warPile.push(newState.playerCard, newState.cpuCard);
             newState.playerCard = null;
             newState.cpuCard = null;
             
-            for (let i = 0; i < 2; i++) {
+            // Add 3 cards from each player to war pile
+            for (let i = 0; i < 3; i++) {
                 newState.warPile.push(newState.playerDeck.shift()!);
                 newState.warPile.push(newState.cpuDeck.shift()!);
             }
