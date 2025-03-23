@@ -172,7 +172,7 @@ export default function WarAnimation({
       {/* Revealing the 4th card that will determine the winner */}
       {warStage === 'revealing-winner' && warWinner && warWinningCard && (
         <div className="relative flex flex-col items-center justify-center w-full h-full">
-          <div className="text-2xl text-white mb-8">FINAL CARD REVEALS THE WINNER!</div>
+          <div className="text-2xl text-white mb-8 text-center w-full">FINAL CARD REVEALS THE WINNER!</div>
           <div className="flex justify-between w-full px-4 sm:px-10 md:px-20">
             {/* Player's 4 cards */}
             <div className="flex flex-col items-center">
