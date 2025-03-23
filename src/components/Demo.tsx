@@ -449,16 +449,24 @@ export default function Demo() {
                     }
                     
                     // Set game over state with clear message
+                    let winnerMessage = '';
+                    if (playerTotal > cpuTotal) {
+                        winnerMessage = `GAME OVER - TIME'S UP! ${username} WINS with ${playerTotal} cards!`;
+                    } else if (playerTotal === cpuTotal) {
+                        winnerMessage = `GAME OVER - TIME'S UP! IT'S A TIE with ${playerTotal} cards each!`;
+                    } else {
+                        winnerMessage = `GAME OVER - TIME'S UP! CPU WINS with ${cpuTotal} cards!`;
+                    }
+                    
                     setGameData(prev => ({
                         ...prev,
                         gameOver: true,
                         readyForNextCard: false,
-                        message: playerTotal > cpuTotal ? 
-                            `GAME OVER - TIME'S UP! ${username} WINS with ${playerTotal} cards!` : 
-                            playerTotal === cpuTotal ?
-                            `GAME OVER - TIME'S UP! IT'S A TIE with ${playerTotal} cards each!` :
-                            `GAME OVER - TIME'S UP! CPU WINS with ${cpuTotal} cards!`
+                        message: winnerMessage
                     }));
+                    
+                    // Ensure the message is immediately shown
+                    setDelayedMessage(winnerMessage);
                     
                     // Handle game end with proper outcome
                     const outcome = playerTotal > cpuTotal ? 'win' : 
@@ -764,15 +772,27 @@ export default function Demo() {
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.4 }}
         >
+          {/* No overlay - removed */}
           <AnimatePresence mode="wait">
             <motion.div 
               key={delayedMessage} 
-              className="text-[#00ff00]" 
-              style={{ textShadow: 'none', position: 'relative', zIndex: 1 }}
+              className={`${delayedMessage.includes('TIME\'S UP') ? 'text-[#ff9900] font-bold text-2xl' : 'text-[#00ff00]'}`} 
+              style={{ 
+                textShadow: delayedMessage.includes('TIME\'S UP') ? '0 0 10px rgba(255, 153, 0, 0.8)' : 'none', 
+                position: 'relative', 
+                zIndex: 1 
+              }}
               initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
+              animate={{ 
+                opacity: 1, 
+                y: 0, 
+                scale: delayedMessage.includes('TIME\'S UP') ? [1, 1.05, 1] : 1
+              }}
               exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.3 }}
+              transition={{ 
+                duration: 0.3,
+                scale: { duration: 0.8, repeat: delayedMessage.includes('TIME\'S UP') ? Infinity : 0 }
+              }}
             >
               {isFirstCard ? "Draw card to begin" : delayedMessage}
             </motion.div>
