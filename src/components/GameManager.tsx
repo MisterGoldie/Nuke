@@ -27,8 +27,8 @@ export function useGameManager({
   setCpuCardChange
 }: GameManagerProps) {
   const handleDrawCard = useCallback(() => {
-    // Prevent any actions if the game is over
-    if (gameData.gameOver) {
+    // Prevent any actions if the game is over or processing
+    if (gameData.gameOver || gameData.isWar) {
       return;
     }
     

@@ -236,16 +236,21 @@ export default function Demo() {
         const cpuCards = gameData.cpuDeck.slice(0, 3);
         setWarCards({player: playerCards, cpu: cpuCards});
         
-        // After 3 more seconds, complete the war
+        // After 3 more seconds, complete the war and continue the game
         const completeTimer = setTimeout(() => {
           if (!gameData.gameOver) {  // Additional check before updating state
             setShowWarAnimation(false);
             setWarStage('complete');
-            setGameData(prev => ({
-              ...prev,
+            
+            // Continue the game after war animation
+            // Draw new cards to resolve the war
+            const updatedState = drawCards({
+              ...gameData,
               isWar: false,
               readyForNextCard: true
-            }));
+            });
+            
+            setGameData(updatedState);
             setIsProcessing(false);
           }
         }, 3000);

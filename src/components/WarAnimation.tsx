@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import CardComponent from './Card';
 
 interface WarAnimationProps {
@@ -16,7 +16,7 @@ export default function WarAnimation({
   warCards = {player: [], cpu: []},
   warStage 
 }: WarAnimationProps) {
-  if (!isVisible && warStage === 'initial') return null;
+  if (!isVisible) return null;
 
   return (
     <div className="absolute inset-0 flex flex-col items-center justify-center z-50">
