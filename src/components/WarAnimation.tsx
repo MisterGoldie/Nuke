@@ -173,12 +173,13 @@ export default function WarAnimation({
       {warStage === 'revealing-winner' && warWinner && warWinningCard && (
         <div className="relative flex flex-col items-center justify-center w-full h-full">
           <div className="text-2xl text-white mb-8 text-center w-full">FINAL CARD REVEALS THE WINNER!</div>
-          <div className="flex justify-between w-full px-4 sm:px-10 md:px-20">
-            {/* Player's 4 cards */}
+          
+          {/* First show the stacks of face-down cards */}
+          <div className="flex justify-between w-full px-4 sm:px-10 md:px-20 mb-8">
+            {/* Player's 3 face-down cards */}
             <div className="flex flex-col items-center">
               <div className="text-xl text-white mb-2">YOUR CARDS</div>
               <div className="relative h-[200px] w-[90px] sm:w-[120px]">
-                {/* First 3 face-down cards */}
                 {[0, 1, 2].map((index) => (
                   <motion.div 
                     key={`player-stack-${index}`}
@@ -191,42 +192,13 @@ export default function WarAnimation({
                     </div>
                   </motion.div>
                 ))}
-                {/* 5th card - shown and flipped for both players */}
-                <motion.div 
-                  className="absolute"
-                  initial={{ y: 4 * 15, rotateY: 180 }}
-                  animate={{ 
-                    y: warWinner === 'player' ? 0 : 4 * 15, 
-                    rotateY: 0,
-                    scale: warWinner === 'player' ? 1.05 : 1,
-                    zIndex: warWinner === 'player' ? 10 : 0
-                  }}
-                  transition={{ duration: 0.8, type: 'spring' }}
-                >
-                  <div className="transform-gpu">
-                    <div className="relative">
-                      {/* Always show player's card, with glow effect if winner */}
-                      {warWinner === 'player' && (
-                        <div className="absolute inset-0 rounded-xl blur-md -z-10 bg-green-500" style={{ transform: 'scale(1.15)' }} />
-                      )}
-                      <CardComponent
-                        suit={warWinningCard.playerSuit === 'hearts' ? '♥️' : warWinningCard.playerSuit === 'diamonds' ? '♦️' : warWinningCard.playerSuit === 'clubs' ? '♣️' : '♠️'}
-                        rank={warWinningCard.playerRank}
-                        isFlipped={true}
-                        isPlayerCard={true}
-                        singleCard={true}
-                      />
-                    </div>
-                  </div>
-                </motion.div>
               </div>
             </div>
             
-            {/* CPU's 4 cards */}
+            {/* CPU's 3 face-down cards */}
             <div className="flex flex-col items-center">
               <div className="text-xl text-white mb-2">CPU CARDS</div>
               <div className="relative h-[200px] w-[90px] sm:w-[120px]">
-                {/* First 3 face-down cards */}
                 {[0, 1, 2].map((index) => (
                   <motion.div 
                     key={`cpu-stack-${index}`}
@@ -239,35 +211,52 @@ export default function WarAnimation({
                     </div>
                   </motion.div>
                 ))}
-                {/* 5th card - shown and flipped for both players */}
-                <motion.div 
-                  className="absolute"
-                  initial={{ y: 4 * 15, rotateY: 180 }}
-                  animate={{ 
-                    y: warWinner === 'cpu' ? 0 : 4 * 15, 
-                    rotateY: 0,
-                    scale: warWinner === 'cpu' ? 1.05 : 1,
-                    zIndex: warWinner === 'cpu' ? 10 : 0
-                  }}
-                  transition={{ duration: 0.8, type: 'spring' }}
-                >
-                  <div className="transform-gpu">
-                    <div className="relative">
-                      {/* Always show CPU's card, with glow effect if winner */}
-                      {warWinner === 'cpu' && (
-                        <div className="absolute inset-0 rounded-xl blur-md -z-10 bg-red-500" style={{ transform: 'scale(1.15)' }} />
-                      )}
-                      <CardComponent
-                        suit={warWinningCard.cpuSuit === 'hearts' ? '♥️' : warWinningCard.cpuSuit === 'diamonds' ? '♦️' : warWinningCard.cpuSuit === 'clubs' ? '♣️' : '♠️'}
-                        rank={warWinningCard.cpuRank}
-                        isFlipped={true}
-                        isPlayerCard={false}
-                        singleCard={true}
-                      />
-                    </div>
-                  </div>
-                </motion.div>
               </div>
+            </div>
+          </div>
+          
+          {/* Center reveal area with both cards side by side */}
+          <div className="flex justify-center items-center space-x-8 sm:space-x-16">
+            {/* Player's card */}
+            <div className="relative">
+              <motion.div
+                initial={{ scale: 0.8, opacity: 0, rotateY: 180 }}
+                animate={{ scale: 1, opacity: 1, rotateY: 0 }}
+                transition={{ duration: 0.8, type: 'spring' }}
+              >
+                {warWinner === 'player' && (
+                  <div className="absolute inset-0 rounded-xl blur-md -z-10 bg-green-500" style={{ transform: 'scale(1.15)' }} />
+                )}
+                <CardComponent
+                  suit={warWinningCard.playerSuit === 'hearts' ? '♥️' : warWinningCard.playerSuit === 'diamonds' ? '♦️' : warWinningCard.playerSuit === 'clubs' ? '♣️' : '♠️'}
+                  rank={warWinningCard.playerRank}
+                  isFlipped={true}
+                  isPlayerCard={true}
+                  singleCard={true}
+                />
+              </motion.div>
+              <div className="text-center text-white mt-2">YOUR CARD</div>
+            </div>
+            
+            {/* CPU's card */}
+            <div className="relative">
+              <motion.div
+                initial={{ scale: 0.8, opacity: 0, rotateY: 180 }}
+                animate={{ scale: 1, opacity: 1, rotateY: 0 }}
+                transition={{ duration: 0.8, type: 'spring' }}
+              >
+                {warWinner === 'cpu' && (
+                  <div className="absolute inset-0 rounded-xl blur-md -z-10 bg-red-500" style={{ transform: 'scale(1.15)' }} />
+                )}
+                <CardComponent
+                  suit={warWinningCard.cpuSuit === 'hearts' ? '♥️' : warWinningCard.cpuSuit === 'diamonds' ? '♦️' : warWinningCard.cpuSuit === 'clubs' ? '♣️' : '♠️'}
+                  rank={warWinningCard.cpuRank}
+                  isFlipped={true}
+                  isPlayerCard={false}
+                  singleCard={true}
+                />
+              </motion.div>
+              <div className="text-center text-white mt-2">CPU CARD</div>
             </div>
           </div>
         </div>
