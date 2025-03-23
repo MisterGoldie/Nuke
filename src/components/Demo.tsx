@@ -226,6 +226,34 @@ export default function Demo() {
         isWarBeingHandled: true
       }));
       
+      // Check if either player has fewer than 4 cards for war
+      // This handles the case where they have enough for the initial draw but not enough for the full war
+      if (gameData.playerDeck.length < 3 || gameData.cpuDeck.length < 3) {
+        // End game immediately if not enough cards
+        const winner = gameData.playerDeck.length < 3 ? 'cpu' : 'player';
+        const message = `GAME OVER - ${winner === 'player' ? username.toUpperCase() : 'CPU'} WINS!`;
+        
+        // Stop the timer
+        setIsTimerRunning(false);
+        
+        setTimeout(() => {
+          // Update game state to game over
+          setGameData(prev => ({
+            ...prev,
+            gameOver: true,
+            message: message,
+            isWarBeingHandled: false,
+            isWar: false
+          }));
+          
+          // Make sure the message displays properly
+          setDelayedMessage(message);
+          setIsProcessing(false);
+        }, 1000);
+        
+        return () => {};
+      }
+      
       // Reset war animation state
       setWarStage('initial');
       setIsProcessing(true);
@@ -236,6 +264,27 @@ export default function Demo() {
       
       // After 1.5 seconds, show the war animation
       warTimer = setTimeout(() => {
+        // Check if either player has less than 3 cards for war
+        if (gameData.playerDeck.length < 3 || gameData.cpuDeck.length < 3) {
+          // End game immediately if not enough cards
+          const winner = gameData.playerDeck.length < 3 ? 'cpu' : 'player';
+          const message = `GAME OVER - ${winner === 'player' ? username : 'CPU'} WINS!`;
+          
+          // Update game state to game over
+          setGameData(prev => ({
+            ...prev,
+            gameOver: true,
+            message: message,
+            isWarBeingHandled: false,
+            isWar: false
+          }));
+          
+          setIsProcessing(false);
+          setShowWarAnimation(false);
+          return;
+        }
+        
+        // Continue with war animation if both players have enough cards
         setShowWarAnimation(true);
         setWarStage('drawing-cards');
         

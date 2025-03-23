@@ -103,7 +103,8 @@ export function drawCards(state: LocalState): LocalState {
     
     // Draw player card first
     newState.playerCard = newState.playerDeck.shift()!;
-    playerRank = newState.playerCard.rank;
+    // Add null check here to prevent runtime errors when playerCard is undefined
+    playerRank = newState.playerCard?.rank || 0;
     
     // Artificially increase WAR probability to 25%
     // Calculate if we should force a WAR (only if not first draw and not coming from a previous WAR)
@@ -138,7 +139,8 @@ export function drawCards(state: LocalState): LocalState {
         newState.cpuCard = newState.cpuDeck.shift()!;
     }
     
-    cpuRank = newState.cpuCard.rank;
+    // Add null check here to prevent runtime errors when cpuCard is undefined
+    cpuRank = newState.cpuCard?.rank || 0;
     
     // Check if game has been running for more than 2 minutes
     const gameRunningTime = Date.now() - (newState.gameStartTime || Date.now());

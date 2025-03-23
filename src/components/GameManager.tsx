@@ -32,6 +32,24 @@ export function useGameManager({
       return;
     }
     
+    // Check if game should be over before drawing cards
+    if (gameData.playerDeck.length === 0 || gameData.cpuDeck.length === 0 || 
+        gameData.playerDeck.length === 52 || gameData.cpuDeck.length === 52) {
+      // Determine winner
+      const winner = gameData.playerDeck.length > 0 ? 'player' : 'cpu';
+      const endMessage = `GAME OVER - ${winner === 'player' ? 'YOU' : 'CPU'} WINS!`;
+      
+      // Update game state to game over
+      setGameData(prev => ({
+        ...prev,
+        gameOver: true,
+        message: endMessage
+      }));
+      
+      handleGameEnd(winner === 'player' ? 'win' : 'loss', false);
+      return;
+    }
+    
     if (!gameData.playerCard && !gameData.cpuCard) {
       setIsProcessing(true);
       const prevPlayerDeckLength = gameData.playerDeck.length;
