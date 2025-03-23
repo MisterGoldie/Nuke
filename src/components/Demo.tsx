@@ -56,6 +56,8 @@ export default function Demo() {
   const [timeRemaining, setTimeRemaining] = useState<number>(240); // 240 seconds = 4 minutes
   const [isGameLocked, setIsGameLocked] = useState(false);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
+  const [playerCardChange, setPlayerCardChange] = useState<number | null>(null);
+  const [cpuCardChange, setCpuCardChange] = useState<number | null>(null);
 
   // Add effect to handle muting across all states
   useEffect(() => {
@@ -142,7 +144,9 @@ export default function Demo() {
     setNukeInitiator,
     setIsProcessing,
     handleGameEnd,
-    playNukeSound
+    playNukeSound,
+    setPlayerCardChange,
+    setCpuCardChange
   });
 
   useEffect(() => {
@@ -598,6 +602,45 @@ export default function Demo() {
           isVisible={showNukeAnimation} 
           initiator={nukeInitiator}
         />
+
+        {/* Card Change Animation Component */}
+        <AnimatePresence>
+          {cpuCardChange && (
+            <motion.div 
+              className="absolute top-[150px] right-[80px] z-50"
+              initial={{ y: 0, opacity: 0, scale: 0.5 }}
+              animate={{ y: -30, opacity: 1, scale: 1.2 }}
+              exit={{ y: -60, opacity: 0 }}
+              transition={{ duration: 0.8 }}
+              onAnimationComplete={() => setCpuCardChange(null)}
+            >
+              <span className={`text-2xl font-bold ${cpuCardChange > 0 ? 'text-green-500' : 'text-red-500'}`}
+                style={{ textShadow: '0 0 8px rgba(0, 0, 0, 0.8)' }}
+              >
+                {cpuCardChange > 0 ? '+' : ''}{cpuCardChange}
+              </span>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <AnimatePresence>
+          {playerCardChange && (
+            <motion.div 
+              className="absolute bottom-[150px] left-[80px] z-50"
+              initial={{ y: 0, opacity: 0, scale: 0.5 }}
+              animate={{ y: -30, opacity: 1, scale: 1.2 }}
+              exit={{ y: -60, opacity: 0 }}
+              transition={{ duration: 0.8 }}
+              onAnimationComplete={() => setPlayerCardChange(null)}
+            >
+              <span className={`text-2xl font-bold ${playerCardChange > 0 ? 'text-green-500' : 'text-red-500'}`}
+                style={{ textShadow: '0 0 8px rgba(0, 0, 0, 0.8)' }}
+              >
+                {playerCardChange > 0 ? '+' : ''}{playerCardChange}
+              </span>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Card Count Display */}
         <motion.div 
