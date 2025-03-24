@@ -300,6 +300,18 @@ export function drawCards(state: LocalState): LocalState {
         }
     }
     
+    // FINAL CHECK: Always check if either player has run out of cards after any card draw
+    // This ensures the game over message is always displayed
+    if (newState.playerDeck.length === 0) {
+        newState.gameOver = true;
+        newState.message = "GAME OVER - CPU WINS!"; 
+        newState.readyForNextCard = false;
+    } else if (newState.cpuDeck.length === 0) {
+        newState.gameOver = true;
+        newState.message = "GAME OVER - YOU WIN!"; 
+        newState.readyForNextCard = false;
+    }
+    
     return newState;
 }
   

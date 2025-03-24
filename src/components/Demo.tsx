@@ -233,6 +233,48 @@ export default function Demo() {
         isWarBeingHandled: true
       }));
       
+      // IMMEDIATELY check if either player doesn't have enough cards to complete a war
+      // For a war, a player needs 5 cards total (1 in play + 3 face down + 1 final card)
+      const playerTotalCards = 1 + gameData.playerDeck.length; // 1 card in play + cards in deck
+      const cpuTotalCards = 1 + gameData.cpuDeck.length; // 1 card in play + cards in deck
+      
+      // If either player has 4 or fewer cards total, they can't complete the war
+      if (playerTotalCards <= 4 || cpuTotalCards <= 4) {
+        console.log(`Not enough cards for war! Player: ${playerTotalCards}, CPU: ${cpuTotalCards}`);
+        
+        // Determine the winner based on who has more cards
+        const winner = playerTotalCards > cpuTotalCards ? 'player' : 'cpu';
+        const message = `GAME OVER - ${winner === 'player' ? username.toUpperCase() : 'CPU'} WINS!`;
+        
+        // Stop the timer
+        setIsTimerRunning(false);
+        
+        // DON'T show any war animation
+        setWarStage('initial');
+        setShowWarAnimation(false);
+        setIsProcessing(false);
+        
+        // Update game state to game over immediately
+        setGameData(prev => ({
+          ...prev,
+          gameOver: true,
+          message: message,
+          isWarBeingHandled: false,
+          isWar: false,
+          playerCard: null,
+          cpuCard: null,
+          warPile: []
+        }));
+        
+        // Make sure the message is visible
+        setDelayedMessage(message);
+        
+        // Record the game outcome
+        handleGameEnd(winner === 'player' ? 'win' : 'loss');
+        
+        return () => {};
+      }
+      
       // For a war, each player needs 3 cards from their deck (the initial matching cards are already in play)
       // So we check if either player has fewer than 3 cards left in their deck
       if (gameData.playerDeck.length < 3 || gameData.cpuDeck.length < 3) {
@@ -246,6 +288,9 @@ export default function Demo() {
         // Immediately clear war state to prevent animation issues
         setWarStage('initial');
         setShowWarAnimation(false);
+        
+        // Immediately clear processing state to unfreeze the UI
+        setIsProcessing(false);
         
         setTimeout(() => {
           // Update game state to game over
@@ -263,8 +308,46 @@ export default function Demo() {
           
           // Make sure the message displays properly
           setDelayedMessage(message);
-          setIsProcessing(false);
-        }, 1000);
+        }, 500);
+        
+        return () => {};
+      }
+      
+      // This check was moved to the beginning of the war effect
+      // and is handled there without starting the animation
+      if (false) {
+        // Player will run out of cards during or after this war
+        // Using constants to avoid variable reference errors
+        const winner = 'player'; // Placeholder, never used
+        const message = `GAME OVER - ${winner === 'player' ? username.toUpperCase() : 'CPU'} WINS!`;
+        
+        // Stop the timer
+        setIsTimerRunning(false);
+        
+        // Immediately clear war state to prevent animation issues
+        setWarStage('initial');
+        setShowWarAnimation(false);
+        
+        // Immediately clear processing state to unfreeze the UI
+        setIsProcessing(false);
+        
+        setTimeout(() => {
+          // Update game state to game over
+          setGameData(prev => ({
+            ...prev,
+            gameOver: true,
+            message: message,
+            isWarBeingHandled: false,
+            isWar: false,
+            // Clear any cards in play to prevent animation issues
+            playerCard: null,
+            cpuCard: null,
+            warPile: []
+          }));
+          
+          // Make sure the message displays properly
+          setDelayedMessage(message);
+        }, 500);
         
         return () => {};
       }
@@ -283,11 +366,12 @@ export default function Demo() {
         if (gameData.playerDeck.length < 3 || gameData.cpuDeck.length < 3) {
           // End game immediately if not enough cards
           const winner = gameData.playerDeck.length < 3 ? 'cpu' : 'player';
-          const message = `GAME OVER - ${winner === 'player' ? username : 'CPU'} WINS!`;
+          const message = `GAME OVER - ${winner === 'player' ? username.toUpperCase() : 'CPU'} WINS!`;
           
           // Immediately clear war state to prevent animation issues
           setWarStage('initial');
           setShowWarAnimation(false);
+          setIsProcessing(false); // CRITICAL: Clear processing state to unfreeze UI
           
           // Update game state to game over
           setGameData(prev => ({
@@ -302,7 +386,42 @@ export default function Demo() {
             warPile: []
           }));
           
-          setIsProcessing(false);
+          // Make sure the message is immediately visible
+          setDelayedMessage(message);
+          return;
+        }
+        
+        // Also check if a player doesn't have enough cards to complete a war
+        // For a war, you need: 1 card already in play + 3 face down + 1 turned card = 5 cards total
+        // So we end the game if a player has 4 or fewer total cards
+        const playerTotalCards = 1 + gameData.playerDeck.length; // 1 card in play + cards in deck
+        const cpuTotalCards = 1 + gameData.cpuDeck.length; // 1 card in play + cards in deck
+        
+        if (playerTotalCards <= 4 || cpuTotalCards <= 4) {
+          console.log('Low card count in war detected:', { playerTotalCards, cpuTotalCards });
+          // Player will run out of cards during this war
+          const winner = playerTotalCards > cpuTotalCards ? 'player' : 'cpu';
+          const message = `GAME OVER - ${winner === 'player' ? username.toUpperCase() : 'CPU'} WINS!`;
+          
+          // Immediately clear war state to prevent animation issues
+          setWarStage('initial');
+          setShowWarAnimation(false);
+          setIsProcessing(false); // CRITICAL: Clear processing state to unfreeze UI
+          
+          // Update game state to game over
+          setGameData(prev => ({
+            ...prev,
+            gameOver: true,
+            message: message,
+            isWarBeingHandled: false,
+            isWar: false,
+            playerCard: null,
+            cpuCard: null,
+            warPile: []
+          }));
+          
+          // Make sure the message is immediately visible
+          setDelayedMessage(message);
           return;
         }
         
@@ -467,6 +586,29 @@ export default function Demo() {
                     if (topCard) updatedState.playerDeck.push(topCard);
                   }
                 }
+              }
+              
+              // Check if either player has run out of cards after the war
+              if (updatedState.playerDeck.length === 0 || updatedState.cpuDeck.length === 0) {
+                // Determine the winner based on who has cards left
+                const gameWinner = updatedState.playerDeck.length > 0 ? 'player' : 'cpu';
+                const gameOverMessage = `GAME OVER - ${gameWinner === 'player' ? username.toUpperCase() : 'CPU'} WINS!`;
+                
+                // Update game state to show game over message
+                updatedState.gameOver = true;
+                updatedState.message = gameOverMessage;
+                updatedState.readyForNextCard = false;
+                
+                // Make sure the message is immediately visible
+                setDelayedMessage(gameOverMessage);
+                
+                // Record the game outcome
+                handleGameEnd(gameWinner === 'player' ? 'win' : 'loss');
+                
+                console.log(`Game over after war! ${gameWinner === 'player' ? username : 'CPU'} wins!`);
+              } else if (updatedState.playerDeck.length <= 5) {
+                // Player is dangerously low on cards - add a warning
+                updatedState.message = `WARNING: You only have ${updatedState.playerDeck.length} cards left!`;
               }
               
               // Update the game state with our changes
