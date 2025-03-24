@@ -107,6 +107,13 @@ export default function Demo() {
     setIsGameLocked(true);
     setIsTimerRunning(false);
     
+    // If the game ended because the timer ran out, don't record any outcome
+    // Timer expiration should not count as a win, loss, or tie for leaderboard purposes
+    if (isTimeUp) {
+        console.log("Timer expired - not recording any outcome");
+        return;
+    }
+    
     if (!context?.user?.fid) {
         console.log("Waiting for FID to load...");
         return;
@@ -226,8 +233,8 @@ export default function Demo() {
         isWarBeingHandled: true
       }));
       
-      // Check if either player has fewer than 4 cards for war
-      // This handles the case where they have enough for the initial draw but not enough for the full war
+      // For a war, each player needs 3 cards from their deck (the initial matching cards are already in play)
+      // So we check if either player has fewer than 3 cards left in their deck
       if (gameData.playerDeck.length < 3 || gameData.cpuDeck.length < 3) {
         // End game immediately if not enough cards
         const winner = gameData.playerDeck.length < 3 ? 'cpu' : 'player';
@@ -236,6 +243,10 @@ export default function Demo() {
         // Stop the timer
         setIsTimerRunning(false);
         
+        // Immediately clear war state to prevent animation issues
+        setWarStage('initial');
+        setShowWarAnimation(false);
+        
         setTimeout(() => {
           // Update game state to game over
           setGameData(prev => ({
@@ -243,7 +254,11 @@ export default function Demo() {
             gameOver: true,
             message: message,
             isWarBeingHandled: false,
-            isWar: false
+            isWar: false,
+            // Clear any cards in play to prevent animation issues
+            playerCard: null,
+            cpuCard: null,
+            warPile: []
           }));
           
           // Make sure the message displays properly
@@ -264,11 +279,15 @@ export default function Demo() {
       
       // After 1.5 seconds, show the war animation
       warTimer = setTimeout(() => {
-        // Check if either player has less than 3 cards for war
+        // Double-check that both players still have enough cards for war
         if (gameData.playerDeck.length < 3 || gameData.cpuDeck.length < 3) {
           // End game immediately if not enough cards
           const winner = gameData.playerDeck.length < 3 ? 'cpu' : 'player';
           const message = `GAME OVER - ${winner === 'player' ? username : 'CPU'} WINS!`;
+          
+          // Immediately clear war state to prevent animation issues
+          setWarStage('initial');
+          setShowWarAnimation(false);
           
           // Update game state to game over
           setGameData(prev => ({
@@ -276,11 +295,14 @@ export default function Demo() {
             gameOver: true,
             message: message,
             isWarBeingHandled: false,
-            isWar: false
+            isWar: false,
+            // Clear any cards in play to prevent animation issues
+            playerCard: null,
+            cpuCard: null,
+            warPile: []
           }));
           
           setIsProcessing(false);
-          setShowWarAnimation(false);
           return;
         }
         
@@ -481,23 +503,51 @@ export default function Demo() {
         
         const timer = setTimeout(() => {
             setShowNukeAnimation(false);
-            setGameData(prev => ({
-                ...prev,
-                isNukeActive: false,
-                playerCard: null,
-                cpuCard: null,
-                readyForNextCard: true,
-                message: "Draw next card to continue"
-            }));
-            setIsProcessing(false);
-        }, 2000);
+            
+            // Check if this was a game-ending nuke message
+            if (gameData.message.includes("Player has fewer than 10 cards")) {
+                // CPU wins because player had fewer than 10 cards
+                setGameData(prev => ({
+                    ...prev,
+                    isNukeActive: false,
+                    gameOver: true,
+                    message: "Game Over - CPU wins with a NUKE!"
+                }));
+                handleGameEnd('loss');
+            } else {
+                // Normal nuke completion - completely reset card state for proper animation timing
+                setGameData(prev => {
+                    // Create a fresh state copy to ensure animation timings reset properly
+                    return {
+                        ...prev,
+                        isNukeActive: false,
+                        // Completely reset card state for proper animation timing
+                        playerCard: null,
+                        cpuCard: null,
+                        readyForNextCard: true,
+                        message: "Draw next card to continue"
+                    };
+                });
+                
+                // Add a small delay before allowing the next card draw
+                // This ensures animation timing is reset properly
+                setTimeout(() => {
+                    setIsProcessing(false);
+                }, 100);
+            }
+            // Only set isProcessing to false for the game-ending case
+            // For normal case, it's handled in the setTimeout above
+            if (gameData.message.includes("Player has fewer than 10 cards")) {
+                setIsProcessing(false);
+            }
+        }, 2500); // Reduced timing for better responsiveness while still showing full animation
         
         return () => {
             clearTimeout(timer);
             setIsProcessing(false);
         };
     }
-  }, [gameData.isNukeActive, gameData.message, playNukeSound]);
+  }, [gameData.isNukeActive, gameData.message, playNukeSound, handleGameEnd]);
 
   // Add effect to handle CPU NUKE sound
   useEffect(() => {
@@ -662,11 +712,6 @@ export default function Demo() {
             setTimeRemaining(prevTime => {
                 if (prevTime <= 1) {
                     clearInterval(timerInterval);
-                    setIsGameLocked(true);
-                    setIsTimerRunning(false);
-                    
-                    const playerTotal = gameData.playerDeck.length + (gameData.playerCard ? 1 : 0);
-                    const cpuTotal = gameData.cpuDeck.length + (gameData.cpuCard ? 1 : 0);
                     
                     // Play a sound to indicate game over
                     const warSound = soundCache.get('/sounds/war.mp3');
@@ -676,30 +721,24 @@ export default function Demo() {
                         warSound.play();
                     }
                     
-                    // Set game over state with clear message
-                    let winnerMessage = '';
-                    if (playerTotal > cpuTotal) {
-                        winnerMessage = `GAME OVER - ${username} WINS!`;
-                    } else if (playerTotal === cpuTotal) {
-                        winnerMessage = `GAME OVER - IT'S A TIE!`;
-                    } else {
-                        winnerMessage = `GAME OVER - CPU WINS!`;
-                    }
+                    // IMPORTANT: When timer runs out, the game simply ends - no winner is declared
+                    const timerMessage = "TIME'S UP - GAME OVER!";
                     
+                    // Set game over state with timer message
                     setGameData(prev => ({
                         ...prev,
                         gameOver: true,
                         readyForNextCard: false,
-                        message: winnerMessage
+                        message: timerMessage
                     }));
                     
-                    // Ensure the message is immediately shown
-                    setDelayedMessage(winnerMessage);
+                    // Ensure the timer message is immediately shown
+                    setDelayedMessage(timerMessage);
                     
-                    // Handle game end with proper outcome
-                    const outcome = playerTotal > cpuTotal ? 'win' : 
-                                  playerTotal === cpuTotal ? 'tie' : 'loss';
-                    handleGameEnd(outcome, true);
+                    // Stop the timer but DON'T record any outcome
+                    setIsTimerRunning(false);
+                    setIsGameLocked(true);
+                    
                     return 0;
                 }
                 return prevTime - 1;
@@ -806,7 +845,7 @@ export default function Demo() {
           <section>
             <h2 className="arcade-text-green text-2xl mb-3 tracking-wide">Winning</h2>
             <p className="arcade-text-green text-sm leading-relaxed">
-              Collect all cards to win! If a player doesn't have enough cards for WAR or NUKE, they automatically lose. Whoever has the most cards when the timer runs out is also declared the winner.
+              Collect all 52 cards to win! If a player doesn't have enough cards for WAR or NUKE, they automatically lose. When the timer runs out, the game simply ends without declaring a winner.
             </p>
           </section>
         </div>
@@ -1034,7 +1073,8 @@ export default function Demo() {
                 scale: { duration: 0.8, repeat: delayedMessage.includes('TIME\'S UP') ? Infinity : 0 }
               }}
             >
-              {isFirstCard ? "Draw card to begin" : delayedMessage}
+              {isFirstCard ? "Draw card to begin" : 
+                timeRemaining === 0 ? "TIME'S UP - GAME OVER!" : delayedMessage}
             </motion.div>
           </AnimatePresence>
         </motion.div>
@@ -1176,6 +1216,11 @@ export default function Demo() {
   // Single game over effect to replace all three game over effects
   useEffect(() => {
     if (gameData.gameOver && !hasSubmittedResult) {
+      // Immediately clear all animations to prevent fuzzy effect
+      setShowWarAnimation(false);
+      setShowNukeAnimation(false);
+      setWarStage('initial');
+      
       // First, ensure all cards are properly allocated
       const newState = { ...gameData };
       
@@ -1199,23 +1244,38 @@ export default function Demo() {
         newState.warPile = [];
       }
 
-      // Allow current animations to complete
+      // Allow current state updates to complete
       setTimeout(() => {
         setGameData(newState);
-        setShowWarAnimation(false);
-        setShowNukeAnimation(false);
         setIsProcessing(false);
 
         // Set final game over message
-        const gameOverMessage = gameData.message.includes("You win") || gameData.message.includes("NUKE") ?
-          `GAME OVER - ${username} WINS!` :
-          "GAME OVER - CPU WINS!";
+        let gameOverMessage;
+        let outcome: 'win' | 'loss' | 'tie';
+        
+        if (gameData.message.includes("Time's Up")) {
+          // Timer ran out - no winner declared
+          gameOverMessage = "TIME'S UP - GAME OVER!";
+          // Don't set an outcome for timer expiration
+          // This will prevent handleGameEnd from being called with any outcome
+          return;
+        } else if (gameData.message.includes("You win") || gameData.message.includes("NUKE")) {
+          // Player won
+          gameOverMessage = `GAME OVER - ${username} WINS!`;
+          outcome = 'win';
+        } else if (gameData.message.includes("tie")) {
+          // It's a tie for other reasons
+          gameOverMessage = "GAME OVER - IT'S A TIE!";
+          outcome = 'tie';
+        } else {
+          // CPU won
+          gameOverMessage = "GAME OVER - CPU WINS!";
+          outcome = 'loss';
+        }
         
         setDelayedMessage(gameOverMessage);
         
         // Handle game end once
-        const outcome = gameData.message.includes("You win") || gameData.message.includes("NUKE") ? 
-          'win' : 'loss';
         handleGameEnd(outcome);
       }, 1000);
 
@@ -1370,32 +1430,36 @@ export default function Demo() {
     };
   }, []);
 
-  // Update the timer effect to handle ties
+  // Update the timer effect to just end the game when timer runs out without declaring a winner
   useEffect(() => {
     if (timeRemaining === 0 && !gameData.gameOver) {
-      const playerCards = gameData.playerDeck.length + (gameData.playerCard ? 1 : 0);
-      const cpuCards = gameData.cpuDeck.length + (gameData.cpuCard ? 1 : 0);
+      // When timer runs out, the game simply ends - no winner is declared
+      // You only win by collecting all 52 cards
       
-      if (playerCards === cpuCards) {
-        setGameData(prev => ({
-          ...prev,
-          gameOver: true,
-          message: "Game Over - It's a tie!"
-        }));
-        handleGameEnd('tie', true);
-      } else {
-        const winner = playerCards > cpuCards ? 'win' : 'loss';
-        setGameData(prev => ({
-          ...prev,
-          gameOver: true,
-          message: winner === 'win' ? 
-            "Game Over - You win on points!" : 
-            "Game Over - CPU wins on points!"
-        }));
-        handleGameEnd(winner, true);
-      }
+      // FORCE the timer message to be displayed correctly
+      const timerMessage = "TIME'S UP - GAME OVER!";
+      
+      // Set the game data with the timer message
+      setGameData(prev => ({
+        ...prev,
+        gameOver: true,
+        message: timerMessage
+      }));
+      
+      // Immediately set the delayed message to ensure it's displayed correctly
+      setDelayedMessage(timerMessage);
+      
+      // Stop the timer but DON'T record any outcome
+      setIsTimerRunning(false);
+      setIsGameLocked(true);
+      
+      // Force the message to be displayed again after a short delay
+      // This ensures it overrides any other messages that might be set
+      setTimeout(() => {
+        setDelayedMessage(timerMessage);
+      }, 100);
     }
-  }, [timeRemaining, gameData, handleGameEnd]);
+  }, [timeRemaining, gameData]);
 
   return null;
 }

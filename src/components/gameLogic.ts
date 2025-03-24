@@ -222,25 +222,64 @@ export function drawCards(state: LocalState): LocalState {
         newState.readyForNextCard = true;
     } else {
         // War scenario - same rank cards
+        
+        // Check if either player has fewer than 5 cards total (1 in play + 4 in deck)
+        // This ensures they have enough cards for the entire war process
+        const playerTotalCards = 1 + newState.playerDeck.length; // 1 card in play + cards in deck
+        const cpuTotalCards = 1 + newState.cpuDeck.length; // 1 card in play + cards in deck
+        
+        // If either player has fewer than 5 cards total, they can't complete a war
+        if (playerTotalCards < 5 || cpuTotalCards < 5) {
+            // Not enough cards for war - determine winner based on who has more cards
+            if (playerTotalCards > cpuTotalCards) {
+                newState.message = "You win! CPU doesn't have enough cards for WAR.";
+                // Player wins both cards
+                newState.playerDeck.push(newState.playerCard, newState.cpuCard);
+                
+                // If CPU has only 1 card left (the one in play), they lose
+                if (cpuTotalCards <= 1) {
+                    newState.gameOver = true;
+                    newState.message = "Game Over - You Win! CPU ran out of cards.";
+                }
+            } else if (cpuTotalCards > playerTotalCards) {
+                newState.message = "CPU wins! You don't have enough cards for WAR.";
+                // CPU wins both cards
+                newState.cpuDeck.push(newState.playerCard, newState.cpuCard);
+                
+                // If player has only 1 card left (the one in play), they lose
+                if (playerTotalCards <= 1) {
+                    newState.gameOver = true;
+                    newState.message = "Game Over - CPU Wins! You ran out of cards.";
+                }
+            } else {
+                // Equal number of cards - split the pot
+                newState.message = "It's a tie! Neither player has enough cards for WAR.";
+                newState.playerDeck.push(newState.playerCard);
+                newState.cpuDeck.push(newState.cpuCard);
+            }
+            
+            // Clear all cards in play and war-related state
+            newState.playerCard = null;
+            newState.cpuCard = null;
+            newState.readyForNextCard = true;
+            newState.isWar = false; // Ensure war flag is reset
+            newState.warPile = []; // Clear war pile
+            return newState;
+        }
+        
+        // Proceed with war if both players have enough cards
         newState.message = `WAR! ${newState.playerCard.display}${newState.playerCard.suit} vs ${newState.cpuCard.display}${newState.cpuCard.suit}`;
         newState.isWar = true;
         
-        if (newState.playerDeck.length >= 3 && newState.cpuDeck.length >= 3) {
-            // Add current cards to war pile
-            newState.warPile.push(newState.playerCard, newState.cpuCard);
-            newState.playerCard = null;
-            newState.cpuCard = null;
-            
-            // Add 3 cards from each player to war pile
-            for (let i = 0; i < 3; i++) {
-                newState.warPile.push(newState.playerDeck.shift()!);
-                newState.warPile.push(newState.cpuDeck.shift()!);
-            }
-        } else {
-            newState.gameOver = true;
-            newState.message = newState.playerDeck.length < 3 ? 
-                "Game Over - Not enough cards for WAR! CPU wins!" : 
-                "Game Over - Not enough cards for WAR! You win!";
+        // Add current cards to war pile
+        newState.warPile.push(newState.playerCard, newState.cpuCard);
+        newState.playerCard = null;
+        newState.cpuCard = null;
+        
+        // Add 3 cards from each player to war pile
+        for (let i = 0; i < 3; i++) {
+            newState.warPile.push(newState.playerDeck.shift()!);
+            newState.warPile.push(newState.cpuDeck.shift()!);
         }
     }
     
@@ -301,10 +340,12 @@ export function handleNuke(state: LocalState, initiator: 'player' | 'cpu'): Loca
     }
 
     if (initiator === 'cpu' && newState.cpuHasNuke) {
-        // If player has less than 10 cards, they lose immediately
+        // If player has less than 10 cards, they will lose but let the animation play out first
         if (newState.playerDeck.length < 10) {
-            newState.gameOver = true;
-            newState.message = "Game Over - CPU wins with a NUKE!";
+            // Instead of setting gameOver immediately, set a flag in the message that will be processed after animation
+            newState.cpuHasNuke = false;
+            newState.isNukeActive = true;
+            newState.message = "CPU LAUNCHED A NUKE! Player has fewer than 10 cards - Game will end after animation";
             return newState;
         }
         
@@ -316,10 +357,12 @@ export function handleNuke(state: LocalState, initiator: 'player' | 'cpu'): Loca
         newState.message = "CPU LAUNCHED A NUKE! You lost 10 cards";
         
     } else if (initiator === 'player' && newState.playerHasNuke) {
-        // If CPU has less than 10 cards, they lose immediately
+        // If CPU has less than 10 cards, they will lose but let the animation play out first
         if (newState.cpuDeck.length < 10) {
-            newState.gameOver = true;
-            newState.message = "Game Over - You win with a NUKE!";
+            // Instead of setting gameOver immediately, set a flag in the message that will be processed after animation
+            newState.playerHasNuke = false;
+            newState.isNukeActive = true;
+            newState.message = "NUKE LAUNCHED! CPU has fewer than 10 cards - Game will end after animation";
             return newState;
         }
         

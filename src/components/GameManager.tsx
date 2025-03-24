@@ -105,7 +105,10 @@ export function useGameManager({
       const prevPlayerDeckLength = prevState.playerDeck.length;
       const prevCpuDeckLength = prevState.cpuDeck.length;
       
+      // Create a copy of the state with nuke applied
       const newState = handleNuke(prevState, 'player');
+      
+      // Trigger nuke animation
       setShowNukeAnimation(true);
       setNukeInitiator('player');
       playNukeSound();
@@ -128,11 +131,37 @@ export function useGameManager({
 
       setTimeout(() => {
         setShowNukeAnimation(false);
-        setIsProcessing(false);
+        
+        // Check if this was a game-ending nuke (CPU had fewer than 10 cards)
         if (newState.gameOver) {
+          setIsProcessing(false);
           handleGameEnd('win');
+        } else if (newState.message.includes("CPU has fewer than 10 cards")) {
+          // The CPU had fewer than 10 cards when the nuke was launched
+          setGameData(prevState => ({
+            ...prevState,
+            gameOver: true,
+            message: "Game Over - You win with a NUKE!"
+          }));
+          setIsProcessing(false);
+          handleGameEnd('win');
+        } else {
+          // For normal nuke completion, reset card state completely for proper animation
+          setGameData(prevState => ({
+            ...prevState,
+            playerCard: null,
+            cpuCard: null,
+            isNukeActive: false,
+            readyForNextCard: true
+          }));
+          
+          // Add a small delay before allowing the next card draw
+          // This ensures animation timing is reset properly
+          setTimeout(() => {
+            setIsProcessing(false);
+          }, 100);
         }
-      }, 2000);
+      }, 2500); // Reduced for better responsiveness while still showing full animation
       return newState;
     });
   }, [gameData, setIsProcessing, setGameData, setShowNukeAnimation, setNukeInitiator, playNukeSound, handleGameEnd, setPlayerCardChange, setCpuCardChange]);
