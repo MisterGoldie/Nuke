@@ -249,7 +249,7 @@ export default function Demo() {
         // Stop the timer
         setIsTimerRunning(false);
         
-        // DON'T show any war animation
+        // CRITICAL: Force hide any war animation and reset all war-related state
         setWarStage('initial');
         setShowWarAnimation(false);
         setIsProcessing(false);
@@ -272,6 +272,7 @@ export default function Demo() {
         // Record the game outcome
         handleGameEnd(winner === 'player' ? 'win' : 'loss');
         
+        // IMPORTANT: Return empty cleanup function to prevent further execution
         return () => {};
       }
       
@@ -285,31 +286,33 @@ export default function Demo() {
         // Stop the timer
         setIsTimerRunning(false);
         
-        // Immediately clear war state to prevent animation issues
+        // CRITICAL: Force hide any war animation and reset all war-related state
         setWarStage('initial');
         setShowWarAnimation(false);
         
         // Immediately clear processing state to unfreeze the UI
         setIsProcessing(false);
         
-        setTimeout(() => {
-          // Update game state to game over
-          setGameData(prev => ({
-            ...prev,
-            gameOver: true,
-            message: message,
-            isWarBeingHandled: false,
-            isWar: false,
-            // Clear any cards in play to prevent animation issues
-            playerCard: null,
-            cpuCard: null,
-            warPile: []
-          }));
-          
-          // Make sure the message displays properly
-          setDelayedMessage(message);
-        }, 500);
+        // Update game state to game over immediately instead of using setTimeout
+        setGameData(prev => ({
+          ...prev,
+          gameOver: true,
+          message: message,
+          isWarBeingHandled: false,
+          isWar: false,
+          // Clear any cards in play to prevent animation issues
+          playerCard: null,
+          cpuCard: null,
+          warPile: []
+        }));
         
+        // Make sure the message displays properly
+        setDelayedMessage(message);
+        
+        // Record the game outcome
+        handleGameEnd(winner === 'player' ? 'win' : 'loss');
+        
+        // IMPORTANT: Return empty cleanup function to prevent further execution
         return () => {};
       }
       
