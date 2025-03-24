@@ -11,6 +11,9 @@ interface CardProps {
 }
 
 export default function Card({ suit, rank, isFlipped, isPlayerCard, onClick, isNukeActive, singleCard = false }: CardProps) {
+  // Determine if the card is red (hearts/diamonds) or black (spades/clubs)
+  const isRedCard = suit.includes('♥️') || suit.includes('♦️') || suit.includes('♥') || suit.includes('♦');
+  
   const borderClass = isNukeActive 
     ? 'border-2 border-red-500 animate-nuke-border' 
     : 'border-2 border-green-500';
@@ -87,84 +90,44 @@ export default function Card({ suit, rank, isFlipped, isPlayerCard, onClick, isN
               </div>
             </div>
             
-            {/* Radial gradient background */}
-            <div className="absolute inset-0 bg-gradient-radial from-purple-600/20 via-transparent to-transparent"></div>
-            
             {/* Card border with glow effect */}
-            <div className="absolute inset-[3px] rounded-lg border-2 border-purple-400/50 shadow-[inset_0_0_15px_rgba(128,0,255,0.2)]">
+            <div className="absolute inset-[3px] rounded-lg border-2 border-purple-400/50 shadow-[inset_0_0_10px_rgba(128,0,255,0.2)]">
               {/* Inner decoration line */}
               <div className="absolute inset-[8px] rounded-md border border-purple-400/30"></div>
             </div>
             
-            {/* Central emblem with enhanced styling */}
+            {/* Central emblem */}
             <div className="absolute inset-0 flex justify-center items-center">
               <div className="relative">
                 {/* Background glow */}
-                <div className="absolute -inset-10 bg-purple-500/10 rounded-full blur-lg"></div>
+                <div className="absolute -inset-8 bg-purple-500/10 rounded-full blur-md"></div>
                 
                 {/* Main N logo with enhanced style */}
-                <div className="relative text-7xl font-bold text-purple-300 drop-shadow-[0_0_10px_rgba(128,0,255,0.8)]">
-                  <span className="animate-pulse">N</span>
+                <div className="relative text-7xl font-bold text-purple-300 drop-shadow-[0_0_8px_rgba(128,0,255,0.7)]">
+                  <span>N</span>
                 </div>
                 
-                {/* Subtle outer rings with animation */}
-                <motion.div 
-                  className="absolute -inset-4 border-2 border-purple-500/30 rounded-full"
-                  animate={{ scale: [1, 1.05, 1] }}
-                  transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                />
-                <motion.div 
-                  className="absolute -inset-6 border border-purple-500/20 rounded-full"
-                  animate={{ scale: [1, 1.08, 1] }}
-                  transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
-                />
-                <motion.div 
-                  className="absolute -inset-8 border border-purple-500/10 rounded-full"
-                  animate={{ scale: [1, 1.1, 1] }}
-                  transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-                />
+                {/* Subtle outer rings - static, no animations */}
+                <div className="absolute -inset-4 border-2 border-purple-500/30 rounded-full" />
+                <div className="absolute -inset-6 border border-purple-500/20 rounded-full" />
               </div>
             </div>
             
             {/* Corner suit symbols with enhanced styling */}
-            <div className="absolute top-3 left-3 text-xl text-purple-200/90 drop-shadow-[0_0_5px_rgba(128,0,255,0.5)] transform -rotate-12">♠</div>
-            <div className="absolute top-3 right-3 text-xl text-purple-200/90 drop-shadow-[0_0_5px_rgba(128,0,255,0.5)] transform rotate-12">♣</div>
-            <div className="absolute bottom-3 left-3 text-xl text-purple-200/90 drop-shadow-[0_0_5px_rgba(128,0,255,0.5)] transform rotate-12">♥</div>
-            <div className="absolute bottom-3 right-3 text-xl text-purple-200/90 drop-shadow-[0_0_5px_rgba(128,0,255,0.5)] transform -rotate-12">♦</div>
+            <div className="absolute top-3 left-3 text-xl text-purple-200/90 drop-shadow-md transform -rotate-12">♠</div>
+            <div className="absolute top-3 right-3 text-xl text-purple-200/90 drop-shadow-md transform rotate-12">♣</div>
+            <div className="absolute bottom-3 left-3 text-xl text-purple-200/90 drop-shadow-md transform rotate-12">♥</div>
+            <div className="absolute bottom-3 right-3 text-xl text-purple-200/90 drop-shadow-md transform -rotate-12">♦</div>
             
-            {/* Diagonal line decorations with subtle animation */}
-            <motion.div 
-              className="absolute h-[200%] w-[1px] bg-gradient-to-b from-purple-400/0 via-purple-400/30 to-purple-400/0 rotate-45 transform-origin-center"
-              animate={{ opacity: [0.2, 0.4, 0.2] }}
-              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-            />
-            <motion.div 
-              className="absolute h-[200%] w-[1px] bg-gradient-to-b from-purple-400/0 via-purple-400/30 to-purple-400/0 -rotate-45 transform-origin-center"
-              animate={{ opacity: [0.2, 0.4, 0.2] }}
-              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: 1.5 }}
-            />
+            {/* Diagonal line decorations - static, no animations */}
+            <div className="absolute h-[200%] w-[1px] bg-purple-400/20 rotate-45 transform-origin-center" />
+            <div className="absolute h-[200%] w-[1px] bg-purple-400/20 -rotate-45 transform-origin-center" />
             
-            {/* Small decorative elements with subtle animation */}
-            <motion.div 
-              className="absolute top-1/4 left-1/4 text-xs text-purple-300/70"
-              animate={{ opacity: [0.5, 1, 0.5] }}
-              transition={{ duration: 2, repeat: Infinity }}
-            >•</motion.div>
-            <motion.div 
-              className="absolute top-1/4 right-1/4 text-xs text-purple-300/70"
-              animate={{ opacity: [0.5, 1, 0.5] }}
-              transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
-            >•</motion.div>
-            <motion.div 
-              className="absolute bottom-1/4 left-1/4 text-xs text-purple-300/70"
-              animate={{ opacity: [0.5, 1, 0.5] }}
-              transition={{ duration: 2, repeat: Infinity, delay: 1 }}
-            >•</motion.div>
-            <motion.div 
-              className="absolute bottom-1/4 right-1/4 text-xs text-purple-300/70"
-              animate={{ opacity: [0.5, 1, 0.5] }}
-              transition={{ duration: 2, repeat: Infinity, delay: 1.5 }}
-            >•</motion.div>
+            {/* Small decorative elements - static, no animations */}
+            <div className="absolute top-1/4 left-1/4 text-xs text-purple-300/50">•</div>
+            <div className="absolute top-1/4 right-1/4 text-xs text-purple-300/50">•</div>
+            <div className="absolute bottom-1/4 left-1/4 text-xs text-purple-300/50">•</div>
+            <div className="absolute bottom-1/4 right-1/4 text-xs text-purple-300/50">•</div>
           </div>
         </motion.div>
 
