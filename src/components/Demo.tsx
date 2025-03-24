@@ -700,7 +700,8 @@ export default function Demo() {
   }, [gameData.isNukeActive, gameData.cpuHasNuke]);
 
   useEffect(() => {
-    if (gameData.readyForNextCard) {
+    // Only reset the message if the game is not over
+    if (gameData.readyForNextCard && !gameData.gameOver) {
         const timer = setTimeout(() => {
             setGameData(prevState => ({
                 ...prevState,
@@ -713,7 +714,7 @@ export default function Demo() {
 
         return () => clearTimeout(timer);
     }
-  }, [gameData.readyForNextCard]);
+  }, [gameData.readyForNextCard, gameData.gameOver]);
 
   // Start gameplay music when tutorial starts and keep it playing through game
   useEffect(() => {
@@ -811,11 +812,17 @@ export default function Demo() {
             
             setDelayedMessage(message);
             
-            const drawNextTimer = setTimeout(() => {
-                setDelayedMessage("Draw next card to continue");
-            }, 2000);
-            
-            return () => clearTimeout(drawNextTimer);
+            // Only set the "Draw next card" message if the game is not over
+            if (!gameData.gameOver && !message.includes("GAME OVER")) {
+                const drawNextTimer = setTimeout(() => {
+                    // Double-check that the game is still not over before updating the message
+                    if (!gameData.gameOver) {
+                        setDelayedMessage("Draw next card to continue");
+                    }
+                }, 2000);
+                
+                return () => clearTimeout(drawNextTimer);
+            }
         }, 400);
         
         return () => clearTimeout(resultTimer);
