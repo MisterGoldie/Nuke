@@ -66,7 +66,7 @@ export default function Card({ suit, rank, isFlipped, isPlayerCard, onClick, isN
         <motion.div
           className={`
             absolute w-full h-full
-            bg-gradient-to-br from-[#4a148c] via-[#7b1fa2] to-[#9c27b0] rounded-xl
+            bg-gradient-to-br from-[#1a0933] via-[#4a148c] to-[#7b1fa2] rounded-xl
             ${borderClass}
             flex justify-center items-center
             backface-hidden
@@ -79,7 +79,7 @@ export default function Card({ suit, rank, isFlipped, isPlayerCard, onClick, isN
         >
           <div className="relative w-full h-full flex justify-center items-center">
             {/* Decorative background pattern */}
-            <div className="absolute inset-0 opacity-10">
+            <div className="absolute inset-0 opacity-15">
               <div className="w-full h-full grid grid-cols-8 grid-rows-12">
                 {Array.from({ length: 96 }).map((_, i) => (
                   <div key={i} className="border-[0.5px] border-white/20"></div>
@@ -87,46 +87,84 @@ export default function Card({ suit, rank, isFlipped, isPlayerCard, onClick, isN
               </div>
             </div>
             
+            {/* Radial gradient background */}
+            <div className="absolute inset-0 bg-gradient-radial from-purple-600/20 via-transparent to-transparent"></div>
+            
             {/* Card border with glow effect */}
-            <div className="absolute inset-[3px] rounded-lg border-2 border-purple-400/70 shadow-[inset_0_0_10px_rgba(128,0,255,0.3)]">
+            <div className="absolute inset-[3px] rounded-lg border-2 border-purple-400/50 shadow-[inset_0_0_15px_rgba(128,0,255,0.2)]">
               {/* Inner decoration line */}
               <div className="absolute inset-[8px] rounded-md border border-purple-400/30"></div>
             </div>
             
-            {/* Central emblem */}
+            {/* Central emblem with enhanced styling */}
             <div className="absolute inset-0 flex justify-center items-center">
               <div className="relative">
-                {/* Background halo */}
-                <div className="absolute -inset-8 bg-purple-500/10 rounded-full blur-md"></div>
+                {/* Background glow */}
+                <div className="absolute -inset-10 bg-purple-500/10 rounded-full blur-lg"></div>
                 
                 {/* Main N logo with enhanced style */}
-                <div className="relative text-7xl font-bold text-purple-400 drop-shadow-[0_0_8px_rgba(128,0,255,0.7)]">
-                  <span className="animate-glow">N</span>
+                <div className="relative text-7xl font-bold text-purple-300 drop-shadow-[0_0_10px_rgba(128,0,255,0.8)]">
+                  <span className="animate-pulse">N</span>
                 </div>
                 
-                {/* Subtle outer rings */}
-                <div className="absolute -inset-4 border-2 border-purple-500/20 rounded-full"></div>
-                <div className="absolute -inset-6 border border-purple-500/10 rounded-full"></div>
+                {/* Subtle outer rings with animation */}
+                <motion.div 
+                  className="absolute -inset-4 border-2 border-purple-500/30 rounded-full"
+                  animate={{ scale: [1, 1.05, 1] }}
+                  transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                />
+                <motion.div 
+                  className="absolute -inset-6 border border-purple-500/20 rounded-full"
+                  animate={{ scale: [1, 1.08, 1] }}
+                  transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+                />
+                <motion.div 
+                  className="absolute -inset-8 border border-purple-500/10 rounded-full"
+                  animate={{ scale: [1, 1.1, 1] }}
+                  transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+                />
               </div>
             </div>
             
             {/* Corner suit symbols with enhanced styling */}
-            <div className="absolute top-3 left-3 text-xl text-white/80 drop-shadow-md transform -rotate-12">♠</div>
-            <div className="absolute top-3 right-3 text-xl text-white/80 drop-shadow-md transform rotate-12">♣</div>
-            <div className="absolute bottom-3 left-3 text-xl text-purple-300/90 drop-shadow-md transform rotate-12">♥</div>
-            <div className="absolute bottom-3 right-3 text-xl text-purple-300/90 drop-shadow-md transform -rotate-12">♦</div>
+            <div className="absolute top-3 left-3 text-xl text-purple-200/90 drop-shadow-[0_0_5px_rgba(128,0,255,0.5)] transform -rotate-12">♠</div>
+            <div className="absolute top-3 right-3 text-xl text-purple-200/90 drop-shadow-[0_0_5px_rgba(128,0,255,0.5)] transform rotate-12">♣</div>
+            <div className="absolute bottom-3 left-3 text-xl text-purple-200/90 drop-shadow-[0_0_5px_rgba(128,0,255,0.5)] transform rotate-12">♥</div>
+            <div className="absolute bottom-3 right-3 text-xl text-purple-200/90 drop-shadow-[0_0_5px_rgba(128,0,255,0.5)] transform -rotate-12">♦</div>
             
-            {/* Diagonal line decorations */}
-            <div className="absolute h-[200%] w-[1px] bg-purple-400/20 rotate-45 transform-origin-center"></div>
-            <div className="absolute h-[200%] w-[1px] bg-purple-400/20 -rotate-45 transform-origin-center"></div>
-            <div className="absolute h-[150%] w-[1px] bg-purple-400/30 rotate-[30deg] transform-origin-center"></div>
-            <div className="absolute h-[150%] w-[1px] bg-purple-400/30 -rotate-[30deg] transform-origin-center"></div>
+            {/* Diagonal line decorations with subtle animation */}
+            <motion.div 
+              className="absolute h-[200%] w-[1px] bg-gradient-to-b from-purple-400/0 via-purple-400/30 to-purple-400/0 rotate-45 transform-origin-center"
+              animate={{ opacity: [0.2, 0.4, 0.2] }}
+              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+            />
+            <motion.div 
+              className="absolute h-[200%] w-[1px] bg-gradient-to-b from-purple-400/0 via-purple-400/30 to-purple-400/0 -rotate-45 transform-origin-center"
+              animate={{ opacity: [0.2, 0.4, 0.2] }}
+              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: 1.5 }}
+            />
             
-            {/* Small decorative elements */}
-            <div className="absolute top-1/4 left-1/4 text-xs text-purple-300/50">•</div>
-            <div className="absolute top-1/4 right-1/4 text-xs text-purple-300/50">•</div>
-            <div className="absolute bottom-1/4 left-1/4 text-xs text-purple-300/50">•</div>
-            <div className="absolute bottom-1/4 right-1/4 text-xs text-purple-300/50">•</div>
+            {/* Small decorative elements with subtle animation */}
+            <motion.div 
+              className="absolute top-1/4 left-1/4 text-xs text-purple-300/70"
+              animate={{ opacity: [0.5, 1, 0.5] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            >•</motion.div>
+            <motion.div 
+              className="absolute top-1/4 right-1/4 text-xs text-purple-300/70"
+              animate={{ opacity: [0.5, 1, 0.5] }}
+              transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
+            >•</motion.div>
+            <motion.div 
+              className="absolute bottom-1/4 left-1/4 text-xs text-purple-300/70"
+              animate={{ opacity: [0.5, 1, 0.5] }}
+              transition={{ duration: 2, repeat: Infinity, delay: 1 }}
+            >•</motion.div>
+            <motion.div 
+              className="absolute bottom-1/4 right-1/4 text-xs text-purple-300/70"
+              animate={{ opacity: [0.5, 1, 0.5] }}
+              transition={{ duration: 2, repeat: Infinity, delay: 1.5 }}
+            >•</motion.div>
           </div>
         </motion.div>
 
@@ -134,19 +172,65 @@ export default function Card({ suit, rank, isFlipped, isPlayerCard, onClick, isN
         <motion.div
           className={`
             absolute w-full h-full
-            bg-white rounded-xl shadow-xl
-            border-2 border-green-500
-            flex flex-col justify-between p-4
+            bg-gradient-to-br from-white via-white to-gray-50 rounded-xl shadow-xl
+            border-2 ${isNukeActive ? 'border-red-500 animate-nuke-border' : 'border-green-500'}
+            flex flex-col justify-between p-2
             backface-hidden rotate-y-180
-            ${suit.includes('♥️') || suit.includes('♦️') ? 'text-red-600' : 'text-black'}
+            overflow-hidden
+            ${suit.includes('♥️') || suit.includes('♦️') || suit.includes('♥') || suit.includes('♦') ? 'text-red-600' : 'text-black'}
           `}
           initial={{ boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)" }}
           animate={{ boxShadow: "0 8px 15px rgba(0, 0, 0, 0.2)" }}
           transition={{ duration: 0.5 }}
         >
-          <div className="self-start text-xl">{rank}{suit}</div>
-          <div className="text-4xl self-center">{suit}</div>
-          <div className="self-end text-xl rotate-180">{rank}{suit}</div>
+          {/* Card inner border with subtle pattern */}
+          <div className="absolute inset-[3px] rounded-lg border border-gray-200">
+            <div className="absolute inset-0 opacity-10">
+              <div className="w-full h-full grid grid-cols-6 grid-rows-8">
+                {Array.from({ length: 48 }).map((_, i) => (
+                  <div key={i} className="border-[0.5px] border-black/5"></div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Top left rank and suit */}
+          <div className="self-start z-10 flex flex-col items-center ml-1 mt-1">
+            <div className={`font-bold ${rank.length > 1 ? 'text-xl' : 'text-2xl'}`}>{rank}</div>
+            <div className={`${rank.length > 1 ? 'text-xl' : 'text-2xl'} -mt-1`}>{suit}</div>
+          </div>
+
+          {/* Center suit display with decorative elements */}
+          <div className="absolute inset-0 flex justify-center items-center z-10">
+            {/* Main center suit symbol */}
+            <div className={`text-6xl transform ${suit.includes('♥️') || suit.includes('♦️') || suit.includes('♥') || suit.includes('♦') ? 'text-red-600' : 'text-black'}`}>
+              {suit}
+            </div>
+
+            {/* Decorative background elements */}
+            <div className="absolute inset-0 flex justify-center items-center opacity-5">
+              <div className="w-32 h-32 rounded-full border-8 border-current"></div>
+              <div className="absolute w-40 h-40 rounded-full border-2 border-current"></div>
+            </div>
+          </div>
+
+          {/* Bottom right rank and suit (inverted) */}
+          <div className="self-end z-10 flex flex-col items-center mr-1 mb-1 transform rotate-180">
+            <div className={`font-bold ${rank.length > 1 ? 'text-xl' : 'text-2xl'}`}>{rank}</div>
+            <div className={`${rank.length > 1 ? 'text-xl' : 'text-2xl'} -mt-1`}>{suit}</div>
+          </div>
+
+          {/* Additional decorative elements based on card rank */}
+          {(rank === 'A') && (
+            <div className="absolute inset-0 flex justify-center items-center">
+              <div className="w-24 h-24 border-2 border-current opacity-10 rounded-lg transform rotate-45"></div>
+            </div>
+          )}
+          {(['K', 'Q', 'J'].includes(rank)) && (
+            <div className="absolute inset-0 flex justify-center items-center">
+              <div className="w-20 h-20 border border-current opacity-10 rounded-full"></div>
+            </div>
+          )}
         </motion.div>
       </motion.div>
     </motion.div>
