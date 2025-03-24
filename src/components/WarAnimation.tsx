@@ -103,14 +103,8 @@ export default function WarAnimation({
                       delay: 0.2 + (index * 0.2)
                     }}
                   >
-                    <div className="w-[90px] h-[126px] sm:w-[120px] sm:h-[168px]">
-                      <CardComponent
-                        suit="♠️"
-                        rank="A"
-                        isFlipped={false}
-                        isPlayerCard={true}
-                        singleCard={true}
-                      />
+                    <div className="w-[90px] h-[126px] sm:w-[120px] sm:h-[168px] bg-purple-700 rounded-xl border-2 border-white flex items-center justify-center text-white">
+                      <span className="text-3xl">?</span>
                     </div>
                   </motion.div>
                 ))}
@@ -138,14 +132,8 @@ export default function WarAnimation({
                       delay: 0.2 + (index * 0.2)
                     }}
                   >
-                    <div className="w-[90px] h-[126px] sm:w-[120px] sm:h-[168px]">
-                      <CardComponent
-                        suit="♠️"
-                        rank="A"
-                        isFlipped={false}
-                        isPlayerCard={false}
-                        singleCard={true}
-                      />
+                    <div className="w-[90px] h-[126px] sm:w-[120px] sm:h-[168px] bg-purple-700 rounded-xl border-2 border-white flex items-center justify-center text-white">
+                      <span className="text-3xl">?</span>
                     </div>
                   </motion.div>
                 ))}
@@ -199,14 +187,8 @@ export default function WarAnimation({
                     initial={{ y: index * 15 }}
                     animate={{ y: index * 15 }}
                   >
-                    <div className="w-[90px] h-[126px] sm:w-[120px] sm:h-[168px]">
-                      <CardComponent
-                        suit="♠️"
-                        rank="A"
-                        isFlipped={false}
-                        isPlayerCard={true}
-                        singleCard={true}
-                      />
+                    <div className="w-[90px] h-[126px] sm:w-[120px] sm:h-[168px] bg-purple-700 rounded-xl border-2 border-white flex items-center justify-center text-white">
+                      <span className="text-3xl">?</span>
                     </div>
                   </motion.div>
                 ))}
@@ -224,14 +206,8 @@ export default function WarAnimation({
                     initial={{ y: index * 15 }}
                     animate={{ y: index * 15 }}
                   >
-                    <div className="w-[90px] h-[126px] sm:w-[120px] sm:h-[168px]">
-                      <CardComponent
-                        suit="♠️"
-                        rank="A"
-                        isFlipped={false}
-                        isPlayerCard={false}
-                        singleCard={true}
-                      />
+                    <div className="w-[90px] h-[126px] sm:w-[120px] sm:h-[168px] bg-purple-700 rounded-xl border-2 border-white flex items-center justify-center text-white">
+                      <span className="text-3xl">?</span>
                     </div>
                   </motion.div>
                 ))}

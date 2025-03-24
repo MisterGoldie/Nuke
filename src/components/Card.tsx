@@ -30,40 +30,24 @@ export default function Card({ suit, rank, isFlipped, isPlayerCard, onClick, isN
       whileHover={isPlayerCard ? { scale: 1.05, y: -5 } : undefined}
       whileTap={isPlayerCard ? { scale: 0.98 } : undefined}
     >
-      {/* Enhanced stack effect - only shown when singleCard is false */}
+      {/* Stack effect - only shown when singleCard is false */}
       {!singleCard && (
         <>
-          {/* Stack effect - bottom card (3rd in stack) */}
+          {/* Stack effect - bottom card */}
           <motion.div 
-            className={`absolute -bottom-1.5 -right-1.5 w-full h-full bg-gradient-to-br from-[#1a0933] via-[#4a148c] to-[#7b1fa2] rounded-xl shadow-lg ${borderClass} opacity-70`}
-            initial={{ scale: 0.97, rotate: 2 }}
-            animate={{ scale: 0.97, rotate: 2 }}
+            className={`absolute top-2 left-1 w-full h-full bg-[#7b1fa2] rounded-xl ${borderClass} opacity-40`}
+            initial={{ scale: 0.98 }}
+            animate={{ scale: 1 }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            style={{ zIndex: -2 }}
-          >
-            {/* Simple card back pattern for stacked cards */}
-            <div className="absolute inset-0 opacity-30 overflow-hidden">
-              <div className="w-full h-full flex justify-center items-center">
-                <div className="text-4xl text-purple-300/50">N</div>
-              </div>
-            </div>
-          </motion.div>
+          />
           
-          {/* Stack effect - middle card (2nd in stack) */}
+          {/* Stack effect - middle card */}
           <motion.div 
-            className={`absolute -bottom-0.5 -right-0.5 w-full h-full bg-gradient-to-br from-[#1a0933] via-[#4a148c] to-[#7b1fa2] rounded-xl shadow-lg ${borderClass} opacity-85`}
-            initial={{ scale: 0.985, rotate: 1 }}
-            animate={{ scale: 0.985, rotate: 1 }}
+            className={`absolute top-1 left-0.5 w-full h-full bg-[#7b1fa2] rounded-xl ${borderClass} opacity-60`}
+            initial={{ scale: 0.99 }}
+            animate={{ scale: 1 }}
             transition={{ duration: 0.5 }}
-            style={{ zIndex: -1 }}
-          >
-            {/* Simple card back pattern for stacked cards */}
-            <div className="absolute inset-0 opacity-50 overflow-hidden">
-              <div className="w-full h-full flex justify-center items-center">
-                <div className="text-4xl text-purple-300/60">N</div>
-              </div>
-            </div>
-          </motion.div>
+          />
         </>
       )}
 
