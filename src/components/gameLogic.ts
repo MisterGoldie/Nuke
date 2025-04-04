@@ -51,7 +51,7 @@ export function initializeGame(): LocalState {
         cpuDeck: deck.slice(midpoint),
         warPile: [],
         gameOver: false,
-        message: "Draw card to begin",
+        message: "",
         readyForNextCard: true,
         isWar: false,
         playerHasNuke: true,
@@ -93,6 +93,11 @@ export function drawCards(state: LocalState): LocalState {
     
     // Check if previous state was a war
     const wasWar = newState.isWar;
+    
+    // EARLY CHECK: If either player has 5 or fewer cards total, avoid wars completely
+    const playerTotalCards = 1 + newState.playerDeck.length; // Current + deck
+    const cpuTotalCards = 1 + newState.cpuDeck.length; // Current + deck
+    const shouldAvoidWar = playerTotalCards <= 5 || cpuTotalCards <= 5;
     
     // Skip CPU NUKE check if it's the first draw
     if (!isFirstDraw && newState.cpuHasNuke && newState.playerDeck.length >= 10 && Math.random() < 0.10) {
@@ -223,33 +228,58 @@ export function drawCards(state: LocalState): LocalState {
     } else {
         // War scenario - same rank cards
         
-        // Check if either player has fewer than 5 cards total (1 in play + 4 in deck)
-        // This ensures they have enough cards for the entire war process
-        const playerTotalCards = 1 + newState.playerDeck.length; // 1 card in play + cards in deck
-        const cpuTotalCards = 1 + newState.cpuDeck.length; // 1 card in play + cards in deck
+        // If we've detected we should avoid wars due to low card count, handle it immediately
+        if (shouldAvoidWar) {
+            // Determine who has more cards and they win
+            if (playerTotalCards > cpuTotalCards) {
+                newState.message = "You win! Not enough cards for WAR.";
+                newState.playerDeck.push(newState.playerCard, newState.cpuCard);
+                
+                // If CPU has very few cards, they lose
+                if (cpuTotalCards <= 3) {
+                    newState.gameOver = true;
+                    newState.message = "GAME OVER - YOU WIN! CPU has too few cards.";
+                }
+            } else {
+                newState.message = "CPU wins! Not enough cards for WAR.";
+                newState.cpuDeck.push(newState.playerCard, newState.cpuCard);
+                
+                // If player has very few cards, they lose
+                if (playerTotalCards <= 3) {
+                    newState.gameOver = true;
+                    newState.message = "GAME OVER - CPU WINS! You have too few cards.";
+                }
+            }
+            
+            newState.playerCard = null;
+            newState.cpuCard = null;
+            newState.readyForNextCard = true;
+            return newState;
+        }
         
-        // If either player has fewer than 5 cards total, they can't complete a war
-        if (playerTotalCards < 5 || cpuTotalCards < 5) {
+        // This ensures they have enough cards for the entire war process
+        // If either player has 5 or fewer cards total, they can't complete a war
+        if (playerTotalCards <= 5 || cpuTotalCards <= 5) {
             // Not enough cards for war - determine winner based on who has more cards
             if (playerTotalCards > cpuTotalCards) {
                 newState.message = "You win! CPU doesn't have enough cards for WAR.";
                 // Player wins both cards
                 newState.playerDeck.push(newState.playerCard, newState.cpuCard);
                 
-                // If CPU has only 1 card left (the one in play), they lose
-                if (cpuTotalCards <= 1) {
+                // If CPU has very few cards left, they lose
+                if (cpuTotalCards <= 3) {
                     newState.gameOver = true;
-                    newState.message = "Game Over - You Win! CPU ran out of cards.";
+                    newState.message = "GAME OVER - YOU WIN! CPU ran out of cards.";
                 }
             } else if (cpuTotalCards > playerTotalCards) {
                 newState.message = "CPU wins! You don't have enough cards for WAR.";
                 // CPU wins both cards
                 newState.cpuDeck.push(newState.playerCard, newState.cpuCard);
                 
-                // If player has only 1 card left (the one in play), they lose
-                if (playerTotalCards <= 1) {
+                // If player has very few cards left, they lose
+                if (playerTotalCards <= 3) {
                     newState.gameOver = true;
-                    newState.message = "Game Over - CPU Wins! You ran out of cards.";
+                    newState.message = "GAME OVER - CPU WINS! You ran out of cards.";
                 }
             } else {
                 // Equal number of cards - split the pot
@@ -309,6 +339,16 @@ export function drawCards(state: LocalState): LocalState {
     } else if (newState.cpuDeck.length === 0) {
         newState.gameOver = true;
         newState.message = "GAME OVER - YOU WIN!"; 
+        newState.readyForNextCard = false;
+    } 
+    // Also end the game if a player is left with just 3 or fewer cards total
+    else if (newState.playerDeck.length <= 3 && !newState.isWar) {
+        newState.gameOver = true;
+        newState.message = "GAME OVER - CPU WINS! You have too few cards left.";
+        newState.readyForNextCard = false;
+    } else if (newState.cpuDeck.length <= 3 && !newState.isWar) {
+        newState.gameOver = true;
+        newState.message = "GAME OVER - YOU WIN! CPU has too few cards left.";
         newState.readyForNextCard = false;
     }
     

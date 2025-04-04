@@ -239,8 +239,8 @@ export default function Demo() {
       const cpuTotalCards = 1 + gameData.cpuDeck.length; // 1 card in play + cards in deck
       
       // If either player has 4 or fewer cards total, they can't complete the war
-      if (playerTotalCards <= 4 || cpuTotalCards <= 4) {
-        console.log(`Not enough cards for war! Player: ${playerTotalCards}, CPU: ${cpuTotalCards}`);
+      if (playerTotalCards <= 5 || cpuTotalCards <= 5) {
+        console.log('Low card count in war detected:', { playerTotalCards, cpuTotalCards });
         
         // Determine the winner based on who has more cards
         const winner = playerTotalCards > cpuTotalCards ? 'player' : 'cpu';
@@ -397,7 +397,7 @@ export default function Demo() {
         const playerTotalCards = 1 + gameData.playerDeck.length; // 1 card in play + cards in deck
         const cpuTotalCards = 1 + gameData.cpuDeck.length; // 1 card in play + cards in deck
         
-        if (playerTotalCards <= 4 || cpuTotalCards <= 4) {
+        if (playerTotalCards <= 5 || cpuTotalCards <= 5) {
           console.log('Low card count in war detected:', { playerTotalCards, cpuTotalCards });
           // Player will run out of cards during this war
           const winner = playerTotalCards > cpuTotalCards ? 'player' : 'cpu';
@@ -834,6 +834,7 @@ export default function Demo() {
   const handleStartGame = () => {
     setGameData(initializeGame());
     setIsFirstCard(true);
+    setDelayedMessage("Draw card to begin");
     setGameState('tutorial');
   };
 
@@ -842,6 +843,7 @@ export default function Demo() {
     setGameState('game');
     setTimeRemaining(240);
     setIsFirstCard(true);
+    setDelayedMessage("Draw card to begin");
     setIsTimerRunning(true);
   };
 
@@ -896,7 +898,7 @@ export default function Demo() {
         
         return () => clearInterval(timerInterval);
     }
-}, [gameState, isTimerRunning, gameData, username, handleGameEnd]);
+}, [gameState, isTimerRunning, isMuted]);
 
   // Menu State
   if (gameState === 'menu') {
@@ -1222,8 +1224,7 @@ export default function Demo() {
                 scale: { duration: 0.8, repeat: delayedMessage.includes('TIME\'S UP') ? Infinity : 0 }
               }}
             >
-              {isFirstCard ? "Draw card to begin" : 
-                timeRemaining === 0 ? "TIME'S UP - GAME OVER!" : delayedMessage}
+              {timeRemaining === 0 ? "TIME'S UP - GAME OVER!" : delayedMessage}
             </motion.div>
           </AnimatePresence>
         </motion.div>
@@ -1478,48 +1479,6 @@ export default function Demo() {
     }
   }, [gameData.gameOver]);
 
-  // Single timer effect that starts when game state changes to 'game'
-  useEffect(() => {
-    console.log('Timer Effect Running:', { gameState, gameOver: gameData.gameOver });
-    
-    if (gameState === 'game') {
-        console.log('Game started - initializing timer');
-        // Reset timer to 4 minutes (240 seconds)
-        setTimeRemaining(240);
-        
-        // Create interval that ticks every second
-        const timerInterval = setInterval(() => {
-            setTimeRemaining(prevTime => {
-                console.log('Current time:', prevTime);
-                // If time is up, handle game end
-                if (prevTime <= 0) {
-                    clearInterval(timerInterval);
-                    const playerTotal = gameData.playerDeck.length + (gameData.playerCard ? 1 : 0);
-                    const cpuTotal = gameData.cpuDeck.length + (gameData.cpuCard ? 1 : 0);
-                    
-                    setGameData(prev => ({
-                        ...prev,
-                        gameOver: true,
-                        message: playerTotal > cpuTotal ? 
-                            `Time's Up - ${username} wins with ${playerTotal} cards!` : 
-                            `Time's Up - CPU wins with ${cpuTotal} cards!`
-                    }));
-                    
-                    handleGameEnd(playerTotal > cpuTotal ? 'win' : 'loss');
-                    return 0;
-                }
-                return prevTime - 1;
-            });
-        }, 1000);
-        
-        // Cleanup function
-        return () => {
-            console.log('Cleaning up timer interval');
-            clearInterval(timerInterval);
-        };
-    }
-}, [gameState]); // Only depend on gameState to prevent unnecessary re-renders
-
   const sendGameNotification = async () => {
     if (!context?.user?.fid) {
       console.log('No FID available, cannot send notification');
@@ -1578,37 +1537,6 @@ export default function Demo() {
       });
     };
   }, []);
-
-  // Update the timer effect to just end the game when timer runs out without declaring a winner
-  useEffect(() => {
-    if (timeRemaining === 0 && !gameData.gameOver) {
-      // When timer runs out, the game simply ends - no winner is declared
-      // You only win by collecting all 52 cards
-      
-      // FORCE the timer message to be displayed correctly
-      const timerMessage = "TIME'S UP - GAME OVER!";
-      
-      // Set the game data with the timer message
-      setGameData(prev => ({
-        ...prev,
-        gameOver: true,
-        message: timerMessage
-      }));
-      
-      // Immediately set the delayed message to ensure it's displayed correctly
-      setDelayedMessage(timerMessage);
-      
-      // Stop the timer but DON'T record any outcome
-      setIsTimerRunning(false);
-      setIsGameLocked(true);
-      
-      // Force the message to be displayed again after a short delay
-      // This ensures it overrides any other messages that might be set
-      setTimeout(() => {
-        setDelayedMessage(timerMessage);
-      }, 100);
-    }
-  }, [timeRemaining, gameData]);
 
   return null;
 }
