@@ -111,9 +111,7 @@ export function drawCards(state: LocalState): LocalState {
     // Add null check here to prevent runtime errors when playerCard is undefined
     playerRank = newState.playerCard?.rank || 0;
     
-    // Artificially increase WAR probability to 25%
-    // Calculate if we should force a WAR (only if not first draw and not coming from a previous WAR)
-    const shouldForceWar = !isFirstDraw && !wasWar && Math.random() < 0.20; // ~20% artificial boost + ~5% natural = ~25%
+    // No artificial WAR probability - relying only on natural occurrences
     
     // If it's the first draw, make sure CPU draws a different card
     if (isFirstDraw) {
@@ -127,20 +125,8 @@ export function drawCards(state: LocalState): LocalState {
             }
         } while (newState.cpuDeck.length > 0);
         newState.cpuCard = cpuCard;
-    } else if (shouldForceWar) {
-        // Try to find a card with the same rank as player's card
-        const sameRankCards = newState.cpuDeck.filter(card => card.rank === playerRank);
-        
-        if (sameRankCards.length > 0) {
-            // Find the index of the first matching card
-            const matchingCardIndex = newState.cpuDeck.findIndex(card => card.rank === playerRank);
-            // Remove that card
-            newState.cpuCard = newState.cpuDeck.splice(matchingCardIndex, 1)[0];
-        } else {
-            // If no matching card, proceed normally
-            newState.cpuCard = newState.cpuDeck.shift()!;
-        }
     } else {
+        // Just draw the next card for CPU - no manipulation
         newState.cpuCard = newState.cpuDeck.shift()!;
     }
     
