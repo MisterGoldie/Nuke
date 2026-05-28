@@ -942,7 +942,7 @@ export default function Demo() {
           textShadow: '0 0 5px #00ff00, 0 0 10px #00ff00',
           opacity: 0.8 
         }}>
-          version 1.2
+          version 1.3
         </div>
 
         <button 
