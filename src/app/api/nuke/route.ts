@@ -1,4 +1,3 @@
-import { NextRequest } from 'next/server';
 import { 
   storeGameResult, 
   getPlayerStats, 
@@ -6,7 +5,7 @@ import {
   getRecentGames 
 } from '~/utils/nukeFirebase';
 
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   try {
     const gameResult = await request.json();
     
@@ -31,7 +30,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function GET(request: NextRequest) {
+export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const action = searchParams.get('action');
