@@ -57,59 +57,36 @@ export default function Card({
     <motion.div
       onClick={isPlayerCard ? onClick : undefined}
       className={`
-        relative w-[var(--card-width,120px)]
-        perspective-1000
-        mx-auto
+        relative ${singleCard ? 'h-full w-full' : 'mx-auto w-[var(--card-width,120px)]'}
         card ${isFlipped ? 'flipped' : ''}
       `}
-      style={{ aspectRatio: cardAspectRatio }}
-      initial={{ scale: 0.95, opacity: 0.8 }}
+      style={{
+        aspectRatio: cardAspectRatio,
+        perspective: 1600,
+        perspectiveOrigin: '50% 50%',
+      }}
+      initial={false}
       animate={{ scale: 1, opacity: 1 }}
-      transition={{ duration: 0.3 }}
-      whileHover={isPlayerCard ? { scale: 1.05, y: -5 } : undefined}
-      whileTap={isPlayerCard ? { scale: 0.98 } : undefined}
+      transition={{ duration: 0.2 }}
+      whileHover={isPlayerCard && onClick ? { scale: 1.04, y: -4 } : undefined}
+      whileTap={isPlayerCard && onClick ? { scale: 0.98 } : undefined}
     >
-      {!singleCard && (
-        <>
-          <motion.div
-            className="absolute top-2 left-1 w-full h-full bg-[#7b1fa2] rounded-xl opacity-40"
-            initial={{ scale: 0.98 }}
-            animate={{ scale: 1 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-          />
-          <motion.div
-            className="absolute top-1 left-0.5 w-full h-full bg-[#7b1fa2] rounded-xl opacity-60"
-            initial={{ scale: 0.99 }}
-            animate={{ scale: 1 }}
-            transition={{ duration: 0.5 }}
-          />
-        </>
-      )}
-
       <motion.div
-        className="relative w-full h-full transform-style-preserve-3d"
+        className="relative h-full w-full [transform-style:preserve-3d]"
+        initial={false}
         animate={{ rotateY: isFlipped ? 180 : 0 }}
         transition={{
-          duration: 0.5,
-          type: 'spring',
-          stiffness: 300,
-          damping: 25,
-          delay: isPlayerCard ? 0 : 0.2,
+          duration: 0.85,
+          ease: [0.45, 0.05, 0.25, 1],
+          delay: isPlayerCard ? 0 : 0.12,
         }}
       >
-        {/* Face-down: purple "N" back (unchanged) */}
-        <motion.div
-          className={`
-            absolute w-full h-full
-            bg-gradient-to-br from-[#1a0933] via-[#4a148c] to-[#7b1fa2] rounded-xl
-            flex justify-center items-center
-            backface-hidden
-            overflow-hidden
-            shadow-lg
-          `}
-          initial={{ boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}
-          animate={{ boxShadow: '0 8px 15px rgba(0, 0, 0, 0.2)' }}
-          transition={{ duration: 0.5 }}
+        {/* Face-down: purple "N" back */}
+        <div
+          className="absolute inset-0 flex items-center justify-center overflow-hidden rounded-xl shadow-lg [backface-visibility:hidden] [-webkit-backface-visibility:hidden]"
+          style={{
+            background: 'linear-gradient(to bottom right, #1a0933, #4a148c, #7b1fa2)',
+          }}
         >
           <div className="relative w-full h-full flex justify-center items-center">
             <div className="absolute inset-0 opacity-15">
@@ -132,20 +109,11 @@ export default function Card({
             <div className="absolute bottom-3 left-3 text-xl text-purple-200/90">♥</div>
             <div className="absolute bottom-3 right-3 text-xl text-purple-200/90">♦</div>
           </div>
-        </motion.div>
+        </div>
 
         {/* Face-up: Crudeboys WebP */}
-        <motion.div
-          className={`
-            absolute w-full h-full
-            rounded-xl shadow-xl
-            backface-hidden rotate-y-180
-            overflow-hidden
-            ${rankColor}
-          `}
-          initial={{ boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}
-          animate={{ boxShadow: '0 8px 15px rgba(0, 0, 0, 0.2)' }}
-          transition={{ duration: 0.5 }}
+        <div
+          className={`absolute inset-0 overflow-hidden rounded-xl shadow-xl [backface-visibility:hidden] [-webkit-backface-visibility:hidden] [transform:rotateY(180deg)] ${rankColor}`}
         >
           <div className="relative w-full h-full bg-white">
             {imageSrc && !frontImageFailed ? (
@@ -191,7 +159,7 @@ export default function Card({
               </>
             )}
           </div>
-        </motion.div>
+        </div>
       </motion.div>
     </motion.div>
   );

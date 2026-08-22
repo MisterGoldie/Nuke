@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { AnimatePresence, motion } from "framer-motion";
-import CardComponent from "../Card";
+import CardHand from "../CardHand";
 import type { LocalState } from "../gameLogic";
 import type { WarStage } from "../gameTypes";
 
@@ -183,12 +183,18 @@ export default function GameScreen({
                 />
               ) : null}
             </AnimatePresence>
-            <CardComponent
-              suit={gameData.cpuCard?.suit || ""}
-              rank={gameData.cpuCard?.display || ""}
-              artId={gameData.cpuCard?.artId}
-              isFlipped={gameData.cpuCard !== null}
-              isPlayerCard={false}
+            <CardHand
+              isPlayer={false}
+              deckCount={gameData.cpuDeck.length}
+              playCard={
+                gameData.cpuCard
+                  ? {
+                      suit: gameData.cpuCard.suit,
+                      display: gameData.cpuCard.display,
+                      artId: gameData.cpuCard.artId,
+                    }
+                  : null
+              }
             />
           </div>
         </motion.div>
@@ -229,14 +235,19 @@ export default function GameScreen({
                 />
               ) : null}
             </AnimatePresence>
-            <CardComponent
-              suit={gameData.playerCard?.suit || ""}
-              rank={gameData.playerCard?.display || ""}
-              artId={gameData.playerCard?.artId}
-              isFlipped={gameData.playerCard !== null}
-              isPlayerCard={true}
-              onClick={onDrawCard}
-              isNukeActive={showNukeAnimation}
+            <CardHand
+              isPlayer
+              deckCount={gameData.playerDeck.length}
+              playCard={
+                gameData.playerCard
+                  ? {
+                      suit: gameData.playerCard.suit,
+                      display: gameData.playerCard.display,
+                      artId: gameData.playerCard.artId,
+                    }
+                  : null
+              }
+              onDraw={onDrawCard}
             />
           </div>
           <p
