@@ -1,11 +1,12 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
+import { getCardArtKey } from '../lib/cardImage';
 import {
-  CARD_IMAGE_FALLBACK,
-  getCardImagePath,
-} from '../lib/cardImage';
+  getCachedCrudeboysImage,
+  loadCrudeboysDeck,
+} from '../lib/crudeboysClient';
 
 const DEFAULT_CARD_ASPECT_RATIO = 240 / 277;
 
@@ -17,9 +18,9 @@ interface CardProps {
   onClick?: () => void;
   isNukeActive?: boolean;
   singleCard?: boolean;
-  /** Override auto path from rank + suit (e.g. `/cards/k-hearts.png`) */
+  /** Override auto Crudeboys art for this card */
   frontImageSrc?: string;
-  /** When false (default), only the PNG shows on the face */
+  /** When false (default), only the NFT art shows on the face */
   showRankOverlay?: boolean;
 }
 
@@ -34,21 +35,59 @@ export default function Card({
   frontImageSrc,
   showRankOverlay = false,
 }: CardProps) {
-  const targetSrc = useMemo(
-    () =>
-      frontImageSrc ??
-      (rank && suit ? getCardImagePath(rank, suit) : CARD_IMAGE_FALLBACK),
-    [frontImageSrc, rank, suit],
-  );
-
-  const [imageSrc, setImageSrc] = useState(targetSrc);
+  const [imageSrc, setImageSrc] = useState<string | null>(frontImageSrc ?? null);
   const [frontImageFailed, setFrontImageFailed] = useState(false);
   const [cardAspectRatio, setCardAspectRatio] = useState(DEFAULT_CARD_ASPECT_RATIO);
 
   useEffect(() => {
-    setImageSrc(targetSrc);
+    let cancelled = false;
+
+    if (frontImageSrc) {
+      setImageSrc(frontImageSrc);
+      setFrontImageFailed(false);
+      return;
+    }
+
+    if (!rank || !suit) {
+      setImageSrc(null);
+      setFrontImageFailed(false);
+      return;
+    }
+
+    const cached = getCachedCrudeboysImage(rank, suit);
+    if (cached) {
+      setImageSrc(cached);
+      setFrontImageFailed(false);
+      return;
+    }
+
+    setImageSrc(null);
     setFrontImageFailed(false);
-  }, [targetSrc]);
+
+    void loadCrudeboysDeck()
+      .then((images) => {
+        if (cancelled) return;
+        const key = getCardArtKey(rank, suit);
+        const url = key ? images[key] : undefined;
+        if (url) {
+          setImageSrc(url);
+          setFrontImageFailed(false);
+          return;
+        }
+        setImageSrc(null);
+        setFrontImageFailed(true);
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setImageSrc(null);
+          setFrontImageFailed(true);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [frontImageSrc, rank, suit]);
 
   const isRedSuit =
     suit.includes('♥️') ||
@@ -140,7 +179,7 @@ export default function Card({
           </div>
         </motion.div>
 
-        {/* Face-up: your PNG (visible after flip) */}
+        {/* Face-up: Crudeboys NFT (visible after flip) */}
         <motion.div
           className={`
             absolute w-full h-full
@@ -154,7 +193,7 @@ export default function Card({
           transition={{ duration: 0.5 }}
         >
           <div className="relative w-full h-full bg-white">
-            {!frontImageFailed ? (
+            {imageSrc && !frontImageFailed ? (
               <img
                 key={imageSrc}
                 src={imageSrc}
@@ -167,10 +206,7 @@ export default function Card({
                   }
                 }}
                 onError={() => {
-                  if (imageSrc !== CARD_IMAGE_FALLBACK) {
-                    setImageSrc(CARD_IMAGE_FALLBACK);
-                    return;
-                  }
+                  setImageSrc(null);
                   setFrontImageFailed(true);
                 }}
               />

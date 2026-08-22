@@ -1,0 +1,265 @@
+{
+  "collection": "crudeboys",
+  "images": {
+    "10-clubs": {
+      "inscriptionId": "b9938e02253b34730ccbafd11ba6b3f118a65168f4a383bc70adff915dd16039i0",
+      "imageUrl": "https://cdn.doggy.market/content/b9938e02253b34730ccbafd11ba6b3f118a65168f4a383bc70adff915dd16039i0",
+      "itemId": "360"
+    },
+    "10-diamonds": {
+      "inscriptionId": "f9079df18e8f7de013ddd82c52cd77b63576242a055be9f75daffeba2839ae92i0",
+      "imageUrl": "https://cdn.doggy.market/content/f9079df18e8f7de013ddd82c52cd77b63576242a055be9f75daffeba2839ae92i0",
+      "itemId": "284"
+    },
+    "10-hearts": {
+      "inscriptionId": "b0503648a5f38f6b4c597c2fd373c39037096c0d5f5b3770f760cf1c6ce38849i0",
+      "imageUrl": "https://cdn.doggy.market/content/b0503648a5f38f6b4c597c2fd373c39037096c0d5f5b3770f760cf1c6ce38849i0",
+      "itemId": "333"
+    },
+    "10-spades": {
+      "inscriptionId": "a9d32f81fe7bc52fde19b889d5cdeec1f00581875b6d3cb76e87f5fd6f6b0832i0",
+      "imageUrl": "https://cdn.doggy.market/content/a9d32f81fe7bc52fde19b889d5cdeec1f00581875b6d3cb76e87f5fd6f6b0832i0",
+      "itemId": "494"
+    },
+    "2-clubs": {
+      "inscriptionId": "292e8a6abfb0f180e6a5d6626a0d3ddde2dd8a61987ba822ce4fb593374d1459i0",
+      "imageUrl": "https://cdn.doggy.market/content/292e8a6abfb0f180e6a5d6626a0d3ddde2dd8a61987ba822ce4fb593374d1459i0",
+      "itemId": "212"
+    },
+    "2-diamonds": {
+      "inscriptionId": "c6b215f04f583a040ab2f1a5a5dbde2804cd00578e5d91df10cfa15155bdc3cdi0",
+      "imageUrl": "https://cdn.doggy.market/content/c6b215f04f583a040ab2f1a5a5dbde2804cd00578e5d91df10cfa15155bdc3cdi0",
+      "itemId": "274"
+    },
+    "2-hearts": {
+      "inscriptionId": "4063099ea5cc4dd9479f899f4b3f6e21ceb0c421fa8e6e640e04371e49f8df65i0",
+      "imageUrl": "https://cdn.doggy.market/content/4063099ea5cc4dd9479f899f4b3f6e21ceb0c421fa8e6e640e04371e49f8df65i0",
+      "itemId": "170"
+    },
+    "2-spades": {
+      "inscriptionId": "cc22b50aec4b18330ca236a6fc1a5d2cba44ec39324cb0840c9baaaf4d4a17d0i0",
+      "imageUrl": "https://cdn.doggy.market/content/cc22b50aec4b18330ca236a6fc1a5d2cba44ec39324cb0840c9baaaf4d4a17d0i0",
+      "itemId": "32"
+    },
+    "3-clubs": {
+      "inscriptionId": "91ec59dfa22f018a2d4610e5f0d140f748a1285cecfa6211b9615492f7735b5fi0",
+      "imageUrl": "https://cdn.doggy.market/content/91ec59dfa22f018a2d4610e5f0d140f748a1285cecfa6211b9615492f7735b5fi0",
+      "itemId": "381"
+    },
+    "3-diamonds": {
+      "inscriptionId": "1bbaac743734be52e97f7506e691e3ef9661597d8033ff65e632b2066d079a97i0",
+      "imageUrl": "https://cdn.doggy.market/content/1bbaac743734be52e97f7506e691e3ef9661597d8033ff65e632b2066d079a97i0",
+      "itemId": "402"
+    },
+    "3-hearts": {
+      "inscriptionId": "96af5d5e43ae601b214718341aff6357b771a8e0cdcc1eb1e709e524cad4049bi0",
+      "imageUrl": "https://cdn.doggy.market/content/96af5d5e43ae601b214718341aff6357b771a8e0cdcc1eb1e709e524cad4049bi0",
+      "itemId": "94"
+    },
+    "3-spades": {
+      "inscriptionId": "6ea56be169fc90eede3ab2fcec4d9dbcdb53543e249756a34712d28e403c10dci0",
+      "imageUrl": "https://cdn.doggy.market/content/6ea56be169fc90eede3ab2fcec4d9dbcdb53543e249756a34712d28e403c10dci0",
+      "itemId": "58"
+    },
+    "4-clubs": {
+      "inscriptionId": "4bdfd045095724012422f5f0faba849ae83b15cb3cb85a22f28446cbea6fa82ai0",
+      "imageUrl": "https://cdn.doggy.market/content/4bdfd045095724012422f5f0faba849ae83b15cb3cb85a22f28446cbea6fa82ai0",
+      "itemId": "462"
+    },
+    "4-diamonds": {
+      "inscriptionId": "92495da92d1bd2ed237db1425e03c0779e143cd76d54783fa0c2467f922559a5i0",
+      "imageUrl": "https://cdn.doggy.market/content/92495da92d1bd2ed237db1425e03c0779e143cd76d54783fa0c2467f922559a5i0",
+      "itemId": "253"
+    },
+    "4-hearts": {
+      "inscriptionId": "1447bc1b856d8524a0ae9bf1983ac487b4e9627ce9388f0862c204d795639bcai0",
+      "imageUrl": "https://cdn.doggy.market/content/1447bc1b856d8524a0ae9bf1983ac487b4e9627ce9388f0862c204d795639bcai0",
+      "itemId": "305"
+    },
+    "4-spades": {
+      "inscriptionId": "258ef6755868c293ded61c884a26ef589cfb0c544f855f22e4f2837bb51656dci0",
+      "imageUrl": "https://cdn.doggy.market/content/258ef6755868c293ded61c884a26ef589cfb0c544f855f22e4f2837bb51656dci0",
+      "itemId": "111"
+    },
+    "5-clubs": {
+      "inscriptionId": "078a6259b4f41ccaffe633c0d0a4842916fd910c4023fb2e6564ab42f00ced8fi0",
+      "imageUrl": "https://cdn.doggy.market/content/078a6259b4f41ccaffe633c0d0a4842916fd910c4023fb2e6564ab42f00ced8fi0",
+      "itemId": "41"
+    },
+    "5-diamonds": {
+      "inscriptionId": "e0b71c65d6172223b020c9138e6b277c340eb4a913cbaa5e1e45ca7b3a5d46fci0",
+      "imageUrl": "https://cdn.doggy.market/content/e0b71c65d6172223b020c9138e6b277c340eb4a913cbaa5e1e45ca7b3a5d46fci0",
+      "itemId": "3"
+    },
+    "5-hearts": {
+      "inscriptionId": "c2e4a2dac154957eafe73130c51521ed01469269630a1a25f3f1c51fae1a738di0",
+      "imageUrl": "https://cdn.doggy.market/content/c2e4a2dac154957eafe73130c51521ed01469269630a1a25f3f1c51fae1a738di0",
+      "itemId": "283"
+    },
+    "5-spades": {
+      "inscriptionId": "4b7e887554ce4415a20465f286f74337afe9006608750c7bd14b6be0dfc8fd26i0",
+      "imageUrl": "https://cdn.doggy.market/content/4b7e887554ce4415a20465f286f74337afe9006608750c7bd14b6be0dfc8fd26i0",
+      "itemId": "241"
+    },
+    "6-clubs": {
+      "inscriptionId": "d9e377bd80fc4b6b609d49c30e067817b7169ef2fe50451cc1e8eb43e5ae3273i0",
+      "imageUrl": "https://cdn.doggy.market/content/d9e377bd80fc4b6b609d49c30e067817b7169ef2fe50451cc1e8eb43e5ae3273i0",
+      "itemId": "134"
+    },
+    "6-diamonds": {
+      "inscriptionId": "c69fc7b768f76ff4e33d47024b5e75482a4b7a8e4a0aad399673bdcbf2853a3ai0",
+      "imageUrl": "https://cdn.doggy.market/content/c69fc7b768f76ff4e33d47024b5e75482a4b7a8e4a0aad399673bdcbf2853a3ai0",
+      "itemId": "153"
+    },
+    "6-hearts": {
+      "inscriptionId": "ae12dba196328cadd40915284e5d1cfede1f9ea38555ca4124c08612c665108ai0",
+      "imageUrl": "https://cdn.doggy.market/content/ae12dba196328cadd40915284e5d1cfede1f9ea38555ca4124c08612c665108ai0",
+      "itemId": "483"
+    },
+    "6-spades": {
+      "inscriptionId": "2057914e4b7cae4739f71f8134f56b9ac351b757ef436cfe4b374dea9e2dee38i0",
+      "imageUrl": "https://cdn.doggy.market/content/2057914e4b7cae4739f71f8134f56b9ac351b757ef436cfe4b374dea9e2dee38i0",
+      "itemId": "511"
+    },
+    "7-clubs": {
+      "inscriptionId": "27f03a40e97d91afb6b7e416e167866f7b8d994665acca03863067d687c1788ai0",
+      "imageUrl": "https://cdn.doggy.market/content/27f03a40e97d91afb6b7e416e167866f7b8d994665acca03863067d687c1788ai0",
+      "itemId": "54"
+    },
+    "7-diamonds": {
+      "inscriptionId": "4f07b5f5cf8aacedeeeceb44e635004153f64854eaf217d08b454f73f66515fai0",
+      "imageUrl": "https://cdn.doggy.market/content/4f07b5f5cf8aacedeeeceb44e635004153f64854eaf217d08b454f73f66515fai0",
+      "itemId": "471"
+    },
+    "7-hearts": {
+      "inscriptionId": "da079effac751c93728d4d48d94a94a537055d07b7d081302d108e284a481e4di0",
+      "imageUrl": "https://cdn.doggy.market/content/da079effac751c93728d4d48d94a94a537055d07b7d081302d108e284a481e4di0",
+      "itemId": "334"
+    },
+    "7-spades": {
+      "inscriptionId": "36b55c5b41739c730c0c11a9d6b78e7cf1aba47fe71a58bb5deb6ccf6497aa49i0",
+      "imageUrl": "https://cdn.doggy.market/content/36b55c5b41739c730c0c11a9d6b78e7cf1aba47fe71a58bb5deb6ccf6497aa49i0",
+      "itemId": "95"
+    },
+    "8-clubs": {
+      "inscriptionId": "42ef27368ef036410cac29ecd15bf7810e6bc2a8b8b86915ef012de53d662543i0",
+      "imageUrl": "https://cdn.doggy.market/content/42ef27368ef036410cac29ecd15bf7810e6bc2a8b8b86915ef012de53d662543i0",
+      "itemId": "491"
+    },
+    "8-diamonds": {
+      "inscriptionId": "2494c1b6710b7ccffd87c57547c43325081a67d2a632919068ec30db43ee8d30i0",
+      "imageUrl": "https://cdn.doggy.market/content/2494c1b6710b7ccffd87c57547c43325081a67d2a632919068ec30db43ee8d30i0",
+      "itemId": "426"
+    },
+    "8-hearts": {
+      "inscriptionId": "31206075c72d83735a51204e8b1be1d6d16c803e3c9f7809287a7b13d7bea0c9i0",
+      "imageUrl": "https://cdn.doggy.market/content/31206075c72d83735a51204e8b1be1d6d16c803e3c9f7809287a7b13d7bea0c9i0",
+      "itemId": "321"
+    },
+    "8-spades": {
+      "inscriptionId": "14541e212e85dd9fa43454a6df260a23b0fb9ab4b8e8453abdd659308cb5e67ci0",
+      "imageUrl": "https://cdn.doggy.market/content/14541e212e85dd9fa43454a6df260a23b0fb9ab4b8e8453abdd659308cb5e67ci0",
+      "itemId": "233"
+    },
+    "9-clubs": {
+      "inscriptionId": "93af77618608bc5125137b7a79bbd1718d5adf44014e872e99051a48d9eb19bdi0",
+      "imageUrl": "https://cdn.doggy.market/content/93af77618608bc5125137b7a79bbd1718d5adf44014e872e99051a48d9eb19bdi0",
+      "itemId": "461"
+    },
+    "9-diamonds": {
+      "inscriptionId": "6181fc5b057e562f28995866456f651f921c54584440b4ec9e80cc15839d8c2ci0",
+      "imageUrl": "https://cdn.doggy.market/content/6181fc5b057e562f28995866456f651f921c54584440b4ec9e80cc15839d8c2ci0",
+      "itemId": "364"
+    },
+    "9-hearts": {
+      "inscriptionId": "511982bd1b85487324c14d517b0e2a32f202fb2b84b4e50a8fa97c992b059bbdi0",
+      "imageUrl": "https://cdn.doggy.market/content/511982bd1b85487324c14d517b0e2a32f202fb2b84b4e50a8fa97c992b059bbdi0",
+      "itemId": "25"
+    },
+    "9-spades": {
+      "inscriptionId": "742a2e4bee0e4d744f7ebd561df88634aa538e1e340b9d0682e218344c3a6b81i0",
+      "imageUrl": "https://cdn.doggy.market/content/742a2e4bee0e4d744f7ebd561df88634aa538e1e340b9d0682e218344c3a6b81i0",
+      "itemId": "501"
+    },
+    "a-clubs": {
+      "inscriptionId": "9c91345d03ac3cbbf1955f528cd2c52384b2d32f66c2d3fde719691da12191cci0",
+      "imageUrl": "https://cdn.doggy.market/content/9c91345d03ac3cbbf1955f528cd2c52384b2d32f66c2d3fde719691da12191cci0",
+      "itemId": "168"
+    },
+    "a-diamonds": {
+      "inscriptionId": "1e2480bdc3a3ae71f3c3a5fce06081166afba2ee51e9add851805a7e19a4fd3ai0",
+      "imageUrl": "https://cdn.doggy.market/content/1e2480bdc3a3ae71f3c3a5fce06081166afba2ee51e9add851805a7e19a4fd3ai0",
+      "itemId": "16"
+    },
+    "a-hearts": {
+      "inscriptionId": "7d3ab942da56a8d6590dde3a03071d28a66330cac4c7da6bd3ea6d5a17c88aaai0",
+      "imageUrl": "https://cdn.doggy.market/content/7d3ab942da56a8d6590dde3a03071d28a66330cac4c7da6bd3ea6d5a17c88aaai0",
+      "itemId": "141"
+    },
+    "a-spades": {
+      "inscriptionId": "d51932c8c65272b61fa17f09e188df72eff8ea37c85c284ba78ec11a48e5168ci0",
+      "imageUrl": "https://cdn.doggy.market/content/d51932c8c65272b61fa17f09e188df72eff8ea37c85c284ba78ec11a48e5168ci0",
+      "itemId": "445"
+    },
+    "j-clubs": {
+      "inscriptionId": "cc366fd064d7d60dd5bda3e527b4ede208e8a98550a028c3f07bf4c1caffeb28i0",
+      "imageUrl": "https://cdn.doggy.market/content/cc366fd064d7d60dd5bda3e527b4ede208e8a98550a028c3f07bf4c1caffeb28i0",
+      "itemId": "303"
+    },
+    "j-diamonds": {
+      "inscriptionId": "9aa992dff3826325f904cfe8348483ecbc0c875c3ebb5116b20a501b7aa7b255i0",
+      "imageUrl": "https://cdn.doggy.market/content/9aa992dff3826325f904cfe8348483ecbc0c875c3ebb5116b20a501b7aa7b255i0",
+      "itemId": "220"
+    },
+    "j-hearts": {
+      "inscriptionId": "a6063787f38540b786c1fad82bb0a753b251e02efc9d350ecf34fea595f04c22i0",
+      "imageUrl": "https://cdn.doggy.market/content/a6063787f38540b786c1fad82bb0a753b251e02efc9d350ecf34fea595f04c22i0",
+      "itemId": "384"
+    },
+    "j-spades": {
+      "inscriptionId": "3357a439d4b017268d7a217cba71bb12c6fc092c641fcb1abf7f13df05865bd8i0",
+      "imageUrl": "https://cdn.doggy.market/content/3357a439d4b017268d7a217cba71bb12c6fc092c641fcb1abf7f13df05865bd8i0",
+      "itemId": "454"
+    },
+    "k-clubs": {
+      "inscriptionId": "d29f5727aeddbda3cfa8ea707a7ce1b1eef28614ff60260d4b04d3457c140558i0",
+      "imageUrl": "https://cdn.doggy.market/content/d29f5727aeddbda3cfa8ea707a7ce1b1eef28614ff60260d4b04d3457c140558i0",
+      "itemId": "213"
+    },
+    "k-diamonds": {
+      "inscriptionId": "44e48776d97e3e69c1783939b91bf49ccf4e1f5fddaf54ff56cb0125f8ed3564i0",
+      "imageUrl": "https://cdn.doggy.market/content/44e48776d97e3e69c1783939b91bf49ccf4e1f5fddaf54ff56cb0125f8ed3564i0",
+      "itemId": "522"
+    },
+    "k-hearts": {
+      "inscriptionId": "564cbe997852d8f9a6e6bc58c740750b4a5cd5f9ab47080f80f2966bd542f787i0",
+      "imageUrl": "https://cdn.doggy.market/content/564cbe997852d8f9a6e6bc58c740750b4a5cd5f9ab47080f80f2966bd542f787i0",
+      "itemId": "192"
+    },
+    "k-spades": {
+      "inscriptionId": "7c72a68b420ee67469546da4f277850a6077deade65e14b397f8ee240401fa82i0",
+      "imageUrl": "https://cdn.doggy.market/content/7c72a68b420ee67469546da4f277850a6077deade65e14b397f8ee240401fa82i0",
+      "itemId": "408"
+    },
+    "q-clubs": {
+      "inscriptionId": "484052b03bbcf4c7863a15a83ce55f6a345a3520649117336df475d7d93cbb7ai0",
+      "imageUrl": "https://cdn.doggy.market/content/484052b03bbcf4c7863a15a83ce55f6a345a3520649117336df475d7d93cbb7ai0",
+      "itemId": "106"
+    },
+    "q-diamonds": {
+      "inscriptionId": "d790ebc2d7ead0713c5a4ef349e36993321014190a97bd9c977fca63c2dd1253i0",
+      "imageUrl": "https://cdn.doggy.market/content/d790ebc2d7ead0713c5a4ef349e36993321014190a97bd9c977fca63c2dd1253i0",
+      "itemId": "502"
+    },
+    "q-hearts": {
+      "inscriptionId": "314abce7436f18f609975b814d36d132b3d758d661d6d590663016970ccfbea5i0",
+      "imageUrl": "https://cdn.doggy.market/content/314abce7436f18f609975b814d36d132b3d758d661d6d590663016970ccfbea5i0",
+      "itemId": "371"
+    },
+    "q-spades": {
+      "inscriptionId": "c98b801ed814c044e752879f9868606a443e1449fe4da37a5baa0ba565b92f16i0",
+      "imageUrl": "https://cdn.doggy.market/content/c98b801ed814c044e752879f9868606a443e1449fe4da37a5baa0ba565b92f16i0",
+      "itemId": "226"
+    }
+  }
+}

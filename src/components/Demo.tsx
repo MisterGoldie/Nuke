@@ -11,6 +11,7 @@ import { useGameAudio } from "./hooks/useGameAudio";
 import { useGameTimer } from "./hooks/useGameTimer";
 import { useTrickFlow } from "./hooks/useTrickFlow";
 import { useWarSequence } from "./hooks/useWarSequence";
+import { preloadCrudeboysDeck } from "~/lib/crudeboysClient";
 import MenuScreen from "./screens/MenuScreen";
 import TutorialScreen from "./screens/TutorialScreen";
 
@@ -118,6 +119,10 @@ export default function Demo() {
     username,
     setDelayedMessage,
   });
+
+  useEffect(() => {
+    void preloadCrudeboysDeck();
+  }, []);
 
   useEffect(() => {
     if (!gameData.gameOver) {
