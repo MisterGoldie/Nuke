@@ -70,6 +70,7 @@ export function useGameManager({
       setGameData(newState);
 
       setTimeout(() => {
+        if (newState.isWar) return;
         const nextCounts = getDisplayCounts(newState);
         let playerDeckChange = nextCounts.player - prevCounts.player;
         let cpuDeckChange = nextCounts.cpu - prevCounts.cpu;
@@ -89,6 +90,7 @@ export function useGameManager({
       }, TRICK_RESULT_MS);
 
       setTimeout(() => {
+        if (newState.isWar) return;
         setIsProcessing(false);
         if (newState.gameOver) {
           const outcome = newState.message.includes('YOU WIN') || newState.message.includes('You win')
@@ -101,7 +103,7 @@ export function useGameManager({
   }, [gameData, setIsProcessing, setGameData, handleGameEnd, setPlayerCardChange, setCpuCardChange]);
 
   const handleNukeClick = useCallback(() => {
-    if (gameData.gameOver || gameData.isNukeActive || !gameData.playerHasNuke) {
+    if (gameData.gameOver || gameData.isWar || gameData.isNukeActive || !gameData.playerHasNuke) {
       return;
     }
 

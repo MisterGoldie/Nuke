@@ -170,10 +170,11 @@ export default function Demo() {
         showNukeAnimation={showNukeAnimation}
         nukeInitiator={nukeInitiator}
         showWarAnimation={war.showWarAnimation}
-        warCards={war.warCards}
         warStage={war.warStage}
+        matchedCards={war.matchedCards}
+        faceDownCards={war.faceDownCards}
+        revealCards={war.revealCards}
         warWinner={war.warWinner}
-        warWinningCard={war.warWinningCard}
         playerCardChange={playerCardChange}
         cpuCardChange={cpuCardChange}
         onPlayerCardChangeDone={() => setPlayerCardChange(null)}

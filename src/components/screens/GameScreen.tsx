@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import { AnimatePresence, motion } from "framer-motion";
 import CardHand from "../CardHand";
-import type { LocalState } from "../gameLogic";
+import type { Card, LocalState } from "../gameLogic";
 import type { WarStage } from "../gameTypes";
 
 const WarAnimation = dynamic(() => import("../WarAnimation"), {
@@ -25,10 +25,11 @@ interface GameScreenProps {
   showNukeAnimation: boolean;
   nukeInitiator: "player" | "cpu";
   showWarAnimation: boolean;
-  warCards: { player: LocalState["warPile"]; cpu: LocalState["warPile"] };
   warStage: WarStage;
+  matchedCards: { player: Card | null; cpu: Card | null };
+  faceDownCards: { player: Card[]; cpu: Card[] };
+  revealCards: { player: Card | null; cpu: Card | null };
   warWinner?: "player" | "cpu";
-  warWinningCard?: Record<string, string>;
   playerCardChange: number | null;
   cpuCardChange: number | null;
   onPlayerCardChangeDone: () => void;
@@ -85,10 +86,11 @@ export default function GameScreen({
   showNukeAnimation,
   nukeInitiator,
   showWarAnimation,
-  warCards,
   warStage,
+  matchedCards,
+  faceDownCards,
+  revealCards,
   warWinner,
-  warWinningCard,
   playerCardChange,
   cpuCardChange,
   onPlayerCardChangeDone,
@@ -110,12 +112,11 @@ export default function GameScreen({
       <NukeAnimation isVisible={showNukeAnimation} initiator={nukeInitiator} />
       <WarAnimation
         isVisible={showWarAnimation}
-        playerCard={gameData.playerCard}
-        cpuCard={gameData.cpuCard}
-        warCards={warCards}
         warStage={warStage}
+        matchedCards={matchedCards}
+        faceDownCards={faceDownCards}
+        revealCards={revealCards}
         warWinner={warWinner}
-        warWinningCard={warWinningCard}
       />
 
       <div className="game-table">

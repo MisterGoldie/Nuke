@@ -55,6 +55,7 @@ export function useTrickFlow({
 
   useEffect(() => {
     if (!enabled || !gameData.playerCard || !gameData.cpuCard) return;
+    if (gameData.isWar && gameData.warPile.length > 0) return;
 
     setDelayedMessage("");
     const resultTimer = setTimeout(() => {
@@ -64,13 +65,15 @@ export function useTrickFlow({
           : gameData.message.replace(/You/g, username);
       setDelayedMessage(message);
 
-      if (!gameData.gameOver && !message.includes("GAME OVER")) {
-        setTimeout(() => {
-          if (!gameData.gameOver) {
-            setDelayedMessage("Draw next card to continue");
-          }
-        }, 2000);
+      if (gameData.isWar || gameData.gameOver || message.includes("GAME OVER")) {
+        return;
       }
+
+      setTimeout(() => {
+        if (!gameData.gameOver) {
+          setDelayedMessage("Draw next card to continue");
+        }
+      }, 2000);
     }, TRICK_RESULT_MS);
 
     return () => clearTimeout(resultTimer);
@@ -78,6 +81,7 @@ export function useTrickFlow({
     enabled,
     gameData.playerCard,
     gameData.cpuCard,
+    gameData.isWar,
     gameData.message,
     gameData.gameOver,
     username,

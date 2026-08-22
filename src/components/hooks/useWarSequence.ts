@@ -3,10 +3,20 @@
 import { useEffect, useRef, useState } from "react";
 import {
   awardWarPile,
+  dealWarAnte,
   getDisplayCounts,
+  resolveWarWinner,
+  type Card,
   type LocalState,
 } from "../gameLogic";
-import { pickArtId } from "~/lib/crudeboysArt";
+import type { HandleGameEnd, WarStage } from "../gameTypes";
+import {
+  TRICK_RESULT_MS,
+  WAR_COMPLETE_MS,
+  WAR_DRAW_MS,
+  WAR_HOLD_MATCH_MS,
+  WAR_REVEAL_HOLD_MS,
+} from "../playTiming";
 
 interface UseWarSequenceArgs {
   gameData: LocalState;
@@ -16,6 +26,10 @@ interface UseWarSequenceArgs {
   playWarSound: () => void;
   username: string;
   handleGameEnd: HandleGameEnd;
+}
+
+function pileByOwner(pile: Card[], owner: "player" | "cpu"): Card[] {
+  return pile.filter((_, index) => (owner === "player" ? index % 2 === 0 : index % 2 === 1));
 }
 
 export function useWarSequence({
@@ -29,15 +43,20 @@ export function useWarSequence({
 }: UseWarSequenceArgs) {
   const [showWarAnimation, setShowWarAnimation] = useState(false);
   const [warStage, setWarStage] = useState<WarStage>("initial");
-  const [warCards, setWarCards] = useState<{ player: LocalState["warPile"]; cpu: LocalState["warPile"] }>({
+  const [matchedCards, setMatchedCards] = useState<{ player: Card | null; cpu: Card | null }>({
+    player: null,
+    cpu: null,
+  });
+  const [faceDownCards, setFaceDownCards] = useState<{ player: Card[]; cpu: Card[] }>({
     player: [],
     cpu: [],
   });
   const [warWinner, setWarWinner] = useState<"player" | "cpu" | undefined>();
-  const [warWinningCard, setWarWinningCard] = useState<Record<string, string> | undefined>();
 
   const warHandledRef = useRef(false);
   const warWinnerRef = useRef<"player" | "cpu" | null>(null);
+  const gameDataRef = useRef(gameData);
+  gameDataRef.current = gameData;
   const handleGameEndRef = useRef(handleGameEnd);
   handleGameEndRef.current = handleGameEnd;
 
@@ -45,65 +64,49 @@ export function useWarSequence({
     if (!gameData.isWar || gameData.gameOver || warHandledRef.current) {
       return;
     }
-    warHandledRef.current = true;
 
+    const tiedPlayer = gameDataRef.current.playerCard;
+    const tiedCpu = gameDataRef.current.cpuCard;
+    if (!tiedPlayer || !tiedCpu || gameDataRef.current.warPile.length > 0) {
+      return;
+    }
+
+    warHandledRef.current = true;
     let cancelled = false;
-    const pile = gameData.warPile;
+
+    setMatchedCards({ player: tiedPlayer, cpu: tiedCpu });
     setIsProcessing(true);
     setWarStage("showing-cards");
-    setWarCards({
-      player: [pile[2], pile[4], pile[6]].filter((card): card is NonNullable<typeof card> => Boolean(card)),
-      cpu: [pile[3], pile[5], pile[7]].filter((card): card is NonNullable<typeof card> => Boolean(card)),
-    });
-    playWarSound();
+    setShowWarAnimation(false);
 
-    const drawingTimer = setTimeout(() => {
+    const startOverlayAt = TRICK_RESULT_MS + WAR_HOLD_MATCH_MS;
+    const revealAt = startOverlayAt + WAR_DRAW_MS;
+    const completeAt = revealAt + WAR_REVEAL_HOLD_MS;
+    const finishAt = completeAt + WAR_COMPLETE_MS;
+
+    const overlayTimer = window.setTimeout(() => {
       if (cancelled) return;
+      playWarSound();
+      setGameData((prev) => dealWarAnte(prev));
       setShowWarAnimation(true);
       setWarStage("drawing-cards");
-    }, 1500);
+    }, startOverlayAt);
 
-    const revealTimer = setTimeout(() => {
+    const revealTimer = window.setTimeout(() => {
       if (cancelled) return;
-      const winner = Math.random() < 0.5 ? "player" : "cpu";
-      warWinnerRef.current = winner;
-      setWarWinner(winner);
-
-      const suits = ["hearts", "diamonds", "clubs", "spades"];
-      const playerSuit = suits[Math.floor(Math.random() * suits.length)]!;
-      let cpuSuit = suits[Math.floor(Math.random() * suits.length)]!;
-      while (cpuSuit === playerSuit) {
-        cpuSuit = suits[Math.floor(Math.random() * suits.length)]!;
-      }
-      const highRanks = ["Q", "K", "A"];
-      const lowRanks = ["9", "10", "J"];
-      const winnerRank = highRanks[Math.floor(Math.random() * highRanks.length)]!;
-      const loserRank = lowRanks[Math.floor(Math.random() * lowRanks.length)]!;
-      const playerRank = winner === "player" ? winnerRank : loserRank;
-      const cpuRank = winner === "cpu" ? winnerRank : loserRank;
-      setWarWinningCard({
-        playerSuit,
-        cpuSuit,
-        playerRank,
-        cpuRank,
-        display: winner === "player" ? winnerRank : loserRank,
-        suit: winner === "player" ? playerSuit : cpuSuit,
-        playerArtId: pickArtId(playerRank, playerSuit) ?? "",
-        cpuArtId: pickArtId(cpuRank, cpuSuit) ?? "",
-      });
       setWarStage("revealing-winner");
-    }, 3500);
+    }, revealAt);
 
-    const completeTimer = setTimeout(() => {
+    const completeTimer = window.setTimeout(() => {
       if (cancelled) return;
       setWarStage("complete");
-    }, 5500);
+    }, completeAt);
 
-    const finishTimer = setTimeout(() => {
+    const finishTimer = window.setTimeout(() => {
       if (cancelled) return;
       setShowWarAnimation(false);
       setGameData((prev) => {
-        const winner = warWinnerRef.current ?? "player";
+        const winner = warWinnerRef.current ?? resolveWarWinner(prev);
         warWinnerRef.current = null;
         const next = awardWarPile(prev, winner);
         if (next.gameOver) {
@@ -112,30 +115,50 @@ export function useWarSequence({
           next.message = gameOverMessage;
           setDelayedMessage(gameOverMessage);
           void handleGameEndRef.current(gameWinner === "player" ? "win" : "loss");
+        } else {
+          setDelayedMessage("Draw next card to continue");
         }
         return next;
       });
       setIsProcessing(false);
       setWarWinner(undefined);
-      setWarWinningCard(undefined);
+      setMatchedCards({ player: null, cpu: null });
+      setFaceDownCards({ player: [], cpu: [] });
       setWarStage("initial");
-    }, 8500);
+      warHandledRef.current = false;
+    }, finishAt);
 
     return () => {
       cancelled = true;
       warHandledRef.current = false;
-      clearTimeout(drawingTimer);
-      clearTimeout(revealTimer);
-      clearTimeout(completeTimer);
-      clearTimeout(finishTimer);
+      window.clearTimeout(overlayTimer);
+      window.clearTimeout(revealTimer);
+      window.clearTimeout(completeTimer);
+      window.clearTimeout(finishTimer);
     };
   }, [gameData.isWar, gameData.gameOver, playWarSound, username, setGameData, setDelayedMessage, setIsProcessing]);
+
+  useEffect(() => {
+    if (!gameData.isWar || gameData.warPile.length === 0) return;
+    const playerPile = pileByOwner(gameData.warPile, "player");
+    const cpuPile = pileByOwner(gameData.warPile, "cpu");
+    setFaceDownCards({
+      player: playerPile.slice(1),
+      cpu: cpuPile.slice(1),
+    });
+    warWinnerRef.current = resolveWarWinner(gameData);
+    setWarWinner(warWinnerRef.current);
+  }, [gameData.isWar, gameData.warPile, gameData.playerCard, gameData.cpuCard]);
 
   return {
     showWarAnimation,
     warStage,
-    warCards,
+    matchedCards,
+    faceDownCards,
+    revealCards: {
+      player: gameData.isWar && gameData.warPile.length > 0 ? gameData.playerCard : null,
+      cpu: gameData.isWar && gameData.warPile.length > 0 ? gameData.cpuCard : null,
+    },
     warWinner,
-    warWinningCard,
   };
 }

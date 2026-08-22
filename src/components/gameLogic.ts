@@ -121,14 +121,84 @@ export function settleTrick(state: LocalState): LocalState {
     return settled;
 }
 
-/** Give the real war pile to the winner. Never invents or drops cards. */
+function pushAntePair(state: LocalState, downs: number): void {
+    for (let i = 0; i < downs; i += 1) {
+        const playerAnte = state.playerDeck.shift();
+        const cpuAnte = state.cpuDeck.shift();
+        if (playerAnte) state.warPile.push(playerAnte);
+        if (cpuAnte) state.warPile.push(cpuAnte);
+    }
+}
+
+function collectWarCards(state: LocalState): void {
+    if (state.playerCard) {
+        state.warPile.push(state.playerCard);
+        state.playerCard = null;
+    }
+    if (state.cpuCard) {
+        state.warPile.push(state.cpuCard);
+        state.cpuCard = null;
+    }
+}
+
+/** After the tied pair has been shown, deal 3 face-down and 1 face-up each. */
+export function dealWarAnte(state: LocalState): LocalState {
+    const next = cloneState(state);
+    if (!next.playerCard || !next.cpuCard || next.warPile.length > 0) {
+        return next;
+    }
+
+    collectWarCards(next);
+
+    const dealRound = (): boolean => {
+        if (next.playerDeck.length < 4 || next.cpuDeck.length < 4) {
+            return false;
+        }
+        pushAntePair(next, 3);
+        next.playerCard = next.playerDeck.shift() ?? null;
+        next.cpuCard = next.cpuDeck.shift() ?? null;
+        return Boolean(next.playerCard && next.cpuCard);
+    };
+
+    if (!dealRound()) {
+        logCountIfBroken(next, "dealWarAnte:short");
+        return next;
+    }
+
+    while (
+        next.playerCard &&
+        next.cpuCard &&
+        next.playerCard.rank === next.cpuCard.rank &&
+        next.playerDeck.length >= 4 &&
+        next.cpuDeck.length >= 4
+    ) {
+        collectWarCards(next);
+        if (!dealRound()) break;
+    }
+
+    logCountIfBroken(next, "dealWarAnte");
+    return next;
+}
+
+export function resolveWarWinner(state: LocalState): "player" | "cpu" {
+    if (state.playerCard && state.cpuCard) {
+        if (state.playerCard.rank > state.cpuCard.rank) return "player";
+        if (state.cpuCard.rank > state.playerCard.rank) return "cpu";
+    }
+    const counts = getDisplayCounts(state);
+    return counts.player >= counts.cpu ? "player" : "cpu";
+}
+
+/** Give the real war pile (plus face-up war cards) to the winner. */
 export function awardWarPile(state: LocalState, winner: "player" | "cpu"): LocalState {
     const next = cloneState(state);
 
-    if (next.warPile.length === 0 && !next.isWar) {
+    if (next.warPile.length === 0 && !next.isWar && !next.playerCard && !next.cpuCard) {
         next.readyForNextCard = false;
         return next;
     }
+
+    collectWarCards(next);
 
     if (winner === "player") {
         next.playerDeck.push(...next.warPile);
@@ -361,7 +431,8 @@ export function drawCards(state: LocalState): LocalState {
         newState.readyForNextCard = true;
         newState.isWar = false;
     } else {
-        const canAffordWar = newState.playerDeck.length >= 3 && newState.cpuDeck.length >= 3;
+        // 3 face-down + 1 face-up each after the matching pair.
+        const canAffordWar = newState.playerDeck.length >= 4 && newState.cpuDeck.length >= 4;
 
         if (!canAffordWar) {
             const playerOwned = newState.playerDeck.length + 1;
@@ -391,17 +462,7 @@ export function drawCards(state: LocalState): LocalState {
         newState.message = `WAR! ${newState.playerCard.display}${newState.playerCard.suit} vs ${newState.cpuCard.display}${newState.cpuCard.suit}`;
         newState.isWar = true;
         newState.readyForNextCard = false;
-
-        newState.warPile.push(newState.playerCard, newState.cpuCard);
-        newState.playerCard = null;
-        newState.cpuCard = null;
-
-        for (let i = 0; i < 3; i++) {
-            const playerAnte = newState.playerDeck.shift();
-            const cpuAnte = newState.cpuDeck.shift();
-            if (playerAnte) newState.warPile.push(playerAnte);
-            if (cpuAnte) newState.warPile.push(cpuAnte);
-        }
+        // Keep the matching cards in play so the table can show them first.
     }
 
     logCountIfBroken(newState, "drawCards");

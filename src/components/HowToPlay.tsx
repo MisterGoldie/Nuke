@@ -20,7 +20,7 @@ export default function HowToPlay({ onBack }: HowToPlayProps) {
         <section>
           <h2 className="text-2xl mb-2">WAR!</h2>
           <p className="text-sm leading-relaxed">
-            When cards match, it's WAR! Each player puts down 3 face-down cards and 1 face-up card. Winner takes all 8 cards!
+            When cards match, it's WAR! Each player puts down 3 face-down cards and 1 face-up card. Winner takes all 10 cards!
           </p>
         </section>
 

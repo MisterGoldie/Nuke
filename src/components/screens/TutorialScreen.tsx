@@ -27,7 +27,7 @@ export default function TutorialScreen({ onStart }: TutorialScreenProps) {
         <section>
           <h2 className="arcade-text-green mb-2 text-xl tracking-wide sm:text-2xl">WAR!</h2>
           <p className="arcade-text-green text-sm leading-relaxed sm:text-base">
-            When cards match, it&apos;s WAR! Each player puts down 3 face-down cards and 1 face-up card. Winner takes all 8 cards!
+            When cards match, it&apos;s WAR! Each player puts down 3 face-down cards and 1 face-up card. Winner takes all 10 cards!
           </p>
         </section>
 
