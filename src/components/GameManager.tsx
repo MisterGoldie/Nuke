@@ -17,6 +17,7 @@ interface GameManagerProps {
   playNukeSound: () => void;
   setPlayerCardChange?: (change: number | null) => void;
   setCpuCardChange?: (change: number | null) => void;
+  setDelayedMessage?: (message: string) => void;
 }
 
 function trickDelta(state: LocalState): { player: number; cpu: number } {
@@ -41,7 +42,8 @@ export function useGameManager({
   handleGameEnd,
   playNukeSound,
   setPlayerCardChange,
-  setCpuCardChange
+  setCpuCardChange,
+  setDelayedMessage,
 }: GameManagerProps) {
   const handleDrawCard = useCallback(() => {
     if (gameData.gameOver || gameData.isWar || gameData.isNukeActive) {
@@ -138,7 +140,11 @@ export function useGameManager({
             cpuCard: null,
             isNukeActive: false,
             readyForNextCard: true,
+            message: "Draw next card to continue",
           }));
+          setDelayedMessage?.("Draw next card to continue");
+          setPlayerCardChange?.(null);
+          setCpuCardChange?.(null);
           setTimeout(() => {
             setIsProcessing(false);
           }, 100);
@@ -147,7 +153,7 @@ export function useGameManager({
 
       return newState;
     });
-  }, [gameData, setIsProcessing, setGameData, setShowNukeAnimation, setNukeInitiator, playNukeSound, handleGameEnd, setPlayerCardChange, setCpuCardChange]);
+  }, [gameData, setIsProcessing, setGameData, setShowNukeAnimation, setNukeInitiator, playNukeSound, handleGameEnd, setPlayerCardChange, setCpuCardChange, setDelayedMessage]);
 
   return { handleDrawCard, handleNukeClick };
 }

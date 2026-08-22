@@ -12,6 +12,9 @@ interface UseCpuNukeSequenceArgs {
   setIsProcessing: (processing: boolean) => void;
   playNukeSound: () => void;
   handleGameEnd: HandleGameEnd;
+  setDelayedMessage: (message: string) => void;
+  setPlayerCardChange?: (change: number | null) => void;
+  setCpuCardChange?: (change: number | null) => void;
 }
 
 export function useCpuNukeSequence({
@@ -22,6 +25,9 @@ export function useCpuNukeSequence({
   setIsProcessing,
   playNukeSound,
   handleGameEnd,
+  setDelayedMessage,
+  setPlayerCardChange,
+  setCpuCardChange,
 }: UseCpuNukeSequenceArgs) {
   const handleGameEndRef = useRef(handleGameEnd);
   handleGameEndRef.current = handleGameEnd;
@@ -50,6 +56,9 @@ export function useCpuNukeSequence({
           readyForNextCard: true,
           message: "Draw next card to continue",
         }));
+        setDelayedMessage("Draw next card to continue");
+        setPlayerCardChange?.(null);
+        setCpuCardChange?.(null);
         setTimeout(() => setIsProcessing(false), 100);
       }
     }, 2500);
@@ -62,6 +71,8 @@ export function useCpuNukeSequence({
     setGameData,
     setIsProcessing,
     setNukeInitiator,
-    setShowNukeAnimation,
+    setDelayedMessage,
+    setPlayerCardChange,
+    setCpuCardChange,
   ]);
 }

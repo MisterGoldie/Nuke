@@ -76,21 +76,6 @@ function CardDelta({
   );
 }
 
-function NukeUsedLabel() {
-  return (
-    <motion.div
-      className="pointer-events-none absolute left-0 top-1/2 z-10 flex -translate-x-[110%] -translate-y-1/2 flex-col items-center text-[0.7rem] text-red-500 sm:text-lg"
-      style={{ textShadow: "0 0 10px #ff0000" }}
-      initial={{ opacity: 0, scale: 0.5 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.5 }}
-    >
-      <span>NUKE</span>
-      <span>USED</span>
-    </motion.div>
-  );
-}
-
 export default function GameScreen({
   gameData,
   cardCounts,
@@ -165,7 +150,7 @@ export default function GameScreen({
             {formatTime(timeRemaining)}
           </motion.span>
           <motion.span
-            className="arcade-text min-w-0 truncate text-right"
+            className="arcade-text flex min-w-0 flex-col items-end truncate text-right"
             animate={{ scale: cardCounts.cpu < 10 ? [1, 1.08, 1] : 1 }}
             transition={{
               duration: 0.5,
@@ -174,6 +159,11 @@ export default function GameScreen({
             }}
           >
             CPU: {cardCounts.cpu}
+            {!gameData.cpuHasNuke && (
+              <span className="text-[0.6rem] font-bold leading-none text-red-500 sm:text-xs">
+                NUKE USED
+              </span>
+            )}
           </motion.span>
         </motion.div>
 
@@ -184,9 +174,6 @@ export default function GameScreen({
         >
           <p className="arcade-text mb-2 text-sm sm:text-lg">CPU&apos;s card</p>
           <div className="relative">
-            <AnimatePresence>
-              {!gameData.cpuHasNuke && <NukeUsedLabel />}
-            </AnimatePresence>
             <AnimatePresence>
               {cpuCardChange ? (
                 <CardDelta
@@ -217,7 +204,11 @@ export default function GameScreen({
               animate={{ opacity: 1, y: 0, scale: timesUp ? [1, 1.04, 1] : 1 }}
               exit={{ opacity: 0, y: -8 }}
             >
-              {timeRemaining === 0 ? "TIME'S UP - GAME OVER!" : delayedMessage}
+              {timeRemaining === 0
+                ? "TIME'S UP - GAME OVER!"
+                : delayedMessage.includes("LAUNCHED")
+                  ? "Draw next card to continue"
+                  : delayedMessage}
             </motion.div>
           </AnimatePresence>
         </motion.div>

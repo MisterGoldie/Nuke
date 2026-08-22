@@ -85,6 +85,7 @@ export default function Demo() {
     playNukeSound,
     setPlayerCardChange,
     setCpuCardChange,
+    setDelayedMessage,
   });
 
   const war = useWarSequence({
@@ -105,6 +106,9 @@ export default function Demo() {
     setIsProcessing,
     playNukeSound,
     handleGameEnd,
+    setDelayedMessage,
+    setPlayerCardChange,
+    setCpuCardChange,
   });
 
   useTrickFlow({
