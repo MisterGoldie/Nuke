@@ -40,6 +40,7 @@ export default function WarAnimation({
                 <CardComponent
                   suit={playerCard.suit}
                   rank={playerCard.display}
+                  artId={playerCard.artId}
                   isFlipped={true}
                   isPlayerCard={true}
                 />
@@ -54,6 +55,7 @@ export default function WarAnimation({
                 <CardComponent
                   suit={cpuCard.suit}
                   rank={cpuCard.display}
+                  artId={cpuCard.artId}
                   isFlipped={true}
                   isPlayerCard={false}
                 />
@@ -230,6 +232,7 @@ export default function WarAnimation({
                 <CardComponent
                   suit={warWinningCard.playerSuit === 'hearts' ? '♥️' : warWinningCard.playerSuit === 'diamonds' ? '♦️' : warWinningCard.playerSuit === 'clubs' ? '♣️' : '♠️'}
                   rank={warWinningCard.playerRank}
+                  artId={warWinningCard.playerArtId}
                   isFlipped={true}
                   isPlayerCard={true}
                   singleCard={true}
@@ -251,6 +254,7 @@ export default function WarAnimation({
                 <CardComponent
                   suit={warWinningCard.cpuSuit === 'hearts' ? '♥️' : warWinningCard.cpuSuit === 'diamonds' ? '♦️' : warWinningCard.cpuSuit === 'clubs' ? '♣️' : '♠️'}
                   rank={warWinningCard.cpuRank}
+                  artId={warWinningCard.cpuArtId}
                   isFlipped={true}
                   isPlayerCard={false}
                   singleCard={true}
@@ -302,6 +306,7 @@ export default function WarAnimation({
                   (warWinningCard.playerSuit === 'hearts' ? '♥️' : warWinningCard.playerSuit === 'diamonds' ? '♦️' : warWinningCard.playerSuit === 'clubs' ? '♣️' : '♠️') :
                   (warWinningCard.cpuSuit === 'hearts' ? '♥️' : warWinningCard.cpuSuit === 'diamonds' ? '♦️' : warWinningCard.cpuSuit === 'clubs' ? '♣️' : '♠️')}
                 rank={warWinner === 'player' ? warWinningCard.playerRank : warWinningCard.cpuRank}
+                artId={warWinner === 'player' ? warWinningCard.playerArtId : warWinningCard.cpuArtId}
                 isFlipped={true}
                 isPlayerCard={warWinner === 'player'}
                 singleCard={true} /* Force single card display */

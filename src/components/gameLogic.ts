@@ -1,8 +1,12 @@
+import { pickArtId } from '~/lib/crudeboysArt';
+
 export interface Card {
     rank: number;
     suit: string;
     display: string;
     symbol: string;
+    /** Crudeboys item id, e.g. "141" -> /crudeboys/141.webp */
+    artId?: string;
 }
 
 export interface LocalState {
@@ -218,6 +222,7 @@ export function createDeck(): Card[] {
                 suit,
                 display: displayRanks[i],
                 symbol: `${displayRanks[i]}${suit}`,
+                artId: pickArtId(displayRanks[i], suit),
             });
         });
     }

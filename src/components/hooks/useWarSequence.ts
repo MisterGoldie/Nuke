@@ -6,7 +6,7 @@ import {
   getDisplayCounts,
   type LocalState,
 } from "../gameLogic";
-import type { HandleGameEnd, WarStage } from "../gameTypes";
+import { pickArtId } from "~/lib/crudeboysArt";
 
 interface UseWarSequenceArgs {
   gameData: LocalState;
@@ -79,13 +79,17 @@ export function useWarSequence({
       const lowRanks = ["9", "10", "J"];
       const winnerRank = highRanks[Math.floor(Math.random() * highRanks.length)]!;
       const loserRank = lowRanks[Math.floor(Math.random() * lowRanks.length)]!;
+      const playerRank = winner === "player" ? winnerRank : loserRank;
+      const cpuRank = winner === "cpu" ? winnerRank : loserRank;
       setWarWinningCard({
         playerSuit,
         cpuSuit,
-        playerRank: winner === "player" ? winnerRank : loserRank,
-        cpuRank: winner === "cpu" ? winnerRank : loserRank,
+        playerRank,
+        cpuRank,
         display: winner === "player" ? winnerRank : loserRank,
         suit: winner === "player" ? playerSuit : cpuSuit,
+        playerArtId: pickArtId(playerRank, playerSuit) ?? "",
+        cpuArtId: pickArtId(cpuRank, cpuSuit) ?? "",
       });
       setWarStage("revealing-winner");
     }, 3500);

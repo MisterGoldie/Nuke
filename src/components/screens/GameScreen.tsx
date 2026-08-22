@@ -186,6 +186,7 @@ export default function GameScreen({
             <CardComponent
               suit={gameData.cpuCard?.suit || ""}
               rank={gameData.cpuCard?.display || ""}
+              artId={gameData.cpuCard?.artId}
               isFlipped={gameData.cpuCard !== null}
               isPlayerCard={false}
             />
@@ -231,6 +232,7 @@ export default function GameScreen({
             <CardComponent
               suit={gameData.playerCard?.suit || ""}
               rank={gameData.playerCard?.display || ""}
+              artId={gameData.playerCard?.artId}
               isFlipped={gameData.playerCard !== null}
               isPlayerCard={true}
               onClick={onDrawCard}

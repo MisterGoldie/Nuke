@@ -11,7 +11,7 @@ import { useGameAudio } from "./hooks/useGameAudio";
 import { useGameTimer } from "./hooks/useGameTimer";
 import { useTrickFlow } from "./hooks/useTrickFlow";
 import { useWarSequence } from "./hooks/useWarSequence";
-import { preloadCrudeboysDeck } from "~/lib/crudeboysClient";
+import { preloadArtIds } from "~/lib/crudeboysArt";
 import MenuScreen from "./screens/MenuScreen";
 import TutorialScreen from "./screens/TutorialScreen";
 
@@ -121,10 +121,6 @@ export default function Demo() {
   });
 
   useEffect(() => {
-    void preloadCrudeboysDeck();
-  }, []);
-
-  useEffect(() => {
     if (!gameData.gameOver) {
       setIsGameLocked(false);
       setHasSubmittedResult(false);
@@ -132,7 +128,12 @@ export default function Demo() {
   }, [gameData.gameOver]);
 
   const startGame = () => {
-    setGameData(initializeGame());
+    const nextGame = initializeGame();
+    setGameData(nextGame);
+    preloadArtIds([
+      ...nextGame.playerDeck.map((card) => card.artId),
+      ...nextGame.cpuDeck.map((card) => card.artId),
+    ]);
     setDelayedMessage("Draw card to begin");
     setScreen("tutorial");
   };
