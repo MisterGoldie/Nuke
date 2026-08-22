@@ -8,8 +8,17 @@ let accountsChanged: Connector['onAccountsChanged'] | undefined
 let chainChanged: Connector['onChainChanged'] | undefined
 let disconnect: Connector['onDisconnect'] | undefined
 
+function isInFrameHost() {
+  if (typeof window === "undefined") return false;
+  try {
+    return window.parent !== window;
+  } catch {
+    return true;
+  }
+}
+
 export function frameConnector() {
-  let connected = true;
+  let connected = false;
 
   return createConnector<typeof sdk.wallet.ethProvider>((config) => ({
     id: "farcaster",
@@ -17,13 +26,24 @@ export function frameConnector() {
     type: frameConnector.type,
 
     async setup() {
-      this.connect({ chainId: config.chains[0].id });
+      if (!isInFrameHost()) return;
+      this.connect({ chainId: config.chains[0].id }).catch(() => {
+        connected = false;
+      });
     },
     async connect({ chainId } = {}) {
       const provider = await this.getProvider();
-      const accounts = await provider.request({
+      if (!provider) {
+        throw new Error("Farcaster wallet is only available inside a Frame");
+      }
+
+      const accounts = (await provider.request({
         method: "eth_requestAccounts",
-      });
+      })) as string[] | undefined;
+
+      if (!accounts?.length) {
+        throw new Error("No Farcaster wallet accounts");
+      }
 
       if (!accountsChanged) {
         accountsChanged = this.onAccountsChanged.bind(this)
@@ -76,6 +96,7 @@ export function frameConnector() {
     async getAccounts() {
       if (!connected) throw new Error("Not connected");
       const provider = await this.getProvider();
+      if (!provider) throw new Error("Not connected");
       const accounts = await provider.request({
         method: "eth_requestAccounts",
       });
@@ -83,16 +104,21 @@ export function frameConnector() {
     },
     async getChainId() {
       const provider = await this.getProvider();
+      if (!provider) return config.chains[0].id;
       const hexChainId = await provider.request({ method: "eth_chainId" });
       return fromHex(hexChainId, "number");
     },
     async isAuthorized() {
-      if (!connected) {
+      if (!connected || !isInFrameHost()) {
         return false;
       }
 
-      const accounts = await this.getAccounts();
-      return !!accounts.length;
+      try {
+        const accounts = await this.getAccounts();
+        return !!accounts.length;
+      } catch {
+        return false;
+      }
     },
     async switchChain({ chainId }) {
       const provider = await this.getProvider();

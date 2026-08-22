@@ -15,8 +15,18 @@ export const config = createConfig({
 const queryClient = new QueryClient();
 
 export default function Provider({ children }: { children: React.ReactNode }) {
+  const inFrame =
+    typeof window !== "undefined" &&
+    (() => {
+      try {
+        return window.parent !== window;
+      } catch {
+        return true;
+      }
+    })();
+
   return (
-    <WagmiProvider config={config}>
+    <WagmiProvider config={config} reconnectOnMount={inFrame}>
       <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
     </WagmiProvider>
   );
