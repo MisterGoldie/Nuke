@@ -9,6 +9,7 @@ import {
 } from "../gameLogic";
 
 interface UseTrickFlowArgs {
+  enabled: boolean;
   gameData: LocalState;
   setGameData: React.Dispatch<React.SetStateAction<LocalState>>;
   username: string;
@@ -16,12 +17,14 @@ interface UseTrickFlowArgs {
 }
 
 export function useTrickFlow({
+  enabled,
   gameData,
   setGameData,
   username,
   setDelayedMessage,
 }: UseTrickFlowArgs) {
   useEffect(() => {
+    if (!enabled) return;
     if (!gameData.readyForNextCard || gameData.gameOver || gameData.isWar || gameData.isNukeActive) {
       return;
     }
@@ -39,6 +42,7 @@ export function useTrickFlow({
 
     return () => clearTimeout(timer);
   }, [
+    enabled,
     gameData.readyForNextCard,
     gameData.gameOver,
     gameData.isWar,
@@ -49,7 +53,7 @@ export function useTrickFlow({
   ]);
 
   useEffect(() => {
-    if (!gameData.playerCard || !gameData.cpuCard) return;
+    if (!enabled || !gameData.playerCard || !gameData.cpuCard) return;
 
     setDelayedMessage("");
     const resultTimer = setTimeout(() => {
@@ -70,6 +74,7 @@ export function useTrickFlow({
 
     return () => clearTimeout(resultTimer);
   }, [
+    enabled,
     gameData.playerCard,
     gameData.cpuCard,
     gameData.message,
@@ -79,6 +84,7 @@ export function useTrickFlow({
   ]);
 
   useEffect(() => {
+    if (!enabled) return;
     const total = countAllCards(gameData);
     if (total === 52) return;
     console.error("Card count error:", {
@@ -90,5 +96,5 @@ export function useTrickFlow({
       display: getDisplayCounts(gameData),
       total,
     });
-  }, [gameData]);
+  }, [enabled, gameData]);
 }

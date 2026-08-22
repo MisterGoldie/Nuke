@@ -21,37 +21,29 @@ export const assetManifest = {
   ]
 };
 
-export const preloadAssets = async (isMuted = false) => {
-  const imagePromises = assetManifest.images.map(src => {
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      img.onload = () => resolve(img);
-      img.onerror = reject;
-      img.src = src;
-    });
+export const preloadAssets = (isMuted = false) => {
+  assetManifest.images.forEach((src) => {
+    if (assetCache.has(src)) return;
+    const img = new Image();
+    img.src = src;
+    assetCache.set(src, img);
   });
 
-  const audioPromises = assetManifest.sounds.map(src => {
-    return new Promise((resolve, reject) => {
-      const audio = new Audio();
-      audio.oncanplaythrough = () => {
-        audio.muted = isMuted;
-        audio.volume = src.includes('gameplay.mp3') ? 0.2 : 0.75;
-        soundCache.set(src, audio);
-        resolve(audio);
-      };
-      audio.onerror = reject;
-      audio.src = src;
-      audio.load();
-    });
-  });
+  assetManifest.sounds.forEach((src) => {
+    const cached = soundCache.get(src);
+    if (cached) {
+      cached.muted = isMuted;
+      return;
+    }
 
-  try {
-    await Promise.all([...imagePromises, ...audioPromises]);
-    console.log('All assets preloaded successfully');
-  } catch (error) {
-    console.error('Error preloading assets:', error);
-  }
+    const audio = new Audio();
+    audio.preload = "auto";
+    audio.muted = isMuted;
+    audio.volume = src.includes("gameplay.mp3") ? 0.2 : 0.75;
+    audio.src = src;
+    soundCache.set(src, audio);
+    audio.load();
+  });
 };
 
 export const playSound = (soundUrl: string, isMuted: boolean) => {

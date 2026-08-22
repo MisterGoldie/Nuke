@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useCallback, useEffect, useState } from "react";
 import { getDisplayCounts, initializeGame, type LocalState } from "./gameLogic";
 import { useGameManager } from "./GameManager";
@@ -10,10 +11,21 @@ import { useGameAudio } from "./hooks/useGameAudio";
 import { useGameTimer } from "./hooks/useGameTimer";
 import { useTrickFlow } from "./hooks/useTrickFlow";
 import { useWarSequence } from "./hooks/useWarSequence";
-import Leaderboard from "./Leaderboard";
-import GameScreen from "./screens/GameScreen";
 import MenuScreen from "./screens/MenuScreen";
 import TutorialScreen from "./screens/TutorialScreen";
+
+const GameScreen = dynamic(() => import("./screens/GameScreen"), {
+  ssr: false,
+  loading: () => (
+    <div className="arcade-container flex items-center justify-center">
+      <p className="arcade-text text-xl animate-pulse">Loading...</p>
+    </div>
+  ),
+});
+
+const Leaderboard = dynamic(() => import("./Leaderboard"), {
+  ssr: false,
+});
 
 export default function Demo() {
   const [screen, setScreen] = useState<ScreenId>("menu");
@@ -27,6 +39,7 @@ export default function Demo() {
   const [playerCardChange, setPlayerCardChange] = useState<number | null>(null);
   const [cpuCardChange, setCpuCardChange] = useState<number | null>(null);
 
+  const inGame = screen === "game";
   const { context, username } = useFarcasterUser();
   const { isMuted, toggleMute, playWarSound, playNukeSound } = useGameAudio(screen);
   const { timeRemaining, resetTimer } = useGameTimer({
@@ -95,6 +108,7 @@ export default function Demo() {
   });
 
   useTrickFlow({
+    enabled: inGame,
     gameData,
     setGameData,
     username,

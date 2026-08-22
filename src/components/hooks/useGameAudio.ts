@@ -51,7 +51,9 @@ export function useGameAudio(screen: ScreenId) {
 
   useEffect(() => {
     preloadAssets(isMuted);
-  }, [isMuted]);
+    // Only kick off preload once; mute changes are applied by the effect above.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (screen === "leaderboard") {
