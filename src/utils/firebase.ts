@@ -1,6 +1,5 @@
 import admin from 'firebase-admin';
 
-// Only initialize if no apps exist
 if (!admin.apps.length) {
   try {
     admin.initializeApp({
@@ -8,7 +7,8 @@ if (!admin.apps.length) {
         projectId: process.env.FIREBASE_PROJECT_ID,
         clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
         privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-      })
+      }),
+      databaseURL: process.env.FIREBASE_DATABASE_URL,
     });
     console.log('Firebase Admin initialized');
   } catch (error) {
@@ -16,6 +16,5 @@ if (!admin.apps.length) {
   }
 }
 
-// Export the admin instance and commonly used services
 export const db = admin.firestore();
-export default admin; 
+export default admin;

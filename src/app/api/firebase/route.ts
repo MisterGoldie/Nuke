@@ -1,50 +1,26 @@
-import admin, { db } from '~/utils/firebase';
+import { db } from '~/utils/firebase';
 import { fetchUserDataByFid } from '../../../utils/neynarUtils';
 import { checkFanTokenOwnership } from '../../../utils/tokenUtils';
 import { calculatePODScore } from '../../../utils/scoreUtils';
-
-interface LeaderboardEntry {
-  fid: string;
-  username: string;
-  wins: number;
-  losses: number;
-  lastPlayed: Date;
-  totalGames?: number;
-}
+import { NUKE_PLAYERS_COLLECTION } from '~/lib/firebaseCollections';
+import { storeGameResult } from '~/utils/nukeFirebase';
 
 export async function POST(request: Request) {
   try {
-    const { fid, action, difficulty } = await request.json();
-    
+    const { fid, action } = await request.json();
+
     if (!fid) {
       return Response.json({ error: 'FID is required' }, { status: 400 });
     }
 
-    const userRef = db.collection('users').doc(fid);
-    
-    switch (action) {
-      case 'win':
-        await userRef.set({
-          wins: admin.firestore.FieldValue.increment(1),
-          [`${difficulty}Wins`]: admin.firestore.FieldValue.increment(1),
-          timestamp: admin.firestore.FieldValue.serverTimestamp()
-        }, { merge: true });
-        break;
-      case 'loss':
-        await userRef.set({
-          losses: admin.firestore.FieldValue.increment(1),
-          timestamp: admin.firestore.FieldValue.serverTimestamp()
-        }, { merge: true });
-        break;
-      case 'tie':
-        await userRef.set({
-          ties: admin.firestore.FieldValue.increment(1),
-          timestamp: admin.firestore.FieldValue.serverTimestamp()
-        }, { merge: true });
-        break;
-      default:
-        return Response.json({ error: 'Invalid action' }, { status: 400 });
+    if (action !== 'win' && action !== 'loss' && action !== 'tie') {
+      return Response.json({ error: 'Invalid action' }, { status: 400 });
     }
+
+    await storeGameResult({
+      playerFid: String(fid),
+      outcome: action,
+    });
 
     return Response.json({ success: true });
   } catch (error) {
@@ -57,11 +33,9 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const userFid = searchParams.get('userFid');
-    
-    const db = admin.firestore();
-    const usersRef = db.collection('nuke_players');
-    
-    // Get leaderboard data
+
+    const usersRef = db.collection(NUKE_PLAYERS_COLLECTION);
+
     const leaderboardSnapshot = await usersRef
       .orderBy('wins', 'desc')
       .limit(10)
@@ -73,7 +47,7 @@ export async function GET(request: Request) {
         const userData = await fetchUserDataByFid(doc.id);
         const totalGames = (data.wins || 0) + (data.losses || 0) + (data.ties || 0);
         const { balance } = await checkFanTokenOwnership(doc.id);
-        
+
         const podScore = calculatePODScore(
           data.wins || 0,
           data.ties || 0,
@@ -88,16 +62,12 @@ export async function GET(request: Request) {
           wins: data.wins || 0,
           losses: data.losses || 0,
           ties: data.ties || 0,
-          easyWins: data.easyWins || 0,
-          mediumWins: data.mediumWins || 0,
-          hardWins: data.hardWins || 0,
           pfp: userData?.pfp || '',
           podScore
         };
       })
     );
 
-    // If userFid is provided, get user's data
     let userData = null;
     if (userFid) {
       const userDoc = await usersRef.doc(userFid).get();
@@ -109,16 +79,13 @@ export async function GET(request: Request) {
         const userDataFromFarcaster = await fetchUserDataByFid(userFid);
         const totalGames = (data.wins || 0) + (data.losses || 0) + (data.ties || 0);
         const { balance } = await checkFanTokenOwnership(userFid);
-        
+
         userData = {
           fid: userFid,
           username: userDataFromFarcaster?.username || `fid:${userFid}`,
           wins: data?.wins || 0,
           losses: data?.losses || 0,
           ties: data?.ties || 0,
-          easyWins: data?.easyWins || 0,
-          mediumWins: data?.mediumWins || 0,
-          hardWins: data.hardWins || 0,
           pfp: userDataFromFarcaster?.pfp || '',
           podScore: calculatePODScore(
             data.wins || 0,
@@ -136,6 +103,4 @@ export async function GET(request: Request) {
     console.error('Error fetching data:', error);
     return Response.json({ error: 'Failed to fetch data' }, { status: 500 });
   }
-} 
-
-//
+}

@@ -1,5 +1,6 @@
 import { db } from './firebase';
 import { FieldValue } from 'firebase-admin/firestore';
+import { NUKE_GAMES_COLLECTION, NUKE_PLAYERS_COLLECTION } from '~/lib/firebaseCollections';
 
 interface GameResult {
   playerFid: string;
@@ -24,7 +25,7 @@ export async function storeGameResult(gameResult: GameResult) {
     const batch = db.batch();
     
     // Add to games collection with simplified data
-    const gameRef = db.collection('nuke_games').doc();
+    const gameRef = db.collection(NUKE_GAMES_COLLECTION).doc();
     batch.set(gameRef, {
       playerFid,
       outcome: gameResult.outcome,
@@ -32,7 +33,7 @@ export async function storeGameResult(gameResult: GameResult) {
     });
     
     // Update player stats with simplified data
-    const playerRef = db.collection('nuke_players').doc(playerFid);
+    const playerRef = db.collection(NUKE_PLAYERS_COLLECTION).doc(playerFid);
     const statsUpdate: Partial<PlayerStats> = {
       totalGames: FieldValue.increment(1) as unknown as number,
       [`${gameResult.outcome}s`]: FieldValue.increment(1) as unknown as number,
@@ -52,7 +53,7 @@ export async function storeGameResult(gameResult: GameResult) {
 // Get player stats
 export async function getPlayerStats(playerFid: string): Promise<PlayerStats | null> {
   try {
-    const doc = await db.collection('nuke_players').doc(playerFid).get();
+    const doc = await db.collection(NUKE_PLAYERS_COLLECTION).doc(playerFid).get();
     return doc.exists ? doc.data() as PlayerStats : null;
   } catch (error) {
     console.error('Error getting player stats:', error);
@@ -63,7 +64,7 @@ export async function getPlayerStats(playerFid: string): Promise<PlayerStats | n
 // Get leaderboard
 export async function getLeaderboard(limit: number = 10) {
   try {
-    const usersRef = db.collection('nuke_players');
+    const usersRef = db.collection(NUKE_PLAYERS_COLLECTION);
     const leaderboardSnapshot = await usersRef
       .orderBy('wins', 'desc')
       .limit(limit)
@@ -82,7 +83,7 @@ export async function getLeaderboard(limit: number = 10) {
 // Get recent games
 export async function getRecentGames(playerFid?: string, limit: number = 10) {
   try {
-    let query = db.collection('nuke_games')
+    let query = db.collection(NUKE_GAMES_COLLECTION)
       .orderBy('timestamp', 'desc')
       .limit(limit);
       
@@ -104,7 +105,7 @@ export async function getRecentGames(playerFid?: string, limit: number = 10) {
 // Update high score
 export async function updateHighScore(playerFid: string, newScore: number) {
   try {
-    const playerRef = db.collection('nuke_players').doc(playerFid);
+    const playerRef = db.collection(NUKE_PLAYERS_COLLECTION).doc(playerFid);
     await playerRef.set({
       highScore: FieldValue.increment(newScore)
     }, { merge: true });
