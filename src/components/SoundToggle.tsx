@@ -9,7 +9,11 @@ export default function SoundToggle({ isMuted, onToggle }: SoundToggleProps) {
   return (
     <button
       onClick={onToggle}
-      className="absolute bottom-4 right-4 z-50 w-8 h-8 flex items-center justify-center"
+      className="absolute z-50 flex h-8 w-8 items-center justify-center"
+      style={{
+        bottom: "max(1rem, env(safe-area-inset-bottom))",
+        right: "max(1rem, env(safe-area-inset-right))",
+      }}
       aria-label={isMuted ? "Unmute sound" : "Mute sound"}
     >
       <Image

@@ -63,7 +63,7 @@ export default function Card({
     <motion.div
       onClick={isPlayerCard ? onClick : undefined}
       className={`
-        relative w-[120px]
+        relative w-[var(--card-width,120px)]
         perspective-1000
         mx-auto
         card ${isFlipped ? 'flipped' : ''}

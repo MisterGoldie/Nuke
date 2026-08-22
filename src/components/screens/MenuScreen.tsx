@@ -27,58 +27,58 @@ export default function MenuScreen({
   };
 
   return (
-    <div className="arcade-container flex flex-col items-center overflow-hidden">
+    <div className="arcade-container">
       <ExplosionBackground isActive={true} />
-      <div className="h-full w-full flex flex-col items-center justify-between pt-10 pb-8">
-        <div />
+      <div className="relative z-10 flex h-full w-full flex-col items-center">
+        <div className="flex w-full justify-end">
+          <button
+            className="arcade-button glow-purple rounded-md border px-3 py-1 text-xs sm:text-sm"
+            style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}
+            onClick={share}
+          >
+            Share Game
+          </button>
+        </div>
 
-        <div className="flex flex-col items-center gap-10 mt-4">
-          <div className="text-center mb-8 transform scale-110">
-            <h1 className="arcade-text text-7xl mb-3 title-glow tracking-wider">NUKE</h1>
-            <p className="arcade-text text-2xl tracking-wide">WAR STYLE CARD GAME</p>
+        <div className="flex flex-1 flex-col items-center justify-center gap-8">
+          <div className="text-center">
+            <h1
+              className="arcade-text title-glow mb-3 tracking-wider"
+              style={{ fontSize: "var(--title-size)" }}
+            >
+              NUKE
+            </h1>
+            <p className="arcade-text text-[clamp(0.95rem,4vw,1.5rem)] tracking-wide">
+              WAR STYLE CARD GAME
+            </p>
           </div>
 
-          <div className="flex flex-col items-center gap-4 w-[280px]">
+          <div className="flex w-full max-w-xs flex-col items-center gap-4">
             <Button
               data-action="start-game"
-              className="arcade-button glow-blue text-2xl py-3 w-full transform hover:scale-105 transition-transform"
+              className="arcade-button glow-blue w-full py-3 text-xl sm:text-2xl"
               onClick={onStartGame}
             >
               START GAME
             </Button>
-
             <Button
               data-action="leaderboard"
-              className="arcade-button glow-yellow text-2xl py-3 w-full transform hover:scale-105 transition-transform"
+              className="arcade-button glow-yellow w-full py-3 text-xl sm:text-2xl"
               onClick={onLeaderboard}
             >
               LEADERBOARD
             </Button>
-            <p className="arcade-text text-sm mt-3 text-center w-full">Powered by /thepod</p>
+            <p className="arcade-text mt-1 text-center text-xs sm:text-sm">Powered by /thepod</p>
           </div>
         </div>
 
-        <div />
+        <p
+          className="arcade-text pb-8 text-center text-xs"
+          style={{ textShadow: "0 0 5px #00ff00", opacity: 0.8 }}
+        >
+          version 1.3
+        </p>
       </div>
-
-      <div
-        className="absolute bottom-16 left-0 right-0 text-center arcade-text text-xs"
-        style={{
-          textShadow: "0 0 5px #00ff00, 0 0 10px #00ff00",
-          opacity: 0.8,
-        }}
-      >
-        version 1.3
-      </div>
-
-      <button
-        className="absolute top-4 right-4 px-3 py-1 text-sm border border-purple-400 rounded-md text-purple-400 hover:bg-gray-800 transition-colors arcade-button glow-purple"
-        style={{ zIndex: 50, backgroundColor: "rgba(0, 0, 0, 0.5)" }}
-        onClick={share}
-      >
-        Share Game
-      </button>
-
       <SoundToggle isMuted={isMuted} onToggle={onToggleMute} />
     </div>
   );

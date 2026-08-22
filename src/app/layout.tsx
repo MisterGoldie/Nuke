@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 
 import "~/app/globals.css";
 import { Providers } from "~/app/providers";
@@ -6,6 +6,15 @@ import { Providers } from "~/app/providers";
 export const metadata: Metadata = {
   title: "Nuke",
   description: "WAR style card game by @goldie and the POD team.",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: "cover",
+  themeColor: "#000000",
 };
 
 export default function RootLayout({

@@ -10,7 +10,7 @@ export default function Leaderboard({ currentUserFid, onBack }: { currentUserFid
   if (isLoading) {
     return (
       <motion.div 
-        className="arcade-container flex flex-col items-center justify-center p-8 h-[685px] w-[420px] bg-black relative overflow-hidden"
+        className="arcade-container bg-black"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
@@ -63,7 +63,7 @@ export default function Leaderboard({ currentUserFid, onBack }: { currentUserFid
 
   if (error) {
     return (
-      <div className="arcade-container flex flex-col items-center justify-center p-8 h-[685px] w-[420px]">
+      <div className="arcade-container justify-center">
         <motion.div 
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
@@ -94,7 +94,7 @@ export default function Leaderboard({ currentUserFid, onBack }: { currentUserFid
 
   return (
     <motion.div 
-      className="arcade-container flex flex-col items-center p-8 pt-96 pb-4 h-[685px] w-[420px] bg-black relative overflow-hidden"
+      className="arcade-container bg-black"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
@@ -107,7 +107,7 @@ export default function Leaderboard({ currentUserFid, onBack }: { currentUserFid
       />
       
       <motion.h1 
-        className="arcade-text text-4xl mb-20 relative z-10"
+        className="arcade-text relative z-10 mb-4 text-3xl sm:mb-6 sm:text-4xl"
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         style={{
@@ -119,7 +119,7 @@ export default function Leaderboard({ currentUserFid, onBack }: { currentUserFid
       </motion.h1>
 
       <motion.div 
-        className="w-full max-w-md space-y-3 max-h-[320px] overflow-y-auto custom-scrollbar relative z-10 px-2 mt-10"
+        className="custom-scrollbar relative z-10 mt-2 min-h-0 w-full max-w-md flex-1 space-y-3 overflow-y-auto px-2"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2, duration: 0.5 }}
@@ -188,9 +188,8 @@ export default function Leaderboard({ currentUserFid, onBack }: { currentUserFid
         ))}
       </motion.div>
 
-      <div className="flex-grow"></div>
       <motion.div 
-        className="flex flex-col items-center gap-3 w-[260px] relative z-10 mb-12"
+        className="relative z-10 mb-4 mt-4 flex w-full max-w-xs flex-col items-center gap-3"
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.4, duration: 0.5 }}

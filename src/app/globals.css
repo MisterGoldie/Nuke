@@ -6,6 +6,13 @@
   --background: #000000;
   --foreground: #00ff00;
   --neon-glow: 0 0 7px #00ff00, 0 0 10px #00ff00, 0 0 21px #00ff00;
+  --card-width: clamp(88px, 26vw, 140px);
+  --hud-size: clamp(0.8rem, 3.4vw, 1.125rem);
+  --title-size: clamp(2.4rem, 14vw, 4.5rem);
+  --safe-top: max(0.75rem, env(safe-area-inset-top));
+  --safe-right: max(0.75rem, env(safe-area-inset-right));
+  --safe-bottom: max(0.75rem, env(safe-area-inset-bottom));
+  --safe-left: max(0.75rem, env(safe-area-inset-left));
 }
 
 @media (prefers-color-scheme: dark) {
@@ -15,10 +22,17 @@
   }
 }
 
+html,
 body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
   background-color: #000000;
+}
+
+body {
   color: var(--foreground);
-  font-family: 'Inter', Helvetica, Arial, sans-serif;
+  font-family: "Inter", Helvetica, Arial, sans-serif;
 }
 
 * {
@@ -100,23 +114,103 @@ body {
 
 .arcade-container {
   background: #000000;
-  padding: 12px !important;
-  position: relative !important;
-  display: flex !important;
-  flex-direction: column !important;
-  /* Farcaster v2 frame dimensions */
-  max-width: 424px;
-  max-height: 695px;
-  height: 100vh;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   width: 100%;
+  max-width: min(100%, 32rem);
+  height: 100dvh;
+  min-height: 100dvh;
   margin: 0 auto;
-  align-items: center !important;
-  justify-content: space-between !important;
-  width: 100% !important; /* Full width on mobile */
-  max-width: 420px !important; /* Max width for larger screens */
-  min-height: 100vh !important; /* Full viewport height */
-  margin: 0 auto !important; /* Center horizontally */
-  overflow: hidden !important; /* Prevent scrolling */
+  overflow: hidden;
+  box-sizing: border-box;
+  padding: var(--safe-top) var(--safe-right) var(--safe-bottom) var(--safe-left);
+  z-index: 1;
+}
+
+@media (min-width: 768px) {
+  :root {
+    --card-width: clamp(110px, 16vh, 160px);
+    --hud-size: 1.125rem;
+    --title-size: 4.5rem;
+  }
+
+  .arcade-container {
+    max-width: 28rem;
+    border-left: 1px solid #1a1a1a;
+    border-right: 1px solid #1a1a1a;
+  }
+}
+
+@media (min-width: 1024px) {
+  .arcade-container {
+    max-width: 32rem;
+  }
+}
+
+@media (max-height: 640px) {
+  :root {
+    --card-width: clamp(72px, 20vh, 110px);
+  }
+}
+
+.game-table {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  gap: clamp(0.35rem, 1.2vh, 0.85rem);
+}
+
+.game-hud,
+.game-status,
+.game-actions {
+  flex-shrink: 0;
+}
+
+.game-cpu,
+.game-player {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+  position: relative;
+}
+
+.game-status {
+  min-height: 2.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 0 0.5rem;
+}
+
+@media (orientation: landscape) and (max-height: 520px) {
+  :root {
+    --card-width: clamp(64px, 28vh, 108px);
+  }
+
+  .game-table {
+    display: grid;
+    grid-template-columns: 1fr minmax(8rem, 1.2fr) 1fr;
+    grid-template-rows: auto 1fr auto;
+    grid-template-areas:
+      "hud hud hud"
+      "cpu status player"
+      "actions actions actions";
+    gap: 0.35rem 0.5rem;
+  }
+
+  .game-hud { grid-area: hud; }
+  .game-cpu { grid-area: cpu; }
+  .game-status { grid-area: status; }
+  .game-player { grid-area: player; }
+  .game-actions { grid-area: actions; }
 }
 
 .arcade-text {
@@ -601,10 +695,6 @@ body {
 }
 
 /* Ensure content stays above the explosion background */
-.arcade-container {
-  position: relative;
-  z-index: 1;
-}
 
 @keyframes spin {
   from {
