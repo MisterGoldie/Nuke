@@ -3,6 +3,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import Card from './Card';
+import {
+  HAND_REVEAL_MS,
+  HAND_SHUFFLE_SETTLE_MS,
+  HAND_SHUFFLE_WAVE_MS,
+} from './playTiming';
 
 const CARD_ASPECT = 1300 / 1500;
 
@@ -102,9 +107,9 @@ export default function CardHand({ isPlayer, deckCount, playCard, onDraw }: Card
 
     setRevealed(false);
     setShuffleWave(1);
-    const waveTwo = window.setTimeout(() => setShuffleWave(2), 220);
-    const settle = window.setTimeout(() => setShuffleWave(0), 620);
-    const reveal = window.setTimeout(() => setRevealed(true), 900);
+    const waveTwo = window.setTimeout(() => setShuffleWave(2), HAND_SHUFFLE_WAVE_MS);
+    const settle = window.setTimeout(() => setShuffleWave(0), HAND_SHUFFLE_SETTLE_MS);
+    const reveal = window.setTimeout(() => setRevealed(true), HAND_REVEAL_MS);
 
     return () => {
       window.clearTimeout(waveTwo);

@@ -7,6 +7,7 @@ import {
   settleTrick,
   type LocalState,
 } from "../gameLogic";
+import { TRICK_RESULT_MS, TRICK_SETTLE_MS } from "../playTiming";
 
 interface UseTrickFlowArgs {
   enabled: boolean;
@@ -38,7 +39,7 @@ export function useTrickFlow({
 
     const timer = setTimeout(() => {
       setGameData((prev) => settleTrick(prev));
-    }, 2000);
+    }, TRICK_SETTLE_MS);
 
     return () => clearTimeout(timer);
   }, [
@@ -70,7 +71,7 @@ export function useTrickFlow({
           }
         }, 2000);
       }
-    }, 400);
+    }, TRICK_RESULT_MS);
 
     return () => clearTimeout(resultTimer);
   }, [

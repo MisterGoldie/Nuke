@@ -59,7 +59,7 @@ function CardDelta({
       initial={{ y: 0, opacity: 0, scale: 0.5 }}
       animate={{ y: -24, opacity: 1, scale: 1.15 }}
       exit={{ y: -48, opacity: 0 }}
-      transition={{ duration: 0.5, delay: 0.3, ease: "easeOut" }}
+      transition={{ duration: 0.5, ease: "easeOut" }}
       onAnimationComplete={onDone}
     >
       <span
@@ -149,8 +149,8 @@ export default function GameScreen({
           >
             {formatTime(timeRemaining)}
           </motion.span>
-          <motion.span
-            className="arcade-text flex min-w-0 flex-col items-end truncate text-right"
+          <motion.div
+            className="flex min-w-0 flex-col items-end justify-center text-right"
             animate={{ scale: cardCounts.cpu < 10 ? [1, 1.08, 1] : 1 }}
             transition={{
               duration: 0.5,
@@ -158,13 +158,16 @@ export default function GameScreen({
               repeatDelay: 1.5,
             }}
           >
-            CPU: {cardCounts.cpu}
+            <span className="arcade-text truncate">CPU: {cardCounts.cpu}</span>
             {!gameData.cpuHasNuke && (
-              <span className="text-[0.6rem] font-bold leading-none text-red-500 sm:text-xs">
+              <span
+                className="mt-1 text-[0.65rem] font-bold leading-tight tracking-wide text-red-500 sm:text-xs"
+                style={{ textShadow: "0 0 8px rgba(239, 68, 68, 0.85)" }}
+              >
                 NUKE USED
               </span>
             )}
-          </motion.span>
+          </motion.div>
         </motion.div>
 
         <motion.div

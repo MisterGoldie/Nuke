@@ -6,6 +6,7 @@ import {
   getDisplayCounts,
   declareWinner,
 } from './gameLogic';
+import { TRICK_RESULT_MS } from './playTiming';
 
 interface GameManagerProps {
   gameData: LocalState;
@@ -85,7 +86,7 @@ export function useGameManager({
         if (cpuDeckChange !== 0 && setCpuCardChange) {
           setCpuCardChange(cpuDeckChange);
         }
-      }, 300);
+      }, TRICK_RESULT_MS);
 
       setTimeout(() => {
         setIsProcessing(false);
